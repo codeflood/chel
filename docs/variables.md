@@ -57,6 +57,12 @@ Even the command name can be substituted from a variable.
 
     {commandName} param
 
+A command substituted from a variable cannot include parameters in the variable value. Map splatting and subscripts make it redundant to add additional parameters to a variable substituted as a command name.
+
+    # not allowed
+    value commandName (command -name value)
+    {commandName} # error
+
 To use a single value of a list instead of the whole list, append a colon (`:`) and the 1 based index of the value you want to use.
 
     command {list:1}
@@ -66,3 +72,11 @@ To use just a single value of a map during substitution, append a colon (`:`) an
     command {map:key}
 
 The substitution is a value substitution, not an object substitution. The variable is not "passed" to commands or scripts. The value the variable holds is substituted into the call.
+
+Variables inside other parameter values are substituted verbatim.
+
+    command (hello {name})
+
+## Well-known Global Variables ##
+
+The command prompt is read from the `prompt` global variable.

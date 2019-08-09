@@ -8,6 +8,8 @@ Chel is case-insensitive for input other than values (parameter or variable). Co
 
 ## Command ##
 
+A command line always starts with a command name.
+
 Chel is a space delimited language.
 
     command parameter1 parameter2
@@ -59,3 +61,7 @@ Use the `param` command to read parameters that were passed to the script or sub
 
     param name -numbered 1 -optional
     param name -named inputname
+
+Parameters are required by default. To make a parameter optional, use the `-optional` flag parameter on the `param` command.
+
+Parameters are immutable. Variables cannot be created with the same name as a parameter.

@@ -2,22 +2,23 @@
 
 Chel provides full control of the execution environment to the host application.
 
-    var factory = new ChelSessionFactory();
+    var runtime = new ChelRuntime()
 
     // Adding commands
-    factory.WithCommand()
-    factory.WithCommands();
+        .WithCommand<MyCommand>()
+        .WithCommandsFromAssembly("assembly.dll")
     
     // Allow file access
-    factory.FileAccess("temp", FileAccess.Allow);
+        .FileAccess("tmp", @"c:\temp", FileAccess.Allow)
+    // The tmp name is used to access the c:\temp disk location
 
     // Add a file script provider
-    factory.AddScriptFolder("scripts");
+        .AddScriptFolder("scripts");
 
-To start a new session, call the `NewSession` method on the session factory.
+To start a new session, call the `NewSession` method on the session runtime.
 
-    var session = factory.NewSession();
+    var session = runtime.NewSession();
 
 To retrieve an existing session, use the `GetSession` method.
 
-    var session = factory.GetSession();
+    var session = runtime.GetSession(42);
