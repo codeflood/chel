@@ -6,19 +6,31 @@ Chel is case-insensitive for input other than values (parameter or variable). Co
     COMMAND -Param value
     Command -paRAM value
 
+## Comment ##
+
+Comments are preceeded by a hash (`#`) character. Anything after the character is ignored.
+
+    # this is a comment
+    command # all this text is ignored.
+
 ## Command ##
 
-A command line always starts with a command name.
+A command line always starts with a command name and is followed by any parameters for the command.
 
 Chel is a space delimited language.
 
     command parameter1 parameter2
 
-To include a space in a parameter, enclose the parameter in brackets.
+To include a space in a parameter, enclose the parameter in parentheses.
 
     command (parameter with space)
 
-Each line starts with a command and is followed by parameters.
+Parentheses can also span multiple lines, to allow multi-line parameters.
+
+    command (
+        parameter
+        with line breaks
+    )
 
 ## Script ##
 
