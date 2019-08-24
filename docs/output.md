@@ -13,5 +13,3 @@ When something is executed, if a return value was provided, it will be displayed
     > a-subscript -param value
     a : b
     c : d
-
-_do we need some way to hide output and only show some? Like in a script?_

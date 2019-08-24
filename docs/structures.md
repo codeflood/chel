@@ -36,7 +36,7 @@ Parentheses can also span multiple lines, to allow multi-line parameters.
 
 A script is a collection of commands which can be invoked by some name. All semantics about how commands operate are also applicable to scripts. A script can accept parameters and also return values.
 
-Scripts are supplied by the host applicable. They may originate from a text file, or other storage the host applicaiton offers.
+Scripts are supplied by the host applicable. They may originate from a text file, or other storage the host application offers.
 
 todo: how to define help in the script file.
 
@@ -56,15 +56,17 @@ It's highly likely the body of the subscript will include spaces and span multip
 
 By default the subscript is only accessible within the script that defined it. To make the subscript available outside the defining script, use the `-g` parameter with the `sub` command to define it as a global subscript.
 
-ex
+    sub -g reset (
+
+    )
 
 ### Return Values ###
 
 To return a value from a script or subscript, use the `return` command.
 
     sub get-name (
-        value num << math:random
-        return text:join name {num}
+        set num << math:random
+        return (name-$num$)
     )
 
 ### Parameters ###

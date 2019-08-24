@@ -2,5 +2,5 @@
 
 Inverses a boolean value.
 
-    not {var}
+    not $var$
     not << isdefined command

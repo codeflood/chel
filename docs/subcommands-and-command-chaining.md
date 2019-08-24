@@ -12,4 +12,4 @@ If the subcommand uses parameters, then the subcommand must be wrapped in parent
 
 The value of a command can be passed along to the scope of another command using command chaining. The output of the previous command is made available by the `~` variable, but is only available to the chained command.
 
-    command >> othercommand {~}
+    command >> othercommand $~$

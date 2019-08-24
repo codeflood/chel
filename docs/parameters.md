@@ -19,7 +19,7 @@ Named parameters are passed by prefixing the parameter name with a dash (`-`), f
 A named parameter cannot be named only with numbers.
 
     # Illegal parameter name. Not allowed.
-    command -12 value
+    command -2 value
 
 ## Flag Parameter ##
 
@@ -32,16 +32,16 @@ A flag parameter is like a named parameter, but no value is passed. It is a bool
 Multiple parameters can be added to a map and passed all at once.
 
     map p (
-        param1 = value
-        param2 = value2
-        1 = value3
-        flagparam = true
+        param1 : value
+        param2 : value2
+        1 : value3
+        flagparam : true
     )
 
     command @p
 
 The keys will be mapped to the named parameters of the target. Keys that are only numbers will be passed as numbered parameters. Numbered parameters must start at 1 and be seqential.
 
-Additional parameters can be pass in addition to the map.
+Additional parameters can be passed in addition to the map.
 
     command @p -named value
