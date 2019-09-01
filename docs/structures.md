@@ -60,6 +60,12 @@ By default the subscript is only accessible within the script that defined it. T
 
     )
 
+Trying to create multiple subscritps with the same name will result in an error. To redefine a subscript, first delete the subscript as follows:
+
+    sub -d reset
+
+To check if a subscript exists, use the `isdefined` command.
+
 ### Return Values ###
 
 To return a value from a script or subscript, use the `return` command.
