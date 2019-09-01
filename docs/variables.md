@@ -77,6 +77,12 @@ To use a single value of a list instead of the whole list, append a colon (`:`) 
 
     command $list:1$
 
+Indexes can also be negative which counts from the end of the list. -1 is the last element, -2 the second last, etc.
+
+    set foo (27 12 35 95)
+    $foo:1$ # 27
+    $foo:-1$ 95
+
 To use just a single value of a map during substitution, append a colon (`:`) and the key.
 
     command $map:key$

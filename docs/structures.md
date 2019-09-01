@@ -1,6 +1,10 @@
 # Structures #
 
-Chel is case-insensitive for input other than values (parameter or variable). Commands, scritps, subscripts and parameter names are not case sensitive. The following commands are all equivalent.
+## Identifiers ##
+
+Identifiers of commands, scripts, subscripts and named parameters are case-insensitive. Any characters can be used in an identifier, as long as it's not reserved, such as those used for grouping (brackets), delimits (spaces) or other special purposes (subcommands).
+
+The following commands are all equivalent.
 
     command -param value
     COMMAND -Param value
@@ -13,9 +17,15 @@ Comments are preceeded by a hash (`#`) character. Anything after the character i
     # this is a comment
     command # all this text is ignored.
 
+A comment block is started with the `#>` token and continues until the `<#` token is encountered.
+
+    #> ignore all this
+    and all this, up to
+    this <#
+
 ## Command ##
 
-A command line always starts with a command name and is followed by any parameters for the command.
+A command line always starts with a command name and is followed by any parameters for the command. A single command line is delimited but a newline.
 
 Chel is a space delimited language.
 

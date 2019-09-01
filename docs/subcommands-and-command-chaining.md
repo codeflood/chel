@@ -8,6 +8,10 @@ If the subcommand uses parameters, then the subcommand must be wrapped in parent
 
     command << (subcommand param1 -named paramvalue)
 
+Scripts and subscripts can also be used as a subcommand.
+
+    command << (script -name value)
+
 # Command Chaining #
 
 The value of a command can be passed along to the scope of another command using command chaining. The output of the previous command is made available by the `~` variable, but is only available to the chained command.

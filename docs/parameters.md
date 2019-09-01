@@ -4,6 +4,8 @@ Parameters can be passed to commands, scripts and subscripts.
 
 All parameters are passed as values.
 
+Any unknown parameters cause an error.
+
 ## Numbered Parameter ##
 
 Numbered parameters are passed to the command with no name. The first numbered parameter is parameter 1, the second is 2, etc.

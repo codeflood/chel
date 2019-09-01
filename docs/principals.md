@@ -1,5 +1,7 @@
 # Principals #
 
+Keep it simple.
+
 Everything is a command.
 
 Everything is a string.
