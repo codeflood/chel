@@ -42,6 +42,7 @@ namespace Chel.UnitTests
 
         [Theory]
         [InlineData("command\ncommand")]
+        [InlineData("\n\ncommand\n\n\n\n\ncommand\n\n")]
         [InlineData("command\r\ncommand")]
         [InlineData(" command  \t   \r\n   command  \r\n\r\n")]
         public void Parse_MultipleCommands_ReturnsCommandInputs(string input)
