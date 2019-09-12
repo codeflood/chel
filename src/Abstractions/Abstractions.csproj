@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <DefaultNamespace>Chel.Abstractions</DefaultNamespace>
+    <AssemblyName>Chel.Abstractions</AssemblyName>
+  </PropertyGroup>
+
+</Project>
