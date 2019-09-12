@@ -56,5 +56,23 @@ namespace Chel.UnitTests
             // assert
             Assert.Equal(expected, result);
         }
+
+        [Theory]
+        [InlineData("command#comment")]
+        [InlineData("command  # comment")]
+        [InlineData("# comment\r\ncommand")]
+        [InlineData("# comment\r\ncommand\r\n# comment")]
+        public void Parse_InputContainsComments_CommentsAreIgnored(string input)
+        {
+            // arrange
+            var sut = new Parser();
+            var expected = new[] { new CommandInput("command") };
+
+            // act
+            var result = sut.Parse(input);
+
+            // assert
+            Assert.Equal(expected, result);
+        }
     }
 }

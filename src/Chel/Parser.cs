@@ -29,7 +29,7 @@ namespace Chel
                 if(parsedLine != null)
                     parsedLines.Add(parsedLine);
             }
-            while(parsedLine != null);
+            while(reader.Peek() != -1);
 
             return parsedLines;
         }
@@ -38,6 +38,7 @@ namespace Chel
         {
             var commandName = new StringBuilder();
             var stop = false;
+            var ignore = false;
 
             while(!stop)
             {
@@ -49,7 +50,9 @@ namespace Chel
                 {
                     if(character == '\n')
                         stop = true;
-                    else if(!char.IsWhiteSpace((char)character))
+                    else if(character == '#')
+                        ignore = true;
+                    else if(!ignore && !char.IsWhiteSpace((char)character))
                         commandName.Append((char)character);
                 }                
             }
