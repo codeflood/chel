@@ -1,0 +1,40 @@
+@startuml class
+
+interface ICommand {
+    Execute() : CommandResult
+}
+
+abstract class CommandResult
+
+class ValueCommandResult
+CommandResult <|-- ValueCommandResult
+
+class ListCommandResult
+CommandResult <|-- ListCommandResult
+
+class MapCommandResult
+CommandResult <|-- MapCommandResult
+
+ICommand --> CommandResult
+
+interface ICommandFactory {
+    Create(:CommandInput) : ICommand
+}
+
+interface ICommandRegistry {
+    Register(:Type)
+    Resolve(string commandName) : Type
+}
+
+ICommandFactory -- ICommand
+
+class CommandRegistry implements ICommandRegistry {
+    ctor()
+    ctor(:ICommandRegistry)
+}
+CommandRegistry --> ICommandRegistry
+
+class CommandFactory implements ICommandFactory
+CommandFactory o-- ICommandRegistry
+
+@enduml
