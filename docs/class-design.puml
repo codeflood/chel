@@ -4,7 +4,9 @@ interface ICommand {
     Execute() : CommandResult
 }
 
-abstract class CommandResult
+abstract class CommandResult {
+    Success : bool
+}
 
 class ValueCommandResult
 CommandResult <|-- ValueCommandResult
@@ -15,6 +17,9 @@ CommandResult <|-- ListCommandResult
 class MapCommandResult
 CommandResult <|-- MapCommandResult
 
+class FailedCommandResult
+CommandResult <|-- FailedCommandResult
+
 ICommand --> CommandResult
 
 interface ICommandFactory {
@@ -23,7 +28,7 @@ interface ICommandFactory {
 
 interface ICommandRegistry {
     Register(:Type)
-    Resolve(string commandName) : Type
+    Resolve(commandName : string) : Type
 }
 
 ICommandFactory -- ICommand

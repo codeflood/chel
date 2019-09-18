@@ -1,5 +1,3 @@
-using System;
-using Chel;
 using Chel.Abstractions;
 using Xunit;
 
