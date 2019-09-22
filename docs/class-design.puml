@@ -42,4 +42,12 @@ CommandRegistry --> ICommandRegistry
 class CommandFactory implements ICommandFactory
 CommandFactory o-- ICommandRegistry
 
+interface INameValidator {
+    IsValid(name : string) : bool
+}
+
+class NameValidator implements INameValidator
+
+CommandRegistry *-- INameValidator
+
 @enduml

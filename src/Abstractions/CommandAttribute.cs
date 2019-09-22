@@ -19,7 +19,7 @@ namespace Chel.Abstractions
                 throw new ArgumentNullException(nameof(commandName));
 
             if(string.IsNullOrEmpty(commandName))
-                throw new ArgumentException("commandName cannot be empty.");
+                throw new ArgumentException("commandName cannot be empty.", nameof(commandName));
 
             CommandName = commandName;
         }

@@ -1,10 +1,10 @@
 using Chel.Abstractions;
 using Chel.Abstractions.Results;
 
-namespace Chel.UnitTests
+namespace Chel.UnitTests.SampleCommands
 {
     // Missing Command attribute.
-    public class BadSampleCommand : ICommand
+    public class MissingAttributeSampleCommand : ICommand
     {
         public CommandResult Execute()
         {

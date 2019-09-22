@@ -1,10 +1,10 @@
 using Chel.Abstractions;
 using Chel.Abstractions.Results;
 
-namespace Chel.UnitTests
+namespace Chel.UnitTests.SampleCommands
 {
-    [Command("sample")]
-    public class SampleCommand : ICommand
+    [Command("  ")]
+    public class InvalidCommandNameSampleCommand : ICommand
     {
         public CommandResult Execute()
         {

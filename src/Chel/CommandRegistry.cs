@@ -9,7 +9,16 @@ namespace Chel
     /// </summary>
     public class CommandRegistry : ICommandRegistry
     {
-        private readonly Type ICommandType = typeof(ICommand);
+        private readonly Type _commandInterfaceType = typeof(ICommand);
+        private readonly INameValidator _nameValidator;
+
+        public CommandRegistry(INameValidator nameValidator)
+        {
+            if(nameValidator == null)
+                throw new ArgumentNullException(nameof(nameValidator));
+
+            _nameValidator = nameValidator;
+        }
 
         public void Register(Type type)
         {
@@ -18,11 +27,15 @@ namespace Chel
 
             var implementsInterface = DoesImplementICommand(type);
             if(!implementsInterface)
-                throw new ArgumentException("Type does not implement ICommand.");
+                throw new ArgumentException($"{type.Name} does not implement ICommand.", nameof(type));
 
             var attribute = ExtractCommandAttribute(type);
             if(attribute == null)
-                throw new ArgumentException("Type is not attributed with CommandAttribute.");
+                throw new ArgumentException($"{type.Name} is not attributed with CommandAttribute.", nameof(type));
+
+            var validCommandName = _nameValidator.IsValid(attribute.CommandName);
+            if(!validCommandName)
+                throw new ArgumentException($"'{attribute.CommandName}' is not a valid command name.", nameof(type));
         }
 
         private bool DoesImplementICommand(Type type)
@@ -31,7 +44,7 @@ namespace Chel
 
             foreach(var i in interfaces)
             {
-                if(i == ICommandType)
+                if(i == _commandInterfaceType)
                     return true;
             }
 
