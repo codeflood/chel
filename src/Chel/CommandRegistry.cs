@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Chel.Abstractions;
 
@@ -10,7 +11,8 @@ namespace Chel
     public class CommandRegistry : ICommandRegistry
     {
         private readonly Type _commandInterfaceType = typeof(ICommand);
-        private readonly INameValidator _nameValidator;
+        private readonly INameValidator _nameValidator = null;
+        private readonly Dictionary<string, Type> _registeredTypes = null;
 
         public CommandRegistry(INameValidator nameValidator)
         {
@@ -18,6 +20,7 @@ namespace Chel
                 throw new ArgumentNullException(nameof(nameValidator));
 
             _nameValidator = nameValidator;
+            _registeredTypes = new Dictionary<string, Type>(StringComparer.OrdinalIgnoreCase);
         }
 
         public void Register(Type type)
@@ -33,9 +36,19 @@ namespace Chel
             if(attribute == null)
                 throw new ArgumentException($"{type.Name} is not attributed with CommandAttribute.", nameof(type));
 
-            var validCommandName = _nameValidator.IsValid(attribute.CommandName);
+            var commandName = attribute.CommandName;
+
+            var validCommandName = _nameValidator.IsValid(commandName);
             if(!validCommandName)
-                throw new ArgumentException($"'{attribute.CommandName}' is not a valid command name.", nameof(type));
+                throw new ArgumentException($"'{commandName}' is not a valid command name.", nameof(type));
+
+            if(_registeredTypes.ContainsKey(commandName))
+            {
+                if(!_registeredTypes.ContainsValue(type))
+                    throw new ArgumentException($"Command name '{commandName}' on command {type.Name} is already used on command type {_registeredTypes[commandName].Name}.", nameof(type));
+            }
+            else
+                _registeredTypes.Add(commandName, type);
         }
 
         private bool DoesImplementICommand(Type type)
@@ -59,7 +72,13 @@ namespace Chel
 
         public Type Resolve(string commandName)
         {
-            throw new NotImplementedException();
+            if(commandName == null)
+                throw new ArgumentNullException(nameof(commandName));
+
+            if(_registeredTypes.ContainsKey(commandName))
+                return _registeredTypes[commandName];
+
+            return null;
         }
     }
 }
