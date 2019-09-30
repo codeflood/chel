@@ -1,7 +1,7 @@
 @startuml class
 
 interface ICommand {
-    Execute() : CommandResult
+    ExecuteAsync() : Task<CommandResult>
 }
 
 abstract class CommandResult {
@@ -49,5 +49,25 @@ interface INameValidator {
 class NameValidator implements INameValidator
 
 CommandRegistry *-- INameValidator
+
+interface ISession {
+    Execute(input : string, resultHandler : Action<CommandResult>)
+}
+
+ISession --> CommandResult
+
+class Session implements ISession
+
+Session *-- ICommandRegistry
+session *-- ICommandFactory
+Session *-- IParser
+
+class ChelRuntime {
+    WithCommand(:Type)
+    NewSession() : ISession
+}
+
+ChelRuntime o-- ISession
+ChelRuntime *-- ICommandRegistry
 
 @enduml
