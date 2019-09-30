@@ -9,5 +9,10 @@ namespace Chel.Abstractions.Results
         {
             Success = false;
         }
+
+        public override string ToString()
+        {
+            return "Unknown command";
+        }
     }
 }

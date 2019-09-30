@@ -9,5 +9,10 @@ namespace Chel.Abstractions.Results
         {
             Success = true;
         }
+
+        public override string ToString()
+        {
+            return string.Empty;
+        }
     }
 }
