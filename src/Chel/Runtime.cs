@@ -1,5 +1,6 @@
 using System;
 using Chel.Abstractions;
+using Chel.Commands;
 
 namespace Chel
 {
@@ -16,6 +17,9 @@ namespace Chel
             _commandRegistry = new CommandRegistry(_nameValidator);
             _commandServices = new CommandServices();
             _parser = new Parser();
+
+            _commandRegistry.Register(typeof(Help));
+            _commandServices.Register(_commandRegistry);
         }
 
         public void RegisterCommandType(Type commandType)

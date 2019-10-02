@@ -1,5 +1,6 @@
 using System;
 using Chel.Abstractions;
+using Chel.Abstractions.Results;
 using Xunit;
 
 namespace Chel.UnitTests
@@ -29,6 +30,21 @@ namespace Chel.UnitTests
 
             // assert
             Assert.NotNull(session);
+        }
+
+        [Fact]
+        public void NewSession_WhenCalled_HelpCommandAvailable()
+        {
+            // arrange
+            var sut = new Runtime();
+            CommandResult commandResult = null;
+
+            // act
+            var session = sut.NewSession();
+            session.Execute("help", result => commandResult = result);
+
+            // assert
+            Assert.IsType<Success>(commandResult);
         }
 
         [Fact]
