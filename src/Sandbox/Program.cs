@@ -10,7 +10,7 @@ namespace Sandbox
             Console.WriteLine("Chel sandbox");
 
             var runtime = new Runtime();
-            runtime.RegisterCommandType(typeof(Greeter));
+            runtime.RegisterCommandType(typeof(Nop));
 
             var session = runtime.NewSession();
 

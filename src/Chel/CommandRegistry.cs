@@ -80,5 +80,10 @@ namespace Chel
 
             return null;
         }
+
+        public IEnumerable<Type> GetAllRegistrations()
+        {
+            return _registeredTypes.Values;
+        }
     }
 }

@@ -1,6 +1,9 @@
 using System;
 using Chel.Abstractions;
+using Chel.Abstractions.Results;
 using Chel.UnitTests.SampleCommands;
+using Chel.UnitTests.Services;
+using NSubstitute;
 using Xunit;
 
 namespace Chel.UnitTests
@@ -11,7 +14,8 @@ namespace Chel.UnitTests
         public void Ctor_CommandRegistryNull_ThrowsException()
         {
             // arrange
-            Action sutAction = () => new CommandFactory(null);
+            var services = new CommandServices();
+            Action sutAction = () => new CommandFactory(null, services);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -19,10 +23,22 @@ namespace Chel.UnitTests
         }
 
         [Fact]
+        public void Ctor_CommandServicesNull_ThrowsException()
+        {
+            // arrange
+            var registry = Substitute.For<ICommandRegistry>();
+            Action sutAction = () => new CommandFactory(registry, null);
+
+            // act, assert
+            var ex = Assert.Throws<ArgumentNullException>(sutAction);
+            Assert.Equal("commandServices", ex.ParamName);
+        }
+
+        [Fact]
         public void Create_InputIsNull_ThrowsException()
         {
             // arrange
-            var sut = CreateCommandFactory();
+            var sut = CreateCommandFactory((registry, services) => {});
             Action sutAction = () => sut.Create(null);
 
             // act, assert
@@ -34,7 +50,7 @@ namespace Chel.UnitTests
         public void Create_CommandNotRegistered_ReturnsNull()
         {
             // arrange
-            var sut = CreateCommandFactory();
+            var sut = CreateCommandFactory((registry, services) => {});
             var input = new CommandInput("command");
 
             // act
@@ -48,7 +64,10 @@ namespace Chel.UnitTests
         public void Create_CommandRegistered_ReturnsCommandInstance()
         {
             // arrange
-            var sut = CreateCommandFactory(typeof(SampleCommand));
+            var sut = CreateCommandFactory((registry, services) =>
+            {
+                registry.Register(typeof(SampleCommand));
+            });
             var input = new CommandInput("sample");
 
             // act
@@ -62,7 +81,10 @@ namespace Chel.UnitTests
         public void Create_MultipleCalls_ReturnsNewInstanceOnEachCall()
         {
             // arrange
-            var sut = CreateCommandFactory(typeof(SampleCommand));
+            var sut = CreateCommandFactory((registry, services) =>
+            {
+                registry.Register(typeof(SampleCommand));
+            });
             var input = new CommandInput("sample");
 
             // act
@@ -73,15 +95,50 @@ namespace Chel.UnitTests
             Assert.NotSame(command, command2);
         }
 
-        private CommandFactory CreateCommandFactory(params Type[] commandTypes)
+        [Fact]
+        public void Create_CommandRequiresRegisteredService_ReturnsCommandInstance()
+        {
+            // arrange
+            var sut = CreateCommandFactory((registry, services) =>
+            {
+                registry.Register(typeof(ServiceDependencyCommand));
+                services.Register<ISampleService>(new SampleService());
+            });
+            var input = new CommandInput("alpha");
+
+            // act
+            var command = sut.Create(input);
+            var result = command.Execute();
+
+            // assert
+            Assert.IsType<Success>(result);
+        }
+
+        [Fact]
+        public void Create_CommandRequiresNotRegisteredService_ThrowsException()
+        {
+            // arrange
+            var sut = CreateCommandFactory((registry, services) =>
+            {
+                registry.Register(typeof(ServiceDependencyCommand));
+            });
+            var input = new CommandInput("alpha");
+            Action sutAction = () => sut.Create(input);
+
+            // act, assert
+            var ex = Assert.Throws<CommandServiceNotRegisteredException>(sutAction);
+            Assert.Equal(typeof(ISampleService), ex.CommandServiceType);
+        }
+
+        private CommandFactory CreateCommandFactory(Action<CommandRegistry, CommandServices> configurator)
         {
             var nameValidator = new NameValidator();
             var registry = new CommandRegistry(nameValidator);
+            var services = new CommandServices();
 
-            foreach(var type in commandTypes)
-                registry.Register(type);
+            configurator.Invoke(registry, services);
 
-            return new CommandFactory(registry);
+            return new CommandFactory(registry, services);
         }
     }
 }

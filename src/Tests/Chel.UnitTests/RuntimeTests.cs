@@ -30,5 +30,17 @@ namespace Chel.UnitTests
             // assert
             Assert.NotNull(session);
         }
+
+        [Fact]
+        public void RegisterCommandService_ServiceIsNull_ThrowsException()
+        {
+            // arrange
+            var sut = new Runtime();
+            Action sutAction = () => sut.RegisterCommandService<object>(null);
+
+            // act, assert
+            var ex = Assert.Throws<ArgumentNullException>(sutAction);
+            Assert.Equal("service", ex.ParamName);
+        }
     }
 }

@@ -89,7 +89,9 @@ namespace Chel.UnitTests
             foreach(var commandType in commandTypes)
                 registry.Register(commandType);
 
-            var factory = new CommandFactory(registry);
+            var services = new CommandServices();
+
+            var factory = new CommandFactory(registry, services);
             var parser = new Parser();
 
             return new Session(parser, factory);

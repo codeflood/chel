@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace Chel.Abstractions
 {
@@ -18,5 +19,10 @@ namespace Chel.Abstractions
         /// </summary>
         /// <param name="commandName">The name of the command to resolve.</param>
         Type Resolve(string commandName);
+
+        /// <summary>
+        /// Gets all the command type registrations.
+        /// </summary>
+        IEnumerable<Type> GetAllRegistrations();
     }
 }

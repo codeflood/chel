@@ -41,6 +41,7 @@ CommandRegistry --> ICommandRegistry
 
 class CommandFactory implements ICommandFactory
 CommandFactory o-- ICommandRegistry
+CommandFactory o-- ICommandServices
 
 interface INameValidator {
     IsValid(name : string) : bool
@@ -58,16 +59,24 @@ ISession --> CommandResult
 
 class Session implements ISession
 
-Session *-- ICommandRegistry
-session *-- ICommandFactory
+Session *-- ICommandFactory
 Session *-- IParser
 
-class ChelRuntime {
-    WithCommand(:Type)
+interface ICommandServices {
+    Register(:object)
+    Resolve(:Type) : object
+}
+
+class CommandServices implements ICommandServices
+
+class Runtime {
+    RegisterCommandType(:Type)
+    RegisterCommandService<T>(:T)
     NewSession() : ISession
 }
 
-ChelRuntime o-- ISession
-ChelRuntime *-- ICommandRegistry
+Runtime o-- ISession
+Runtime *-- ICommandRegistry
+Runtime *-- ICommandServices
 
 @enduml

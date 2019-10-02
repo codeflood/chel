@@ -1,10 +1,10 @@
 using Chel.Abstractions;
 using Chel.Abstractions.Results;
 
-namespace Sandbox
+namespace Chel.UnitTests.SampleCommands
 {
-    [Command("hi")]
-    public class Greeter : ICommand
+    [Command("sample2")]
+    public class SampleCommand2 : ICommand
     {
         public CommandResult Execute()
         {

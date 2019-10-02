@@ -79,7 +79,6 @@ namespace Chel.UnitTests
             sut.Register(typeof(SampleCommand));
         }
 
-        // different command, same command name.
         [Fact]
         public void Register_CommandNameAlreadyUsedOnDifferentCommand_ThrowsException()
         {
@@ -145,6 +144,34 @@ namespace Chel.UnitTests
 
             // assert
             Assert.Equal(typeof(SampleCommand), commandType);
+        }
+
+        [Fact]
+        public void GetAllRegistrations_WhenNothingRegistered_ReturnsEmptyCollection()
+        {
+            // arrange
+            var sut = CreateCommandRegistry();
+
+            // act
+            var types = sut.GetAllRegistrations();
+
+            // assert
+            Assert.Empty(types);
+        }
+
+        [Fact]
+        public void GetAllRegistrations_WhenTypesRegistered_ReturnsTypes()
+        {
+            // arrange
+            var sut = CreateCommandRegistry();
+            sut.Register(typeof(SampleCommand));
+            sut.Register(typeof(SampleCommand2));
+
+            // act
+            var types = sut.GetAllRegistrations();
+
+            // assert
+            Assert.Equal(types, new[]{ typeof(SampleCommand), typeof(SampleCommand2) });
         }
 
         private CommandRegistry CreateCommandRegistry()
