@@ -64,7 +64,7 @@ namespace Chel.UnitTests
             sut.Execute("sample", result => executionResult = result);
 
             // assert
-            Assert.IsType<UnknownCommand>(executionResult);
+            Assert.IsType<UnknownCommandResult>(executionResult);
         }
 
         [Fact]
@@ -78,7 +78,7 @@ namespace Chel.UnitTests
             sut.Execute("sample", result => executionResult = result);
             
             // assert
-            Assert.IsType<Success>(executionResult);
+            Assert.IsType<SuccessResult>(executionResult);
         }
 
         private Session CreateSession(params Type[] commandTypes)

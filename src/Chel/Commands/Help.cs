@@ -19,7 +19,7 @@ namespace Chel.Commands
 
         public CommandResult Execute()
         {
-            return new Success();
+            return new ValueResult("Nothing to see here, move along");
         }
     }
 }

@@ -44,7 +44,7 @@ namespace Chel.UnitTests
             session.Execute("help", result => commandResult = result);
 
             // assert
-            Assert.IsType<Success>(commandResult);
+            Assert.IsType<ValueResult>(commandResult);
         }
 
         [Fact]

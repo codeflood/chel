@@ -111,7 +111,7 @@ namespace Chel.UnitTests
             var result = command.Execute();
 
             // assert
-            Assert.IsType<Success>(result);
+            Assert.IsType<SuccessResult>(result);
         }
 
         [Fact]

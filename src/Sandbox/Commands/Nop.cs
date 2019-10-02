@@ -8,7 +8,7 @@ namespace Sandbox
     {
         public CommandResult Execute()
         {
-            return new Success();
+            return new SuccessResult();
         }
     }
 }

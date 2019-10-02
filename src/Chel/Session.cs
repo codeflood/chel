@@ -30,7 +30,7 @@ namespace Chel
 
             foreach(var commandInput in commandInputs)
             {
-                CommandResult result = new UnknownCommand();
+                CommandResult result = new UnknownCommandResult();
 
                 var command = _commandFactory.Create(commandInput);
                 if(command != null)

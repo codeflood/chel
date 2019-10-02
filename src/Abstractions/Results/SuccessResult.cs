@@ -3,9 +3,9 @@ namespace Chel.Abstractions.Results
     /// <summary>
     /// A successful <see cref="CommandResult"/> with no return value.
     /// </summary>
-    public class Success : CommandResult
+    public class SuccessResult : CommandResult
     {
-        public Success()
+        public SuccessResult()
         {
             Success = true;
         }
