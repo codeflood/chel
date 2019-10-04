@@ -30,22 +30,22 @@ namespace Chel
 
             var implementsInterface = DoesImplementICommand(type);
             if(!implementsInterface)
-                throw new ArgumentException($"{type.Name} does not implement ICommand.", nameof(type));
+                throw new ArgumentException(string.Format(Texts.ParameterDoesNotImplementICommand, type.FullName), nameof(type));
 
             var attribute = ExtractCommandAttribute(type);
             if(attribute == null)
-                throw new ArgumentException($"{type.Name} is not attributed with CommandAttribute.", nameof(type));
+                throw new ArgumentException(string.Format(Texts.ParameterIsNotAttributedWithCommandAttribute, type.FullName), nameof(type));
 
             var commandName = attribute.CommandName;
 
             var validCommandName = _nameValidator.IsValid(commandName);
             if(!validCommandName)
-                throw new ArgumentException($"'{commandName}' is not a valid command name.", nameof(type));
+                throw new InvalidCommandNameException(commandName);
 
             if(_registeredTypes.ContainsKey(commandName))
             {
                 if(!_registeredTypes.ContainsValue(type))
-                    throw new ArgumentException($"Command name '{commandName}' on command {type.Name} is already used on command type {_registeredTypes[commandName].Name}.", nameof(type));
+                    throw new CommandNameAlreadyUsedException(commandName, type, _registeredTypes[commandName]);
             }
             else
                 _registeredTypes.Add(commandName, type);

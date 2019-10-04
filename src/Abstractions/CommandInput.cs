@@ -19,7 +19,7 @@ namespace Chel.Abstractions
         public CommandInput(string commandName)
         {
             if(commandName == null)
-                throw new ArgumentException("Parameter 'commandName' cannot be null");
+                throw new ArgumentNullException(nameof(commandName));
 
             CommandName = commandName;
         }

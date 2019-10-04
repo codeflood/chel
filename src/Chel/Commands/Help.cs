@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using Chel.Abstractions;
 using Chel.Abstractions.Results;
 
@@ -19,7 +20,17 @@ namespace Chel.Commands
 
         public CommandResult Execute()
         {
-            return new ValueResult("Nothing to see here, move along");
+            // todo: temporary implementation.
+            var output = new StringBuilder();
+            output.Append($"{Texts.AvailableCommands}:{Environment.NewLine}");
+
+            foreach(var command in _commandRegistry.GetAllRegistrations())
+            {
+                // todo: implement command descriptors
+                output.Append($"{command.Name}{Environment.NewLine}");
+            }
+
+            return new ValueResult(output.ToString());
         }
     }
 }

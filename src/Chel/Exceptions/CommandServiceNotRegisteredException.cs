@@ -7,8 +7,11 @@ namespace Chel
         public Type CommandServiceType { get; private set; }
 
         public CommandServiceNotRegisteredException(Type type)
-            : base($"Command service implementing {type.Name} has not been registered")
+            : base(string.Format(Texts.CommandServiceNotRegistered, type?.FullName))
         {
+            if(type == null)
+                throw new ArgumentNullException(nameof(type));
+
             CommandServiceType = type;
         }
     }

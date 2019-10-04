@@ -12,7 +12,7 @@ namespace Chel.Abstractions.Results
 
         public override string ToString()
         {
-            return "Unknown command";
+            return Texts.UnknownCommand;
         }
     }
 }

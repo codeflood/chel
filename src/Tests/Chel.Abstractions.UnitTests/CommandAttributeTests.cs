@@ -23,8 +23,8 @@ namespace Chel.Abstractions.UnitTests
             Action sutAction = () => new CommandAttribute("");
 
             // act, assert
-            var ex = Assert.Throws<ArgumentException>(sutAction);
-            Assert.Equal("commandName", ex.ParamName);
+            var ex = Assert.Throws<InvalidCommandNameException>(sutAction);
+            Assert.Equal("", ex.CommandName);
         }
 
         [Fact]

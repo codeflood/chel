@@ -1,4 +1,5 @@
 using System;
+using Chel.Abstractions;
 using Chel.UnitTests.SampleCommands;
 using Xunit;
 
@@ -39,7 +40,7 @@ namespace Chel.UnitTests
             // act, assert
             var ex = Assert.Throws<ArgumentException>(sutAction);
             Assert.Equal("type", ex.ParamName);
-            Assert.Contains("CommandRegistryTests does not implement ICommand.", ex.Message);
+            Assert.Contains("Chel.UnitTests.CommandRegistryTests does not implement ICommand", ex.Message);
         }
 
         [Fact]
@@ -52,7 +53,7 @@ namespace Chel.UnitTests
             // act, assert
             var ex = Assert.Throws<ArgumentException>(sutAction);
             Assert.Equal("type", ex.ParamName);
-            Assert.Contains("MissingAttributeSampleCommand is not attributed with CommandAttribute.", ex.Message);
+            Assert.Contains("Chel.UnitTests.SampleCommands.MissingAttributeSampleCommand is not attributed with CommandAttribute", ex.Message);
         }
 
         [Fact]
@@ -63,9 +64,8 @@ namespace Chel.UnitTests
             Action sutAction = () => sut.Register(typeof(InvalidCommandNameSampleCommand));
 
             // act, assert
-            var ex = Assert.Throws<ArgumentException>(sutAction);
-            Assert.Equal("type", ex.ParamName);
-            Assert.Contains("'  ' is not a valid command name.", ex.Message);
+            var ex = Assert.Throws<InvalidCommandNameException>(sutAction);
+            Assert.Equal("  ", ex.CommandName);
         }
 
         [Fact]
@@ -88,9 +88,10 @@ namespace Chel.UnitTests
             Action sutAction = () => sut.Register(typeof(DuplicateSampleCommand));
 
             // act, assert
-            var ex = Assert.Throws<ArgumentException>(sutAction);
-            Assert.Equal("type", ex.ParamName);
-            Assert.Contains("Command name 'sample' on command DuplicateSampleCommand is already used on command type SampleCommand.", ex.Message);
+            var ex = Assert.Throws<CommandNameAlreadyUsedException>(sutAction);
+            Assert.Equal("sample", ex.CommandName);
+            Assert.Equal(typeof(DuplicateSampleCommand), ex.CommandType);
+            Assert.Equal(typeof(SampleCommand), ex.OtherCommandType);
         }
 
         [Fact]

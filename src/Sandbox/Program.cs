@@ -7,7 +7,8 @@ namespace Sandbox
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Chel sandbox");
+            var version = typeof(Runtime).Assembly.GetName().Version;
+            Console.WriteLine($"Chel sandbox {version}");
 
             var runtime = new Runtime();
             runtime.RegisterCommandType(typeof(Nop));
@@ -15,6 +16,7 @@ namespace Sandbox
             var session = runtime.NewSession();
 
             Console.WriteLine("Type 'exit' to exit.");
+            Console.WriteLine("Type 'help' for help.");
 
             var input = Console.ReadLine();
             while(input != "exit")

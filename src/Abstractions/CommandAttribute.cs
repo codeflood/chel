@@ -13,14 +13,15 @@ namespace Chel.Abstractions
         /// Gets the name of the command.
         /// </summary>
         public string CommandName { get; private set;}
+        
         public CommandAttribute(string commandName)
         {
             if(commandName == null)
                 throw new ArgumentNullException(nameof(commandName));
 
             if(string.IsNullOrEmpty(commandName))
-                throw new ArgumentException("commandName cannot be empty.", nameof(commandName));
-
+                throw new InvalidCommandNameException(commandName);
+                
             CommandName = commandName;
         }
     }

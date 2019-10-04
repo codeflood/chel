@@ -21,7 +21,7 @@ namespace Chel
             var serviceType = typeof(T);
 
             if(_serviceRegistrations.ContainsKey(serviceType))
-                throw new ArgumentException($"The service type {serviceType.Name} has already been registered", nameof(service));
+                throw new InvalidOperationException(string.Format(Texts.ServiceTypeAlreadyRegistered, serviceType.FullName));
 
             _serviceRegistrations.Add(serviceType, service);
         }

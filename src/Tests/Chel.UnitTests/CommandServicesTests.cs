@@ -63,9 +63,8 @@ namespace Chel.UnitTests
             Action sutAction = () => sut.Register(service2);
 
             // act, assert
-            var ex = Assert.Throws<ArgumentException>(sutAction);
-            Assert.Equal("service", ex.ParamName);
-            Assert.Contains("The service type SampleService has already been registered", ex.Message);
+            var ex = Assert.Throws<InvalidOperationException>(sutAction);
+            Assert.Contains("The service type Chel.UnitTests.Services.SampleService has already been registered", ex.Message);
         }
 
         [Fact]
