@@ -1,6 +1,5 @@
 <Project>
     <PropertyGroup>
-        <MajorVersion>0</MajorVersion>
-        <MinorVersion>1</MinorVersion>
+        <AssemblyVersion>0.1.0.0</AssemblyVersion>
     </PropertyGroup>
 </Project>

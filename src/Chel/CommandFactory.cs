@@ -27,10 +27,12 @@ namespace Chel
             if(commandInput == null)
                 throw new ArgumentNullException(nameof(commandInput));
 
-            var type = _commandRegistry.Resolve(commandInput.CommandName);
+            var descriptor = _commandRegistry.Resolve(commandInput.CommandName);
 
-            if(type == null)
+            if(descriptor == null)
                 return null;
+
+            var type = descriptor.ImplementingType;
 
             var constructor = type.GetConstructors().FirstOrDefault();
             var parameters = constructor?.GetParameters();

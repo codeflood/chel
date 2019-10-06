@@ -12,7 +12,7 @@ namespace Chel
     {
         private readonly Type _commandInterfaceType = typeof(ICommand);
         private readonly INameValidator _nameValidator = null;
-        private readonly Dictionary<string, Type> _registeredTypes = null;
+        private readonly Dictionary<string, CommandDescriptor> _registeredTypes = null;
 
         public CommandRegistry(INameValidator nameValidator)
         {
@@ -20,7 +20,7 @@ namespace Chel
                 throw new ArgumentNullException(nameof(nameValidator));
 
             _nameValidator = nameValidator;
-            _registeredTypes = new Dictionary<string, Type>(StringComparer.OrdinalIgnoreCase);
+            _registeredTypes = new Dictionary<string, CommandDescriptor>(StringComparer.OrdinalIgnoreCase);
         }
 
         public void Register(Type type)
@@ -38,17 +38,19 @@ namespace Chel
 
             var commandName = attribute.CommandName;
 
+            var descriptor = new CommandDescriptor(type, commandName);
+
             var validCommandName = _nameValidator.IsValid(commandName);
             if(!validCommandName)
                 throw new InvalidCommandNameException(commandName);
 
             if(_registeredTypes.ContainsKey(commandName))
             {
-                if(!_registeredTypes.ContainsValue(type))
-                    throw new CommandNameAlreadyUsedException(commandName, type, _registeredTypes[commandName]);
+                if(!_registeredTypes.ContainsValue(descriptor))
+                    throw new CommandNameAlreadyUsedException(commandName, type, _registeredTypes[commandName].ImplementingType);
             }
             else
-                _registeredTypes.Add(commandName, type);
+                _registeredTypes.Add(commandName, descriptor);
         }
 
         private bool DoesImplementICommand(Type type)
@@ -70,7 +72,7 @@ namespace Chel
             return (CommandAttribute)attributes.FirstOrDefault();
         }
 
-        public Type Resolve(string commandName)
+        public CommandDescriptor Resolve(string commandName)
         {
             if(commandName == null)
                 throw new ArgumentNullException(nameof(commandName));
@@ -81,7 +83,7 @@ namespace Chel
             return null;
         }
 
-        public IEnumerable<Type> GetAllRegistrations()
+        public IEnumerable<CommandDescriptor> GetAllRegistrations()
         {
             return _registeredTypes.Values;
         }

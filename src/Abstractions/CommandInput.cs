@@ -38,7 +38,7 @@ namespace Chel.Abstractions
 
         public override int GetHashCode()
         {
-            return CommandName.GetHashCode();
+            return CommandName.ToLower().GetHashCode();
         }
     }
 }

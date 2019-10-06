@@ -15,14 +15,14 @@ namespace Chel.Abstractions
         void Register(Type type);
 
         /// <summary>
-        /// Resolve the <see cref="Type"/> which implements a specific command name.
+        /// Resolve a command by it's name.
         /// </summary>
         /// <param name="commandName">The name of the command to resolve.</param>
-        Type Resolve(string commandName);
+        CommandDescriptor Resolve(string commandName);
 
         /// <summary>
         /// Gets all the command type registrations.
         /// </summary>
-        IEnumerable<Type> GetAllRegistrations();
+        IEnumerable<CommandDescriptor> GetAllRegistrations();
     }
 }

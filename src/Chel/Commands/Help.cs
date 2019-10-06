@@ -24,10 +24,9 @@ namespace Chel.Commands
             var output = new StringBuilder();
             output.Append($"{Texts.AvailableCommands}:{Environment.NewLine}");
 
-            foreach(var command in _commandRegistry.GetAllRegistrations())
+            foreach(var descriptor in _commandRegistry.GetAllRegistrations())
             {
-                // todo: implement command descriptors
-                output.Append($"{command.Name}{Environment.NewLine}");
+                output.Append($"{descriptor.CommandName}{Environment.NewLine}");
             }
 
             return new ValueResult(output.ToString());

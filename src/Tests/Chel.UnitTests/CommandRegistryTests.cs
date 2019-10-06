@@ -120,31 +120,33 @@ namespace Chel.UnitTests
         }
 
         [Fact]
-        public void Resolve_CommandIsRegistered_ReturnsCommandType()
+        public void Resolve_CommandIsRegistered_ReturnsCommandDescriptor()
         {
             // arrange
             var sut = CreateCommandRegistry();
             sut.Register(typeof(SampleCommand));
+            var descriptor = new CommandDescriptor(typeof(SampleCommand), "sample");
 
             // act
-            var commandType = sut.Resolve("sample");
+            var resolvedDescriptor = sut.Resolve("sample");
 
             // assert
-            Assert.Equal(typeof(SampleCommand), commandType);
+            Assert.Equal(descriptor, resolvedDescriptor);
         }
 
         [Fact]
-        public void Resolve_DifferentCasing_ReturnsCommandType()
+        public void Resolve_DifferentCasing_ReturnsCommandDescriptor()
         {
             // arrange
             var sut = CreateCommandRegistry();
             sut.Register(typeof(SampleCommand));
+            var descriptor = new CommandDescriptor(typeof(SampleCommand), "sample");
 
             // act
-            var commandType = sut.Resolve("SAmPLE");
+            var resolvedDescriptor = sut.Resolve("SAmPLE");
 
             // assert
-            Assert.Equal(typeof(SampleCommand), commandType);
+            Assert.Equal(descriptor, resolvedDescriptor);
         }
 
         [Fact]
@@ -161,18 +163,20 @@ namespace Chel.UnitTests
         }
 
         [Fact]
-        public void GetAllRegistrations_WhenTypesRegistered_ReturnsTypes()
+        public void GetAllRegistrations_WhenTypesRegistered_ReturnsDescriptors()
         {
             // arrange
             var sut = CreateCommandRegistry();
             sut.Register(typeof(SampleCommand));
             sut.Register(typeof(SampleCommand2));
+            var descriptor1 = new CommandDescriptor(typeof(SampleCommand), "sample");
+            var descriptor2 = new CommandDescriptor(typeof(SampleCommand2), "sample2");
 
             // act
-            var types = sut.GetAllRegistrations();
+            var resolvedDescriptors = sut.GetAllRegistrations();
 
             // assert
-            Assert.Equal(types, new[]{ typeof(SampleCommand), typeof(SampleCommand2) });
+            Assert.Equal(new[]{ descriptor1, descriptor2 }, resolvedDescriptors);
         }
 
         private CommandRegistry CreateCommandRegistry()

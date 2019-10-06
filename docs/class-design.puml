@@ -26,12 +26,20 @@ interface ICommandFactory {
     Create(:CommandInput) : ICommand
 }
 
-interface ICommandRegistry {
-    Register(:Type)
-    Resolve(commandName : string) : Type
+ICommandFactory -- ICommand
+
+class CommandDescriptor {
+    ImplementingType : Type
+    CommandName : string
 }
 
-ICommandFactory -- ICommand
+interface ICommandRegistry {
+    Register(:Type)
+    Resolve(commandName : string) : CommandDescriptor
+    GetAllRegistrations() : IEnumerable<CommandDescriptor>
+}
+
+ICommandRegistry *-- CommandDescriptor
 
 class CommandRegistry implements ICommandRegistry {
     ctor()

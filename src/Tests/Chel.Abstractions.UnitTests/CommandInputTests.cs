@@ -69,5 +69,20 @@ namespace Chel.Abstractions.UnitTests
             // assert
             Assert.Equal(hashcode1, hashcode2);
         }
+
+        [Fact]
+        public void GetHashCode_CommandNamesCasingDifferent_HashCodeAreSame()
+        {
+            // arrange
+            var sut1 = new CommandInput("command");
+            var sut2 = new CommandInput("COMmAND");
+
+            // act
+            var hashcode1 = sut1.GetHashCode();
+            var hashcode2 = sut2.GetHashCode();
+
+            // assert
+            Assert.Equal(hashcode1, hashcode2);
+        }
     }
 }
