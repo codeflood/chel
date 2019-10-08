@@ -5,7 +5,7 @@ using Chel.Abstractions.Results;
 
 namespace Chel.Commands
 {
-    [Command("help")]
+    [Command("help", "Lists available commands and displays help for commands.")]
     public class Help : ICommand
     {
         private ICommandRegistry _commandRegistry;
@@ -26,7 +26,7 @@ namespace Chel.Commands
 
             foreach(var descriptor in _commandRegistry.GetAllRegistrations())
             {
-                output.Append($"{descriptor.CommandName}{Environment.NewLine}");
+                output.Append($"{descriptor.CommandName, -25}{descriptor.Description}{Environment.NewLine}");
             }
 
             return new ValueResult(output.ToString());

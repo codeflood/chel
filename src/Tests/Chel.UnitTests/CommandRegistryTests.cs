@@ -125,7 +125,7 @@ namespace Chel.UnitTests
             // arrange
             var sut = CreateCommandRegistry();
             sut.Register(typeof(SampleCommand));
-            var descriptor = new CommandDescriptor(typeof(SampleCommand), "sample");
+            var descriptor = CreateSampleCommandDescriptor();
 
             // act
             var resolvedDescriptor = sut.Resolve("sample");
@@ -140,7 +140,7 @@ namespace Chel.UnitTests
             // arrange
             var sut = CreateCommandRegistry();
             sut.Register(typeof(SampleCommand));
-            var descriptor = new CommandDescriptor(typeof(SampleCommand), "sample");
+            var descriptor = CreateSampleCommandDescriptor();
 
             // act
             var resolvedDescriptor = sut.Resolve("SAmPLE");
@@ -169,8 +169,8 @@ namespace Chel.UnitTests
             var sut = CreateCommandRegistry();
             sut.Register(typeof(SampleCommand));
             sut.Register(typeof(SampleCommand2));
-            var descriptor1 = new CommandDescriptor(typeof(SampleCommand), "sample");
-            var descriptor2 = new CommandDescriptor(typeof(SampleCommand2), "sample2");
+            var descriptor1 = CreateSampleCommandDescriptor();
+            var descriptor2 = CreateSampleCommand2Descriptor();
 
             // act
             var resolvedDescriptors = sut.GetAllRegistrations();
@@ -183,6 +183,18 @@ namespace Chel.UnitTests
         {
             var nameValidator = new NameValidator();
             return new CommandRegistry(nameValidator);
+        }
+
+        private CommandDescriptor CreateSampleCommandDescriptor()
+        {
+            var builder = new CommandDescriptor.Builder(typeof(SampleCommand), "sample", "description");
+            return builder.Build();
+        }
+
+        private CommandDescriptor CreateSampleCommand2Descriptor()
+        {
+            var builder = new CommandDescriptor.Builder(typeof(SampleCommand2), "sample2", "description");
+            return builder.Build();
         }
     }
 }

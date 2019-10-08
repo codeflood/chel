@@ -5,7 +5,7 @@ using Chel.UnitTests.Services;
 
 namespace Chel.UnitTests.SampleCommands
 {
-    [Command("alpha")]
+    [Command("alpha", "A command that requires a dependency.")]
     public class ServiceDependencyCommand : ICommand
     {
         private ISampleService _service = null;

@@ -7,65 +7,19 @@ namespace Chel.Abstractions.UnitTests
     public class CommandDescriptorTests
     {
         [Fact]
-        public void Ctor_ImplementingTypeIsNull_ThrowsException()
-        {
-            // arrange
-            Action sutAction = () => new CommandDescriptor(null, "something");
-
-            // act, assert
-            var ex = Assert.Throws<ArgumentNullException>(sutAction);
-            Assert.Equal("implementingType", ex.ParamName);
-        }
-
-        [Fact]
-        public void Ctor_CommandNameIsNull_ThrowsException()
-        {
-            // arrange
-            Action sutAction = () => new CommandDescriptor(GetType(), null);
-
-            // act, assert
-            var ex = Assert.Throws<ArgumentNullException>(sutAction);
-            Assert.Equal("commandName", ex.ParamName);
-        }
-
-        [Fact]
-        public void Ctor_CommandNameIsEmpty_ThrowsException()
-        {
-            // arrange
-            Action sutAction = () => new CommandDescriptor(GetType(), "");
-
-            // act, assert
-            var ex = Assert.Throws<ArgumentException>(sutAction);
-            Assert.Equal("commandName", ex.ParamName);
-            Assert.Contains("commandName cannot be empty", ex.Message);
-        }
-
-        [Fact]
-        public void Ctor_WhenCalled_SetsProperties()
-        {
-            // arrange
-            var type = GetType();
-
-            // act
-            var sut = new CommandDescriptor(type, "command");
-
-            // assert
-            Assert.Equal(type, sut.ImplementingType);
-            Assert.Equal("command", sut.CommandName);
-        }
-
-        [Fact]
         public void Equals_DescriptorsAreEqual_ReturnsTrue()
         {
             // arrange
             var type = GetType();
-            var sut1 = new CommandDescriptor(type, "command");
-            var sut2 = new CommandDescriptor(type, "command");
+            var builder = new CommandDescriptor.Builder(type, "command", "description");
+            var sut1 = builder.Build();
+            var sut2 = builder.Build();
 
             // act
             var result = sut1.Equals(sut2);
 
             // assert
+            Assert.NotSame(sut1, sut2);
             Assert.True(result);
         }
 
@@ -85,8 +39,9 @@ namespace Chel.Abstractions.UnitTests
         {
             // arrange
             var type = GetType();
-            var sut1 = new CommandDescriptor(type, "command");
-            var sut2 = new CommandDescriptor(type, "command");
+            var builder = new CommandDescriptor.Builder(type, "command", "description");
+            var sut1 = builder.Build();
+            var sut2 = builder.Build();
 
             // act
             var hashcode1 = sut1.GetHashCode();
@@ -113,9 +68,14 @@ namespace Chel.Abstractions.UnitTests
             var type1 = typeof(CommandDescriptorTests);
             var type2 = typeof(CommandDescriptor);
 
-            yield return new object[] { new CommandDescriptor(type2, "command"), new CommandDescriptor(type1, "command") };
-            yield return new object[] { new CommandDescriptor(type1, "other"), new CommandDescriptor(type1, "command") };
-            yield return new object[] { new CommandDescriptor(type2, "other"), new CommandDescriptor(type1, "command") };
+            var type1WithCommandBuilder = new CommandDescriptor.Builder(type1, "command", "description");
+            var type2WithCommandBuilder = new CommandDescriptor.Builder(type2, "command", "description");
+            var type1WithOtherBuilder = new CommandDescriptor.Builder(type1, "other", "description");
+            var type2WithOtherBuilder = new CommandDescriptor.Builder(type2, "other", "description");
+
+            yield return new object[] { type2WithCommandBuilder.Build(), type1WithCommandBuilder.Build() };
+            yield return new object[] { type1WithOtherBuilder.Build(), type1WithCommandBuilder.Build() };
+            yield return new object[] { type2WithOtherBuilder.Build(), type1WithCommandBuilder.Build() };
         }
     }
 }

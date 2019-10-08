@@ -38,11 +38,11 @@ namespace Chel
 
             var commandName = attribute.CommandName;
 
-            var descriptor = new CommandDescriptor(type, commandName);
-
             var validCommandName = _nameValidator.IsValid(commandName);
             if(!validCommandName)
                 throw new InvalidCommandNameException(commandName);
+
+            var descriptor = DescribeCommandType(type, attribute);
 
             if(_registeredTypes.ContainsKey(commandName))
             {
@@ -70,6 +70,12 @@ namespace Chel
         {
             var attributes = type.GetCustomAttributes(typeof(CommandAttribute), true);
             return (CommandAttribute)attributes.FirstOrDefault();
+        }
+
+        private CommandDescriptor DescribeCommandType(Type type, CommandAttribute attribute)
+        {
+            var builder = new CommandDescriptor.Builder(type, attribute.CommandName, attribute.Description);
+            return builder.Build();
         }
 
         public CommandDescriptor Resolve(string commandName)

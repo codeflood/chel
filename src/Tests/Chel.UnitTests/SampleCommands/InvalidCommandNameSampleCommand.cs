@@ -3,7 +3,7 @@ using Chel.Abstractions.Results;
 
 namespace Chel.UnitTests.SampleCommands
 {
-    [Command("  ")]
+    [Command("  ", "A command which does nothing.")]
     public class InvalidCommandNameSampleCommand : ICommand
     {
         public CommandResult Execute()
