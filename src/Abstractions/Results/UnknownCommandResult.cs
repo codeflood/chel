@@ -3,16 +3,16 @@ namespace Chel.Abstractions.Results
     /// <summary>
     /// A <see cref="CommandResult" /> indicating the command was not known.
     /// </summary>
-    public class UnknownCommandResult : CommandResult
+    public class UnknownCommandResult : FailureResult
     {
-        public UnknownCommandResult()
+        public UnknownCommandResult(int sourceLine)
+            : base(sourceLine)
         {
-            Success = false;
         }
 
         public override string ToString()
         {
-            return Texts.UnknownCommand;
+            return $"{base.ToString()}: {Texts.UnknownCommand}";
         }
     }
 }

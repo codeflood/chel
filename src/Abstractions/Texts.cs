@@ -6,7 +6,11 @@ namespace Chel.Abstractions
 
         public const string ArgumentCannotBeNull = "{0} cannot be null";
 
+        public const string ArgumentMustBeGreaterThanZero = "{0} must be greater than 0";
+
         public const string ArgumentCannotBeNullOrEmpty = "{0} cannot be null or empty";
+
+        public const string ErrorOnLine = "ERROR (Line {0})";
 
         public const string InvalidCommandNameNull = "The command name null is invalid";
 

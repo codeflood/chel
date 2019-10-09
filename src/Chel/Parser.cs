@@ -19,12 +19,14 @@ namespace Chel
                 return parsedLines;
 
             var reader = new StringReader(input);
+            var sourceLine = 1;
 
             CommandInput parsedLine = null;
 
             do
             {
-                parsedLine = ParseSingleLine(reader);
+                parsedLine = ParseSingleLine(reader, sourceLine);
+                sourceLine++;
 
                 if(parsedLine != null)
                     parsedLines.Add(parsedLine);
@@ -34,7 +36,7 @@ namespace Chel
             return parsedLines;
         }
 
-        private CommandInput ParseSingleLine(StringReader reader)
+        private CommandInput ParseSingleLine(StringReader reader, int sourceLine)
         {
             var commandName = new StringBuilder();
             var stop = false;
@@ -67,7 +69,7 @@ namespace Chel
             if(string.IsNullOrEmpty(parsedCommandName))
                 return null;
 
-            return new CommandInput(parsedCommandName);
+            return new CommandInput(sourceLine, parsedCommandName);
         }
     }
 }

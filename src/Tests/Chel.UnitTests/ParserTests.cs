@@ -29,7 +29,7 @@ namespace Chel.UnitTests
         {
             // arrange
             var sut = new Parser();
-            var expected = new[] { new CommandInput("command") };
+            var expected = new[] { new CommandInput(1, "command") };
 
             // act
             var result = sut.Parse("command");
@@ -39,15 +39,15 @@ namespace Chel.UnitTests
         }
 
         [Theory]
-        [InlineData("command\ncommand")]
-        [InlineData("\n\ncommand\n\n\n\n\ncommand\n\n")]
-        [InlineData("command\r\ncommand")]
-        [InlineData(" command  \t   \r\n   command  \r\n\r\n")]
-        public void Parse_MultipleCommands_ReturnsCommandInputs(string input)
+        [InlineData("command\ncommand", 1, 2)]
+        [InlineData("\n\ncommand\n\n\n\n\ncommand\n\n", 3, 8)]
+        [InlineData("command\r\ncommand", 1, 2)]
+        [InlineData(" command  \t   \r\n   command  \r\n\r\n", 1, 2)]
+        public void Parse_MultipleCommands_ReturnsCommandInputs(string input, int sourceLine1, int sourceLine2)
         {
             // arrange
             var sut = new Parser();
-            var expected = new[] { new CommandInput("command"), new CommandInput("command") };
+            var expected = new[] { new CommandInput(sourceLine1, "command"), new CommandInput(sourceLine2, "command") };
 
             // act
             var result = sut.Parse(input);
@@ -57,15 +57,15 @@ namespace Chel.UnitTests
         }
 
         [Theory]
-        [InlineData("command#comment")]
-        [InlineData("command  # comment")]
-        [InlineData("# comment\r\ncommand")]
-        [InlineData("# comment\r\ncommand\r\n# comment")]
-        public void Parse_InputContainsComments_CommentsAreIgnored(string input)
+        [InlineData("command#comment", 1)]
+        [InlineData("command  # comment", 1)]
+        [InlineData("# comment\r\ncommand", 2)]
+        [InlineData("# comment\r\ncommand\r\n# comment", 2)]
+        public void Parse_InputContainsComments_CommentsAreIgnored(string input, int sourceLine)
         {
             // arrange
             var sut = new Parser();
-            var expected = new[] { new CommandInput("command") };
+            var expected = new[] { new CommandInput(sourceLine, "command") };
 
             // act
             var result = sut.Parse(input);

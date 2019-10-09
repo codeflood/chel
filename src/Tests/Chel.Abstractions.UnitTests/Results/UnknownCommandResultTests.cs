@@ -9,13 +9,13 @@ namespace Chel.Abstractions.UnitTests.Results
         public void ToString_WhenCalled_ReturnsExpectedString()
         {
             // arrange
-            var sut = new UnknownCommandResult();
+            var sut = new UnknownCommandResult(3);
 
             // act
             var result = sut.ToString();
 
             // assert
-            Assert.Equal("Unknown command", result);
+            Assert.Equal("ERROR (Line 3): Unknown command", result);
         }
     }
 }
