@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using Chel.Abstractions;
 
@@ -74,8 +75,21 @@ namespace Chel
 
         private CommandDescriptor DescribeCommandType(Type type, CommandAttribute attribute)
         {
-            var builder = new CommandDescriptor.Builder(type, attribute.CommandName, attribute.Description);
+            var builder = new CommandDescriptor.Builder(type, attribute.CommandName);
+
+            var descriptionAttributes = ExtractDescriptionAttributes(type);
+            foreach(var descriptionAttribute in descriptionAttributes)
+            {
+                builder.AddDescription(descriptionAttribute.Text, descriptionAttribute.CultureName);
+            }
+
             return builder.Build();
+        }
+
+        private IEnumerable<DescriptionAttribute> ExtractDescriptionAttributes(Type type)
+        {
+            var attributes = type.GetCustomAttributes(typeof(DescriptionAttribute), true);
+            return attributes.Select(x => (DescriptionAttribute)x);
         }
 
         public CommandDescriptor Resolve(string commandName)

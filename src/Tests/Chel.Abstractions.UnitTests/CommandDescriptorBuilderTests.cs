@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using Xunit;
 
 namespace Chel.Abstractions.UnitTests
@@ -9,7 +10,7 @@ namespace Chel.Abstractions.UnitTests
         public void Ctor_ImplementingTypeIsNull_ThrowsException()
         {
             // arrange
-            Action sutAction = () => new CommandDescriptor.Builder(null, "command", "lorem ipsum");
+            Action sutAction = () => new CommandDescriptor.Builder(null, "command");
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -20,7 +21,7 @@ namespace Chel.Abstractions.UnitTests
         public void Ctor_CommandNameIsNull_ThrowsException()
         {
             // arrange
-            Action sutAction = () => new CommandDescriptor.Builder(GetType(), null, "lorem ipsum");
+            Action sutAction = () => new CommandDescriptor.Builder(GetType(), null);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -31,7 +32,7 @@ namespace Chel.Abstractions.UnitTests
         public void Ctor_CommandNameIsEmpty_ThrowsException()
         {
             // arrange
-            Action sutAction = () => new CommandDescriptor.Builder(GetType(), "", "lorem ipsum");
+            Action sutAction = () => new CommandDescriptor.Builder(GetType(), "");
 
             // act, assert
             var ex = Assert.Throws<ArgumentException>(sutAction);
@@ -40,10 +41,23 @@ namespace Chel.Abstractions.UnitTests
         }
 
         [Fact]
-        public void Ctor_DescriptionIsNull_ThrowsException()
+        public void Ctor_WhenCalled_SetsProperties()
+        {
+            // arrange, act
+            var sut = CreateCommandDescriptorBuilder();
+            sut.AddDescription("description", "en");
+
+            // assert
+            Assert.Equal(GetType(), sut.ImplementingType);
+            Assert.Equal("command", sut.CommandName);
+        }
+
+        [Fact]
+        public void AddDescription_DescriptionIsNull_ThrowsException()
         {
             // arrange
-            Action sutAction = () => new CommandDescriptor.Builder(GetType(), "command", null);
+            var sut = CreateCommandDescriptorBuilder();
+            Action sutAction = () => sut.AddDescription(null, "en-AU");
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -51,10 +65,11 @@ namespace Chel.Abstractions.UnitTests
         }
 
         [Fact]
-        public void Ctor_DescriptionIsEmpty_ThrowsException()
+        public void AddDescription_DescriptionIsEmpty_ThrowsException()
         {
             // arrange
-            Action sutAction = () => new CommandDescriptor.Builder(GetType(), "command", "");
+            var sut = CreateCommandDescriptorBuilder();
+            Action sutAction = () => sut.AddDescription("", "en-AU");
 
             // act, assert
             var ex = Assert.Throws<ArgumentException>(sutAction);
@@ -63,15 +78,31 @@ namespace Chel.Abstractions.UnitTests
         }
 
         [Fact]
-        public void Ctor_WhenCalled_SetsProperties()
+        public void AddDescription_CultureNameIsEmpty_DescriptionSetForInvariantCulture()
         {
-            // arrange, act
+            // arrange
             var sut = CreateCommandDescriptorBuilder();
 
+            // act
+            sut.AddDescription("description", "");
+
             // assert
-            Assert.Equal(GetType(), sut.ImplementingType);
-            Assert.Equal("command", sut.CommandName);
-            Assert.Equal("lorem ipsum", sut.Description);
+            var descriptor = sut.Build();
+            var description = descriptor.GetDescription(CultureInfo.InvariantCulture.Name);
+            Assert.Equal("description", description);
+        }
+
+        [Fact]
+        public void AddDescription_CultureAlreadyAdded_ThrowsException()
+        {
+            // arrange
+            var sut = CreateCommandDescriptorBuilder();
+            sut.AddDescription("description", "en");
+            Action sutAction = () => sut.AddDescription("description", "en");
+
+            // act, assert
+            var ex = Assert.Throws<InvalidOperationException>(sutAction);
+            Assert.Contains("Description for culture en has already been added", ex.Message);
         }
 
         [Fact]
@@ -80,6 +111,7 @@ namespace Chel.Abstractions.UnitTests
             // arrange
             var sut = CreateCommandDescriptorBuilder();
             sut.ImplementingType = null;
+            sut.AddDescription("description", "en");
 
             Action sutAction = () => sut.Build();
 
@@ -96,6 +128,7 @@ namespace Chel.Abstractions.UnitTests
             // arrange
             var sut = CreateCommandDescriptorBuilder();
             sut.CommandName = commandName;
+            sut.AddDescription("description", "en");
 
             Action sutAction = () => sut.Build();
 
@@ -104,20 +137,20 @@ namespace Chel.Abstractions.UnitTests
             Assert.Contains("CommandName cannot be null or empty", ex.Message);
         }
 
-        [Theory]
-        [InlineData("")]
-        [InlineData(null)]
-        public void Build_DescriptionIsNullOrEmpty_ThrowsException(string description)
+        [Fact]
+        public void Build_LocalizedDescriptionsAdded_DescriptionsAvailableOnDescriptor()
         {
             // arrange
             var sut = CreateCommandDescriptorBuilder();
-            sut.Description = description;
+            sut.AddDescription("description", "en");
+            sut.AddDescription("au description", "en-AU");
 
-            Action sutAction = () => sut.Build();
+            // act
+            var descriptor = sut.Build();
 
-            // act, assert
-            var ex = Assert.Throws<InvalidOperationException>(sutAction);
-            Assert.Contains("Description cannot be null or empty", ex.Message);
+            // assert
+            Assert.Equal("description", descriptor.GetDescription("en"));
+            Assert.Equal("au description", descriptor.GetDescription("en-AU"));
         }
 
         [Fact]
@@ -125,7 +158,7 @@ namespace Chel.Abstractions.UnitTests
         {
             // arrange
             var sut = CreateCommandDescriptorBuilder();
-            sut.Description = "lorem ipsum";
+            sut.AddDescription("description", "en");
 
             // act
             var descriptor = sut.Build();
@@ -133,12 +166,26 @@ namespace Chel.Abstractions.UnitTests
             // assert
             Assert.Equal(GetType(), descriptor.ImplementingType);
             Assert.Equal("command", descriptor.CommandName);
-            Assert.Equal("lorem ipsum", descriptor.Description);
+            Assert.Equal("description", descriptor.GetDescription("en"));
+        }
+
+        [Fact]
+        public void Build_NoDescriptionsAdded_ReturnsDescriptor()
+        {
+            // arrange
+            var sut = CreateCommandDescriptorBuilder();
+
+            // act
+            var descriptor = sut.Build();
+
+            // act, assert
+            Assert.Equal(GetType(), descriptor.ImplementingType);
+            Assert.Equal("command", descriptor.CommandName);
         }
 
         private CommandDescriptor.Builder CreateCommandDescriptorBuilder()
         {
-            return new CommandDescriptor.Builder(GetType(), "command", "lorem ipsum");
+            return new CommandDescriptor.Builder(GetType(), "command");
         }
     }
 }

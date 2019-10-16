@@ -3,7 +3,8 @@ using Chel.Abstractions.Results;
 
 namespace Sandbox
 {
-    [Command("nop", "Do nothing.")]
+    [Command("nop")]
+    [Description("Do nothing.")]
     public class Nop : ICommand
     {
         public CommandResult Execute()

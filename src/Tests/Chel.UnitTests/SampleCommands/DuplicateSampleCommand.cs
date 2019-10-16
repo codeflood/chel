@@ -3,7 +3,7 @@ using Chel.Abstractions.Results;
 
 namespace Chel.UnitTests.SampleCommands
 {
-    [Command("sample", "A duplicate sample command.")]
+    [Command("sample")]
     public class DuplicateSampleCommand : ICommand
     {
         public CommandResult Execute()

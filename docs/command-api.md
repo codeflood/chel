@@ -31,3 +31,25 @@ Parameters can have multiple mappings to account for short and long formats. Use
     [FlagParameter("flag", "description of the parameter")]
     [ParameterAlias("f")]
     public bool Flag { get; set; }
+
+## Descriptions ##
+
+To support the help system, command implementations can add the `Description` attribute to the class and all parameters.
+
+    [Command("mycommand")]
+    [Description("This command does something")]
+    public class MyCommand : ICommand
+    {
+    }
+
+Descriptions can be added for specific cultures by specifying the culture name as the second parameter in the `Description` attribute.
+
+    [Command("mycommand")]
+    [Description("This command does something")]
+    [Description("This command does something for en", "en")]
+    [Description("This command does something for en-AU", "en-AU")]
+    public class MyCommand : ICommand
+    {
+    }
+
+When resolving descriptions for members, if a specific culture doesn't have a description provided, the parent culture of the requested culture will be tried instead. If no descriptions are found for the culture, the description with no culture specified (invariant culture) will be used.

@@ -1,4 +1,6 @@
 using System;
+using System.Globalization;
+using System.Threading;
 using Chel.Abstractions;
 using Chel.UnitTests.SampleCommands;
 using Xunit;
@@ -187,13 +189,15 @@ namespace Chel.UnitTests
 
         private CommandDescriptor CreateSampleCommandDescriptor()
         {
-            var builder = new CommandDescriptor.Builder(typeof(SampleCommand), "sample", "description");
+            var builder = new CommandDescriptor.Builder(typeof(SampleCommand), "sample");
+            builder.AddDescription("description", "en");
             return builder.Build();
         }
 
         private CommandDescriptor CreateSampleCommand2Descriptor()
         {
-            var builder = new CommandDescriptor.Builder(typeof(SampleCommand2), "sample2", "description");
+            var builder = new CommandDescriptor.Builder(typeof(SampleCommand2), "sample2");
+            builder.AddDescription("description", "en");
             return builder.Build();
         }
     }

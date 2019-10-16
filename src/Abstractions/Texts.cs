@@ -6,9 +6,13 @@ namespace Chel.Abstractions
 
         public const string ArgumentCannotBeNull = "{0} cannot be null";
 
+        public const string ArgumentNotValidCulture = "{0} is not a valid culture";
+
         public const string ArgumentMustBeGreaterThanZero = "{0} must be greater than 0";
 
         public const string ArgumentCannotBeNullOrEmpty = "{0} cannot be null or empty";
+
+        public const string DescriptionForCultureAlreadyAdded = "Description for culture {0} has already been added";
 
         public const string ErrorOnLine = "ERROR (Line {0})";
 
