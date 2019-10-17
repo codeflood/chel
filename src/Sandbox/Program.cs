@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Globalization;
-using System.Threading;
 using Chel;
+using Sandbox.Commands;
 
 namespace Sandbox
 {
@@ -14,17 +13,23 @@ namespace Sandbox
 
             var runtime = new Runtime();
             runtime.RegisterCommandType(typeof(Nop));
+            runtime.RegisterCommandType(typeof(Exit));
 
             var session = runtime.NewSession();
 
             Console.WriteLine("Type 'exit' to exit.");
             Console.WriteLine("Type 'help' for help.");
 
-            var input = Console.ReadLine();
-            while(input != "exit")
+            var exit = false;
+            while(!exit)
             {
+                var input = Console.ReadLine();
+
                 session.Execute(input, result => 
                 {
+                    if(result is ExitResult)
+                        exit = true;
+
                     var previousColor = Console.ForegroundColor;
 
                     if(!result.Success)
@@ -36,7 +41,7 @@ namespace Sandbox
                 });
                 Console.WriteLine();
                 
-                input = Console.ReadLine();
+                //input = Console.ReadLine();
             }
         }
     }

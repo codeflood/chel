@@ -3,13 +3,13 @@ using Chel.Abstractions.Results;
 
 namespace Sandbox.Commands
 {
-    [Command("nop")]
-    [Description("Do nothing.")]
-    public class Nop : ICommand
+    [Command("exit")]
+    [Description("Exit the sandbox.")]
+    public class Exit : ICommand
     {
         public CommandResult Execute()
         {
-            return new SuccessResult();
+            return new ExitResult();
         }
     }
 }
