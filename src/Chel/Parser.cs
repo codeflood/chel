@@ -7,7 +7,7 @@ using Chel.Abstractions;
 namespace Chel
 {
     /// <summary>
-    /// The default parser.
+    /// The default implementation of the <see cref="IParser" />.
     /// </summary>
     public class Parser : IParser
     {

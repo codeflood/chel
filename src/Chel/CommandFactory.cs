@@ -5,11 +5,19 @@ using Chel.Abstractions;
 
 namespace Chel
 {
+    /// <summary>
+    /// The default implementation of the <see cref="ICommandFactory" />.
+    /// </summary>
     public class CommandFactory : ICommandFactory
     {
         private ICommandRegistry _commandRegistry = null;
         private ICommandServices _commandServices = null;
 
+        /// <summary>
+        /// Create a new instance.
+        /// </summary>
+        /// <param name="commandRegistry">The commands that have been registered.</param>
+        /// <param name="commandServices">The command services that have been registered.</param>
         public CommandFactory(ICommandRegistry commandRegistry, ICommandServices commandServices)
         {
             if(commandRegistry == null)
@@ -22,6 +30,10 @@ namespace Chel
             _commandServices = commandServices;
         }
 
+        /// <summary>
+        /// Create a new instance of a command.
+        /// </summary>
+        /// <param name="commandInput">The <see cref="CommandInput" /> containing the details of the command to instantiate.</param>
         public ICommand Create(CommandInput commandInput)
         {
             if(commandInput == null)

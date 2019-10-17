@@ -1,13 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using Chel.Abstractions;
 
 namespace Chel
 {
-    /// <summary>
-    /// The default command registry.
+    // <summary>
+    /// The default implementation of the <see cref="ICommandRegistry" />.
     /// </summary>
     public class CommandRegistry : ICommandRegistry
     {
@@ -15,6 +14,10 @@ namespace Chel
         private readonly INameValidator _nameValidator = null;
         private readonly Dictionary<string, CommandDescriptor> _registeredTypes = null;
 
+        /// <summary>
+        /// Create a new instance.
+        /// </summary>
+        /// <param name="nameValidator">A <see cref="INameValidator" /> used to validate the name of the command.</param>
         public CommandRegistry(INameValidator nameValidator)
         {
             if(nameValidator == null)
@@ -24,6 +27,10 @@ namespace Chel
             _registeredTypes = new Dictionary<string, CommandDescriptor>(StringComparer.OrdinalIgnoreCase);
         }
 
+        /// <summary>
+        /// Register a command.
+        /// </summary>
+        /// <param name="type">The <see cref="Type" /> implementing the command.</param>
         public void Register(Type type)
         {
             if(type == null)
@@ -92,6 +99,10 @@ namespace Chel
             return attributes.Select(x => (DescriptionAttribute)x);
         }
 
+        /// <summary>
+        /// Resolve a <see cref="CommandDescriptor" /> for a given command name.
+        /// </summary>
+        /// <param name="commandName">The name of the command to resolve.</param>
         public CommandDescriptor Resolve(string commandName)
         {
             if(commandName == null)
@@ -103,6 +114,9 @@ namespace Chel
             return null;
         }
 
+        /// <summary>
+        /// Gets all the commands registered with the registry.
+        /// </summary>
         public IEnumerable<CommandDescriptor> GetAllRegistrations()
         {
             return _registeredTypes.Values;

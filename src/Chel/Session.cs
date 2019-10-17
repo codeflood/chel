@@ -4,11 +4,19 @@ using Chel.Abstractions.Results;
 
 namespace Chel
 {
+    /// <summary>
+    /// The default implementation of the <see cref="ISession" />.
+    /// </summary>
     public class Session : ISession
     {
         private IParser _parser = null;
         private ICommandFactory _commandFactory = null;
 
+        /// <summary>
+        /// Create a new instance.
+        /// </summary>
+        /// <param name="parser">The <see cref="IParser" /> used to parse input.</param>
+        /// <param name="commandFactory">The <see cref="ICommandFactory" /> used to instantiate commands.</param>
         public Session(IParser parser, ICommandFactory commandFactory)
         {   
             if(parser == null)
@@ -21,6 +29,11 @@ namespace Chel
             _parser = parser;
         }
 
+        /// <summary>
+        /// Executes input.
+        /// </summary>
+        /// <param name="input">The input to execute.</param>
+        /// <param name="resultHandler">The handler to execute for the results of the input.</param>
         public void Execute(string input, Action<CommandResult> resultHandler)
         {
             if(resultHandler == null)
