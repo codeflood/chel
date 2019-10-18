@@ -36,14 +36,16 @@ namespace Chel.Abstractions
 
             // Try for a less specific culture
             var culture = new CultureInfo(cultureName);
-            culture = culture.Parent;
 
-            while(culture != null && culture != culture.Parent)
+            while(culture != null)
             {
+                culture = culture.Parent;
+
                 if(_descriptions.ContainsKey(culture.Name))
                     return _descriptions[culture.Name];
 
-                culture = culture.Parent;
+                if(culture == culture.Parent)
+                    culture = null;
             }
 
             return null;

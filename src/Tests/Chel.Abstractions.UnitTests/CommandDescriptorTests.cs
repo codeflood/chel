@@ -119,7 +119,7 @@ namespace Chel.Abstractions.UnitTests
         }
 
         [Fact]
-        public void GetDescription_DescriptionNotPresent_ReturnsDescription()
+        public void GetDescription_DescriptionNotPresent_ReturnsNull()
         {
             // arrange
             var builder = CreateCommandDescriptorBuilder();
@@ -143,6 +143,23 @@ namespace Chel.Abstractions.UnitTests
 
             // act
             var description = sut.GetDescription("en-AU");
+
+            // assert
+            Assert.Equal("description", description);
+        }
+
+        [Theory]
+        [InlineData("fr")]
+        [InlineData("en-AU")]
+        public void GetDescription_OnlyInvariantDescriptionPresent_ReturnsInvariantDescription(string cultureName)
+        {
+            // arrange
+            var builder = CreateCommandDescriptorBuilder();
+            builder.AddDescription("description", null);
+            var sut = builder.Build();
+
+            // act
+            var description = sut.GetDescription(cultureName);
 
             // assert
             Assert.Equal("description", description);
