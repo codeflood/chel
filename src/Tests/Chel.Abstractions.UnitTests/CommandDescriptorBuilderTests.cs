@@ -41,18 +41,6 @@ namespace Chel.Abstractions.UnitTests
         }
 
         [Fact]
-        public void Ctor_WhenCalled_SetsProperties()
-        {
-            // arrange, act
-            var sut = CreateCommandDescriptorBuilder();
-            sut.AddDescription("description", "en");
-
-            // assert
-            Assert.Equal(GetType(), sut.ImplementingType);
-            Assert.Equal("command", sut.CommandName);
-        }
-
-        [Fact]
         public void AddDescription_DescriptionIsNull_ThrowsException()
         {
             // arrange
@@ -103,38 +91,6 @@ namespace Chel.Abstractions.UnitTests
             // act, assert
             var ex = Assert.Throws<InvalidOperationException>(sutAction);
             Assert.Contains("Description for culture en has already been added", ex.Message);
-        }
-
-        [Fact]
-        public void Build_TypeIsNull_ThrowsException()
-        {
-            // arrange
-            var sut = CreateCommandDescriptorBuilder();
-            sut.ImplementingType = null;
-            sut.AddDescription("description", "en");
-
-            Action sutAction = () => sut.Build();
-
-            // act, assert
-            var ex = Assert.Throws<InvalidOperationException>(sutAction);
-            Assert.Contains("ImplementingType cannot be null", ex.Message);
-        }
-
-        [Theory]
-        [InlineData("")]
-        [InlineData(null)]
-        public void Build_CommandNameIsNullOrEmpty_ThrowsException(string commandName)
-        {
-            // arrange
-            var sut = CreateCommandDescriptorBuilder();
-            sut.CommandName = commandName;
-            sut.AddDescription("description", "en");
-
-            Action sutAction = () => sut.Build();
-
-            // act, assert
-            var ex = Assert.Throws<InvalidOperationException>(sutAction);
-            Assert.Contains("CommandName cannot be null or empty", ex.Message);
         }
 
         [Fact]

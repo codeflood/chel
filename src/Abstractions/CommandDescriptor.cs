@@ -80,17 +80,9 @@ namespace Chel.Abstractions
         /// </summary>
         public class Builder
         {
+            private Type _implementingType = null;
+            private string _commandName = null;
             private Dictionary<string, string> _descriptions = new Dictionary<string, string>();
-
-            /// <summary>
-            /// Gets the <see cref="Type"/> implementing the command.
-            /// </summary>
-            public Type ImplementingType { get; set; }
-
-            /// <summary>
-            /// Gets the name of the command.
-            /// </summary>
-            public string CommandName { get; set; }
 
             public Builder(Type implementingType, string commandName)
             {
@@ -103,8 +95,8 @@ namespace Chel.Abstractions
                 if(commandName == string.Empty)
                     throw new ArgumentException(string.Format(Texts.ArgumentCannotBeEmpty, nameof(commandName)), nameof(commandName));
 
-                ImplementingType = implementingType;
-                CommandName = commandName;
+                _implementingType = implementingType;
+                _commandName = commandName;
             }
 
             public void AddDescription(string description, string cultureName)
@@ -125,16 +117,10 @@ namespace Chel.Abstractions
 
             public CommandDescriptor Build()
             {
-                if(ImplementingType == null)
-                    throw new InvalidOperationException(string.Format(Texts.ArgumentCannotBeNull, nameof(ImplementingType)));
-
-                if(string.IsNullOrEmpty(CommandName))
-                    throw new InvalidOperationException(string.Format(Texts.ArgumentCannotBeNullOrEmpty, nameof(CommandName)));
-
                 var descriptor = new CommandDescriptor
                 {
-                    ImplementingType = ImplementingType,
-                    CommandName = CommandName
+                    ImplementingType = _implementingType,
+                    CommandName = _commandName
                 };
 
                 descriptor.SetDescriptions(_descriptions);
