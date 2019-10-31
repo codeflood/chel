@@ -38,7 +38,7 @@ namespace Chel.Abstractions.UnitTests
             var ex = Assert.Throws<ArgumentException>(sutAction);
             Assert.Equal("commandName", ex.ParamName);
             Assert.Contains("commandName cannot be empty", ex.Message);
-        }
+        }   
 
         [Fact]
         public void AddDescription_DescriptionIsNull_ThrowsException()

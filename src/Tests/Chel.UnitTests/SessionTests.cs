@@ -13,7 +13,7 @@ namespace Chel.UnitTests
         private void Ctor_ParserIsNull_ThrowsException()
         {
             // arrange
-            Action sutAction = () => new Session(null, Substitute.For<ICommandFactory>());
+            Action sutAction = () => new Session(null, Substitute.For<ICommandFactory>(), Substitute.For<ICommandParameterBinder>());
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -24,11 +24,22 @@ namespace Chel.UnitTests
         private void Ctor_FactoryIsNull_ThrowsException()
         {
             // arrange
-            Action sutAction = () => new Session(Substitute.For<IParser>(), null);
+            Action sutAction = () => new Session(Substitute.For<IParser>(), null, Substitute.For<ICommandParameterBinder>());
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
             Assert.Equal("commandFactory", ex.ParamName);
+        }
+
+        [Fact]
+        public void Ctor_BinderIsNull_ThrowsException()
+        {
+            // arrange
+            Action sutAction = () => new Session(Substitute.For<IParser>(), Substitute.For<ICommandFactory>(), null);
+
+            // act, assert
+            var ex = Assert.Throws<ArgumentNullException>(sutAction);
+            Assert.Equal("parameterBinder", ex.ParamName);
         }
 
         [Fact]
@@ -64,7 +75,25 @@ namespace Chel.UnitTests
             sut.Execute("sample", result => executionResult = result);
 
             // assert
-            Assert.IsType<UnknownCommandResult>(executionResult);
+            Assert.IsType<FailureResult>(executionResult);
+            var failureResult = executionResult as FailureResult;
+            Assert.Equal(1, failureResult.SourceLine);
+        }
+
+        [Fact]
+        private void Execute_ErrorOnLine2_ReportsFailureOnLine2()
+        {
+            // arrange
+            var sut = CreateSession(typeof(SampleCommand));
+            CommandResult executionResult = null;
+
+            // act
+            sut.Execute("sample\nboo", result => executionResult = result);
+
+            // assert
+            Assert.IsType<FailureResult>(executionResult);
+            var failureResult = executionResult as FailureResult;
+            Assert.Equal(2, failureResult.SourceLine);
         }
 
         [Fact]
@@ -81,8 +110,37 @@ namespace Chel.UnitTests
             Assert.IsType<SuccessResult>(executionResult);
         }
 
+        [Fact]
+        public void Execute_ParameterProvided_ParameterSetOnCommand()
+        {
+            // arrange
+            var sut = CreateSession(typeof(NumberedParameterCommand));
+            ValueResult executionResult = null;
+
+            // act
+            sut.Execute("num p1 p2", result => executionResult = result as ValueResult);
+            
+            // assert
+            Assert.Equal("p1 p2", executionResult.Value);
+        }
+
+        [Fact]
+        public void Execute_ParameterBindingHasErrors_FailureResultReturned()
+        {
+            // arrange
+            var sut = CreateSession(typeof(NumberedParameterCommand));
+            FailureResult executionResult = null;
+
+            // act
+            sut.Execute("num p1 p2 p3", result => executionResult = result as FailureResult);
+            
+            // assert
+            Assert.Equal("ERROR (Line 1): Unknown numbered parameter 3", executionResult.ToString());
+        }
+
         private Session CreateSession(params Type[] commandTypes)
         {
+            var parser = new Parser();
             var nameValidator = new NameValidator();
             var registry = new CommandRegistry(nameValidator);
 
@@ -90,11 +148,10 @@ namespace Chel.UnitTests
                 registry.Register(commandType);
 
             var services = new CommandServices();
-
             var factory = new CommandFactory(registry, services);
-            var parser = new Parser();
+            var binder = new CommandParameterBinder();
 
-            return new Session(parser, factory);
+            return new Session(parser, factory, binder);
         }
     }
 }

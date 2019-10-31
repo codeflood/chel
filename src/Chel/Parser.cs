@@ -38,38 +38,64 @@ namespace Chel
 
         private CommandInput ParseSingleLine(StringReader reader, int sourceLine)
         {
-            var commandName = new StringBuilder();
-            var stop = false;
-            var ignore = false;
+            var parsedBlock = ParseBlock(reader);
 
-            while(!stop)
+            if(parsedBlock.Block == null)
+                return null;
+
+            var commandInputBuilder = new CommandInput.Builder(sourceLine, parsedBlock.Block);
+
+            while(!parsedBlock.EndOfLine)
+            {
+                parsedBlock = ParseBlock(reader);
+                if(parsedBlock.Block != null)
+                    commandInputBuilder.AddNumberedParameter(parsedBlock.Block);
+            }
+            
+            return commandInputBuilder.Build();
+        }
+
+        private ParseBlock ParseBlock(StringReader reader)
+        {
+            var block = new StringBuilder();
+            var endOfLine = false;
+            var ignore = false;
+            var capturing = false;
+
+            while(!endOfLine)
             {
                 var character = reader.Read();
                 
-                if(character == -1)
-                    stop = true;
+                if(character == -1 || character == '\n')
+                {
+                    endOfLine = true;
+                    break;
+                }
                 else
                 {
-                    if(character == '\n')
-                        stop = true;
-                    else if(character == '#')
+                    if(character == '#')
                         ignore = true;
+                    else if(capturing && char.IsWhiteSpace((char)character))
+                        break;
                     else if(!ignore && !char.IsWhiteSpace((char)character))
-                        commandName.Append((char)character);
+                    {
+                        capturing = true;
+                        block.Append((char)character);
+                    }
                 }                
             }
 
-            var parsedCommandName = commandName.ToString();
+            var parsedBlock = block.ToString();
 
             // Trim last \r in case it was a Windows line ending
-            if(parsedCommandName.Length > 0 &&
-                parsedCommandName[parsedCommandName.Length - 1] == '\r')
-                parsedCommandName = parsedCommandName.Substring(0, parsedCommandName.Length - 1);
+            if(parsedBlock.Length > 0 &&
+                parsedBlock[parsedBlock.Length - 1] == '\r')
+                parsedBlock = parsedBlock.Substring(0, parsedBlock.Length - 1);
             
-            if(string.IsNullOrEmpty(parsedCommandName))
-                return null;
+            if(string.IsNullOrEmpty(parsedBlock))
+                return new ParseBlock(null, endOfLine);
 
-            return new CommandInput(sourceLine, parsedCommandName);
+            return new ParseBlock(parsedBlock, endOfLine);
         }
     }
 }

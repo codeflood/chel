@@ -84,6 +84,11 @@ namespace Chel.Abstractions
             private string _commandName = null;
             private Dictionary<string, string> _descriptions = new Dictionary<string, string>();
 
+            /// <summary>
+            /// Create a new instance.
+            /// </summary>
+            /// <param name="implementingType">The <see cref="Type"/> implementing the command.</param>
+            /// <param name="commandName">The name of the command.</param>
             public Builder(Type implementingType, string commandName)
             {
                 if(implementingType == null)
@@ -99,6 +104,11 @@ namespace Chel.Abstractions
                 _commandName = commandName;
             }
 
+            /// <summary>
+            /// Add a description to the descriptor.
+            /// </summary>
+            /// <param name="description">The description to add.</param>
+            /// <param name="cultureName">The name of the culture the description is for.</param>
             public void AddDescription(string description, string cultureName)
             {
                 if(description == null)
@@ -115,6 +125,9 @@ namespace Chel.Abstractions
                 _descriptions.Add(key, description);
             }
 
+            /// <summary>
+            /// Build the <see cref="CommandDescriptor" /> using the information set on the builder.
+            /// </summary>
             public CommandDescriptor Build()
             {
                 var descriptor = new CommandDescriptor

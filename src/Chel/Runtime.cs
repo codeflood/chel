@@ -12,6 +12,7 @@ namespace Chel
         private INameValidator _nameValidator = null;
         private ICommandRegistry _commandRegistry = null;
         private ICommandServices _commandServices = null;
+        private ICommandParameterBinder _parameterBinder = null;
         private IParser _parser = null;
 
         /// <summary>
@@ -22,6 +23,7 @@ namespace Chel
             _nameValidator = new NameValidator();
             _commandRegistry = new CommandRegistry(_nameValidator);
             _commandServices = new CommandServices();
+            _parameterBinder = new CommandParameterBinder();
             _parser = new Parser();
 
             _commandRegistry.Register(typeof(Help));
@@ -59,7 +61,7 @@ namespace Chel
         public ISession NewSession()
         {
             var factory = new CommandFactory(_commandRegistry, _commandServices);
-            return new Session(_parser, factory);
+            return new Session(_parser, factory, _parameterBinder);
         }
     }
 }

@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Chel.Abstractions;
 using Xunit;
 
@@ -29,7 +32,7 @@ namespace Chel.UnitTests
         {
             // arrange
             var sut = new Parser();
-            var expected = new[] { new CommandInput(1, "command") };
+            var expected = new[] { CreateCommandInput(1, "command") };
 
             // act
             var result = sut.Parse("command");
@@ -47,7 +50,7 @@ namespace Chel.UnitTests
         {
             // arrange
             var sut = new Parser();
-            var expected = new[] { new CommandInput(sourceLine1, "command"), new CommandInput(sourceLine2, "command") };
+            var expected = new[] { CreateCommandInput(sourceLine1, "command"), CreateCommandInput(sourceLine2, "command") };
 
             // act
             var result = sut.Parse(input);
@@ -65,13 +68,64 @@ namespace Chel.UnitTests
         {
             // arrange
             var sut = new Parser();
-            var expected = new[] { new CommandInput(sourceLine, "command") };
+            var expected = new[] { CreateCommandInput(sourceLine, "command") };
 
             // act
             var result = sut.Parse(input);
 
             // assert
             Assert.Equal(expected, result);
+        }
+
+        [Theory]
+        [MemberData(nameof(InputWithNumberedParametersDataSource))]
+        public void Parse_InputWithNumberedParameters_ParametersParsedInOrder(string input, CommandInput[] expected)
+        {
+            // arrange
+            var sut = new Parser();
+
+            // act
+            var result = sut.Parse(input);
+
+            // assert
+            Assert.Equal(expected, result.ToArray());
+        }
+
+        public static IEnumerable<object[]> InputWithNumberedParametersDataSource()
+        {
+            var builder1 = new CommandInput.Builder(1, "command");
+            builder1.AddNumberedParameter("param");
+            var commandInput1 = builder1.Build();
+
+            yield return new object[]{ "command param", new[] { commandInput1 } };
+            yield return new object[]{ "command   param", new[] { commandInput1 } };
+            yield return new object[]{ "command\tparam", new[] { commandInput1 } };
+            yield return new object[]{ "command  \t  param  \t", new[] { commandInput1 } };
+
+            var builder2 = new CommandInput.Builder(1, "command");
+            builder2.AddNumberedParameter("param1");
+            builder2.AddNumberedParameter("param2");
+            var commandInput2 = builder2.Build();
+
+            yield return new object[]{ "command param1 param2", new[] { commandInput2 } };
+            yield return new object[]{ "command  \t param1   param2", new[] { commandInput2 } };
+
+            var builder3 = new CommandInput.Builder(2, "command");
+            builder3.AddNumberedParameter("param1");
+            builder3.AddNumberedParameter("param2");
+            var commandInput3 = builder3.Build();
+
+            yield return new object[]{ "command param\ncommand param1\tparam2", new[] { commandInput1, commandInput3 } };
+            yield return new object[]{ "command param  \n  command  param1    param2", new[] { commandInput1, commandInput3 } };
+            yield return new object[]{ "command param  #comment\ncommand param1\tparam2", new[] { commandInput1, commandInput3 } };
+
+            // todo: param with spaces
+        }
+
+        private CommandInput CreateCommandInput(int sourceLine, string commandName)
+        {
+            var builder = new CommandInput.Builder(sourceLine, commandName);
+            return builder.Build();
         }
     }
 }

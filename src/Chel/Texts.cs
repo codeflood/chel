@@ -13,5 +13,9 @@ namespace Chel
         public const string ParameterIsNotAttributedWithCommandAttribute = "{0} is not attributed with CommandAttribute";
 
         public const string ServiceTypeAlreadyRegistered = "The service type {0} has already been registered";
+
+        public const string UnknownCommand = "Unknown command";
+        
+        public const string UnknownNumberedParameter = "Unknown numbered parameter {0}";
     }
 }

@@ -12,7 +12,11 @@ namespace Chel.Abstractions
         /// Gets the name of the command.
         /// </summary>
         public string CommandName { get; private set;}
-        
+
+        /// <summary>
+        /// Create a new instance.
+        /// </summary>
+        /// <param name="commandName">The name of the command.</param>
         public CommandAttribute(string commandName)
         {
             if(commandName == null)

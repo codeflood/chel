@@ -51,7 +51,7 @@ namespace Chel.UnitTests
         {
             // arrange
             var sut = CreateCommandFactory((registry, services) => {});
-            var input = new CommandInput(1, "command");
+            var input = CreateCommandInput(1, "command");
 
             // act
             var command = sut.Create(input);
@@ -68,7 +68,7 @@ namespace Chel.UnitTests
             {
                 registry.Register(typeof(SampleCommand));
             });
-            var input = new CommandInput(1, "sample");
+            var input = CreateCommandInput(1, "sample");
 
             // act
             var command = sut.Create(input);
@@ -85,7 +85,7 @@ namespace Chel.UnitTests
             {
                 registry.Register(typeof(SampleCommand));
             });
-            var input = new CommandInput(1, "sample");
+            var input = CreateCommandInput(1, "sample");
 
             // act
             var command = sut.Create(input);
@@ -104,7 +104,7 @@ namespace Chel.UnitTests
                 registry.Register(typeof(ServiceDependencyCommand));
                 services.Register<ISampleService>(new SampleService());
             });
-            var input = new CommandInput(1, "alpha");
+            var input = CreateCommandInput(1, "alpha");
 
             // act
             var command = sut.Create(input);
@@ -122,7 +122,7 @@ namespace Chel.UnitTests
             {
                 registry.Register(typeof(ServiceDependencyCommand));
             });
-            var input = new CommandInput(1, "alpha");
+            var input = CreateCommandInput(1, "alpha");
             Action sutAction = () => sut.Create(input);
 
             // act, assert
@@ -139,6 +139,12 @@ namespace Chel.UnitTests
             configurator.Invoke(registry, services);
 
             return new CommandFactory(registry, services);
+        }
+
+        private CommandInput CreateCommandInput(int sourceLine, string commandName)
+        {
+            var builder = new CommandInput.Builder(sourceLine, commandName);
+            return builder.Build();
         }
     }
 }

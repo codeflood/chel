@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace Chel.Abstractions
 {
@@ -8,30 +9,22 @@ namespace Chel.Abstractions
     public class CommandInput
     {
         /// <summary>
-        /// Gets the name of the command to execute.
-        /// </summary>
-        public string CommandName { get; }
-
-        /// <summary>
         /// Gets the line number the command was parsed from.
         /// </summary>
-        public int SourceLine { get; }
+        public int SourceLine { get; private set; }
 
         /// <summary>
-        /// Create a new instance.
+        /// Gets the name of the command to execute.
         /// </summary>
-        /// <param name="sourceLine">The line number the command was parsed from.</param>
-        /// <param name="commandName">The name of the command to execute.</param>
-        public CommandInput(int sourceLine, string commandName)
+        public string CommandName { get; private set; }
+
+        /// <summary>
+        /// Gets the numbered parameters for the command.
+        /// </summary>
+        public IReadOnlyList<string> NumberedParameters { get; private set; }
+
+        private CommandInput()
         {
-            if(sourceLine <= 0)
-                throw new ArgumentException(string.Format(Texts.ArgumentMustBeGreaterThanZero, nameof(sourceLine)), nameof(sourceLine));
-
-            if(commandName == null)
-                throw new ArgumentNullException(nameof(commandName));
-
-            SourceLine = sourceLine;
-            CommandName = commandName;
         }
 
         public override bool Equals(object obj)
@@ -39,6 +32,15 @@ namespace Chel.Abstractions
             if(obj is CommandInput)
             {
                 var other = obj as CommandInput;
+
+                if(NumberedParameters.Count != other.NumberedParameters.Count)
+                    return false;
+
+                for(var i = 0; i < NumberedParameters.Count; i++)
+                {
+                    if(!NumberedParameters[i].Equals(other.NumberedParameters[i]))
+                        return false;
+                }
 
                 return
                     SourceLine == other.SourceLine && 
@@ -50,9 +52,72 @@ namespace Chel.Abstractions
 
         public override int GetHashCode()
         {
+            var numberedParametersHash = 0;
+            foreach(var parameter in NumberedParameters)
+            {
+                numberedParametersHash += parameter.GetHashCode();
+            }
+
             return
+                numberedParametersHash +
                 SourceLine.GetHashCode() + 
                 CommandName.ToLower().GetHashCode();
+        }
+
+        /// <summary>
+        /// Builds instances of <see cref="CommandInput" />.
+        /// </summary>
+        public class Builder
+        {
+            private int _sourceLine = -1;
+            private string _commandName = null;
+            private List<string> _numberedParameters = null;
+
+            /// <summary>
+            /// Create a new instance.
+            /// </summary>
+            /// <param name="sourceLine">The line number the command was parsed from.</param>
+            /// <param name="commandName">The name of the command to execute.</param>
+            public Builder(int sourceLine, string commandName)
+            {
+                if(sourceLine <= 0)
+                    throw new ArgumentException(string.Format(Texts.ArgumentMustBeGreaterThanZero, nameof(sourceLine)), nameof(sourceLine));
+
+                if(commandName == null)
+                    throw new ArgumentNullException(nameof(commandName));
+
+                if(commandName.Equals(string.Empty))
+                    throw new ArgumentException(string.Format(Texts.ArgumentCannotBeEmpty, nameof(commandName)), nameof(commandName));
+
+                _sourceLine = sourceLine;
+                _commandName = commandName;
+
+                _numberedParameters = new List<string>();
+            }
+
+            /// <summary>
+            /// Add a numbered parameter to the command input.
+            /// </summary>
+            /// <param name="value">The parameter value to add.</param>
+            public void AddNumberedParameter(string value)
+            {
+                if(value == null)
+                    throw new ArgumentNullException(nameof(value));
+
+                _numberedParameters.Add(value);
+            }
+
+            public CommandInput Build()
+            {
+                var commandInput = new CommandInput()
+                {
+                    SourceLine = _sourceLine,
+                    CommandName = _commandName,
+                    NumberedParameters = new List<string>(_numberedParameters)
+                };
+
+                return commandInput;
+            }
         }
     }
 }

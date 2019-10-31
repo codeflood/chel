@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Chel.Abstractions;
 using Chel.Abstractions.Results;
 
@@ -11,13 +12,15 @@ namespace Chel
     {
         private IParser _parser = null;
         private ICommandFactory _commandFactory = null;
+        private ICommandParameterBinder _parameterBinder = null;
 
         /// <summary>
         /// Create a new instance.
         /// </summary>
         /// <param name="parser">The <see cref="IParser" /> used to parse input.</param>
         /// <param name="commandFactory">The <see cref="ICommandFactory" /> used to instantiate commands.</param>
-        public Session(IParser parser, ICommandFactory commandFactory)
+        /// <param name="parameterBinder">The binder used to bind parameters to command properties.</summary>
+        public Session(IParser parser, ICommandFactory commandFactory, ICommandParameterBinder parameterBinder)
         {   
             if(parser == null)
                 throw new ArgumentNullException(nameof(parser));
@@ -25,8 +28,12 @@ namespace Chel
             if(commandFactory == null)
                 throw new ArgumentNullException(nameof(commandFactory));
 
+            if(parameterBinder == null)
+                throw new ArgumentNullException(nameof(parameterBinder));
+
             _commandFactory = commandFactory;
             _parser = parser;
+            _parameterBinder = parameterBinder;
         }
 
         /// <summary>
@@ -43,15 +50,22 @@ namespace Chel
 
             foreach(var commandInput in commandInputs)
             {
-                CommandResult result = new UnknownCommandResult(1);
+                CommandResult commandResult = null;
 
                 var command = _commandFactory.Create(commandInput);
                 if(command != null)
                 {
-                    result = command.Execute();
-                }
+                    var bindingResult = _parameterBinder.Bind(command, commandInput);
 
-                resultHandler(result);
+                    if(bindingResult.Success)
+                        commandResult = command.Execute();
+                    else
+                        commandResult = new FailureResult(commandInput.SourceLine, bindingResult.Errors.ToArray());
+                }
+                else
+                    commandResult = new FailureResult(commandInput.SourceLine, new[] { Texts.UnknownCommand });
+
+                resultHandler(commandResult);
             }
         }
     }
