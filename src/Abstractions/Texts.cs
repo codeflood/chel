@@ -12,8 +12,6 @@ namespace Chel.Abstractions
 
         public const string ArgumentCannotBeNullOrEmpty = "{0} cannot be null or empty";
 
-        public const string DescriptionForCultureAlreadyAdded = "Description for culture {0} has already been added";
-
         public const string ErrorOnLine = "ERROR (Line {0})";
 
         public const string InvalidCommandNameNull = "The command name null is invalid";

@@ -12,18 +12,24 @@ namespace Chel
     {
         private readonly Type _commandInterfaceType = typeof(ICommand);
         private readonly INameValidator _nameValidator = null;
+        private readonly ICommandDescriptorGenerator _commandDescriptorGenerator = null;
         private readonly Dictionary<string, CommandDescriptor> _registeredTypes = null;
 
         /// <summary>
         /// Create a new instance.
         /// </summary>
         /// <param name="nameValidator">A <see cref="INameValidator" /> used to validate the name of the command.</param>
-        public CommandRegistry(INameValidator nameValidator)
+        /// <param name="commandDescriptorGenerator">A <see cref="ICommandDescriptorGenerator" /> used to describe commands.</param>
+        public CommandRegistry(INameValidator nameValidator, ICommandDescriptorGenerator commandDescriptorGenerator)
         {
             if(nameValidator == null)
                 throw new ArgumentNullException(nameof(nameValidator));
 
+            if(commandDescriptorGenerator == null)
+                throw new ArgumentNullException(nameof(commandDescriptorGenerator));
+
             _nameValidator = nameValidator;
+            _commandDescriptorGenerator = commandDescriptorGenerator;
             _registeredTypes = new Dictionary<string, CommandDescriptor>(StringComparer.OrdinalIgnoreCase);
         }
 
@@ -40,25 +46,22 @@ namespace Chel
             if(!implementsInterface)
                 throw new ArgumentException(string.Format(Texts.ParameterDoesNotImplementICommand, type.FullName), nameof(type));
 
-            var attribute = ExtractCommandAttribute(type);
-            if(attribute == null)
-                throw new ArgumentException(string.Format(Texts.ParameterIsNotAttributedWithCommandAttribute, type.FullName), nameof(type));
+            var descriptor = _commandDescriptorGenerator.DescribeCommand(type);
+            if(descriptor == null)
+                throw new InvalidOperationException(string.Format(Texts.DescriptorCouldNotBeGenerated, type.FullName));
 
-            var commandName = attribute.CommandName;
-
-            var validCommandName = _nameValidator.IsValid(commandName);
+            var validCommandName = _nameValidator.IsValid(descriptor.CommandName);
             if(!validCommandName)
-                throw new InvalidCommandNameException(commandName);
+                throw new InvalidCommandNameException(descriptor.CommandName);
 
-            var descriptor = DescribeCommandType(type, attribute);
-
-            if(_registeredTypes.ContainsKey(commandName))
+            if(_registeredTypes.ContainsKey(descriptor.CommandName))
             {
-                if(!_registeredTypes.ContainsValue(descriptor))
-                    throw new CommandNameAlreadyUsedException(commandName, type, _registeredTypes[commandName].ImplementingType);
+                var existing = _registeredTypes[descriptor.CommandName];
+                if(existing.ImplementingType != type)
+                    throw new CommandNameAlreadyUsedException(descriptor.CommandName, type, _registeredTypes[descriptor.CommandName].ImplementingType);
             }
             else
-                _registeredTypes.Add(commandName, descriptor);
+                _registeredTypes.Add(descriptor.CommandName, descriptor);
         }
 
         private bool DoesImplementICommand(Type type)
@@ -80,24 +83,20 @@ namespace Chel
             return (CommandAttribute)attributes.FirstOrDefault();
         }
 
-        private CommandDescriptor DescribeCommandType(Type type, CommandAttribute attribute)
+        private List<ParameterDescriptor> DescribeCommandParameters(Type type)
         {
-            var builder = new CommandDescriptor.Builder(type, attribute.CommandName);
+            var parameters = new List<ParameterDescriptor>();
 
-            var descriptionAttributes = ExtractDescriptionAttributes(type);
-            foreach(var descriptionAttribute in descriptionAttributes)
+            var properties = type.GetProperties();
+            foreach(var property in properties)
             {
-                builder.AddDescription(descriptionAttribute.Text, descriptionAttribute.CultureName);
+
             }
 
-            return builder.Build();
+            return parameters;
         }
 
-        private IEnumerable<DescriptionAttribute> ExtractDescriptionAttributes(Type type)
-        {
-            var attributes = type.GetCustomAttributes(typeof(DescriptionAttribute), true);
-            return attributes.Select(x => (DescriptionAttribute)x);
-        }
+        
 
         /// <summary>
         /// Resolve a <see cref="CommandDescriptor" /> for a given command name.

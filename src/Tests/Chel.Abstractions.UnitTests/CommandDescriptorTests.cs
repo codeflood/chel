@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using Chel.Abstractions.UnitTests.SampleCommands;
+using NSubstitute;
 using Xunit;
 
 namespace Chel.Abstractions.UnitTests
@@ -7,95 +9,98 @@ namespace Chel.Abstractions.UnitTests
     public class CommandDescriptorTests
     {
         [Fact]
-        public void Equals_DescriptorsAreEqual_ReturnsTrue()
+        public void Ctor_ImplementingTypeIsNull_ThrowsException()
         {
             // arrange
-            var type = GetType();
-            var builder = new CommandDescriptor.Builder(type, "command");
-            builder.AddDescription("description", "en");
+            Action sutAction = () => new CommandDescriptor("command", null, Substitute.For<ITextResolver>(), new List<ParameterDescriptor>());
+
+            // act, assert
+            var ex = Assert.Throws<ArgumentNullException>(sutAction);
+            Assert.Equal("implementingType", ex.ParamName);
+        }
+
+        [Fact]
+        public void Ctor_CommandNameIsNull_ThrowsException()
+        {
+            // arrange
+            Action sutAction = () => new CommandDescriptor(null, GetType(), Substitute.For<ITextResolver>(), new List<ParameterDescriptor>());
+
+            // act, assert
+            var ex = Assert.Throws<ArgumentNullException>(sutAction);
+            Assert.Equal("commandName", ex.ParamName);
+        }
+
+        [Fact]
+        public void Ctor_CommandNameIsEmpty_ThrowsException()
+        {
+            // arrange
+            Action sutAction = () => new CommandDescriptor("", GetType(), Substitute.For<ITextResolver>(), new List<ParameterDescriptor>());
+
+            // act, assert
+            var ex = Assert.Throws<ArgumentException>(sutAction);
+            Assert.Equal("commandName", ex.ParamName);
+            Assert.Contains("commandName cannot be empty", ex.Message);
+        }  
+
+        [Fact]
+        public void Ctor_TextResolverIsNull_ThrowsException()
+        {
+            // arrange
+            Action sutAction = () => new CommandDescriptor("command", GetType(), null, new List<ParameterDescriptor>());
+
+            // act, assert
+            var ex = Assert.Throws<ArgumentNullException>(sutAction);
+            Assert.Equal("descriptions", ex.ParamName);
+        }
+
+        [Fact]
+        public void Ctor_ParameterDescriptorsIsNull_NumberedParametersIsEmpty()
+        {
+            // arrange
+            var texts = Substitute.For<ITextResolver>();
+
+            // act
+            var sut = new CommandDescriptor("command", GetType(), texts, null);
+
+            // assert
+            Assert.Empty(sut.NumberedParameters);
+        }
+
+        [Fact]
+        public void Ctor_ValidParameters_PropertiesSet()
+        {
+            // arrange
+            var type = typeof(SampleCommand);
+            var commandTexts = Substitute.For<ITextResolver>();
+
+            var property = type.GetProperty("Parameter");
+            var parameterTexts = Substitute.For<ITextResolver>();
+            var numberedParameters = new List<NumberedParameterDescriptor>
+            {
+                new NumberedParameterDescriptor(1, "num", property, parameterTexts)
+            };
+
+            // act
+            var sut = new CommandDescriptor("command", type, commandTexts, numberedParameters);
+
+            // assert
+            Assert.Equal("command", sut.CommandName);
+            Assert.Equal(type, sut.ImplementingType);
             
-            var sut1 = builder.Build();
-            var sut2 = builder.Build();
-
-            // act
-            var result = sut1.Equals(sut2);
-
-            // assert
-            Assert.NotSame(sut1, sut2);
-            Assert.True(result);
-        }
-
-        [Theory]
-        [MemberData(nameof(DescriptorsAreDifferentDataSource))]
-        public void Equals_DescriptorsAreDifferent_ReturnsFalse(CommandDescriptor sut1, CommandDescriptor sut2)
-        {
-            // act
-            var result = sut1.Equals(sut2);
-
-            // assert
-            Assert.False(result);
+            var numberedParameter1 = sut.NumberedParameters[0];
+            Assert.Equal(1, numberedParameter1.Number);
+            Assert.Equal("num", numberedParameter1.PlaceholderText);
+            Assert.Equal(property, numberedParameter1.Property);
         }
 
         [Fact]
-        public void GetHashCode_DescriptorsAreSame_HashCodesAreSame()
+        public void GetDescription_CultureIsNull_ThrowsException()
         {
             // arrange
-            var type = GetType();
-            var builder = new CommandDescriptor.Builder(type, "command");
-            builder.AddDescription("description", "en");
+            var texts = Substitute.For<ITextResolver>();
+            texts.GetText("en").Returns("text");
 
-            var sut1 = builder.Build();
-            var sut2 = builder.Build();
-
-            // act
-            var hashcode1 = sut1.GetHashCode();
-            var hashcode2 = sut2.GetHashCode();
-
-            // assert
-            Assert.Equal(hashcode1, hashcode2);
-        }
-
-        [Theory]
-        [MemberData(nameof(DescriptorsAreDifferentDataSource))]
-        public void GetHashCode_DescriptorsAreDifferent_CodesAreDifferent(CommandDescriptor sut1, CommandDescriptor sut2)
-        {
-            // act
-            var hashcode1 = sut1.GetHashCode();
-            var hashcode2 = sut2.GetHashCode();
-
-            // assert
-            Assert.NotEqual(hashcode1, hashcode2);
-        }
-
-        public static IEnumerable<object[]> DescriptorsAreDifferentDataSource()
-        {
-            var type1 = typeof(CommandDescriptorTests);
-            var type2 = typeof(CommandDescriptor);
-
-            var type1WithCommandBuilder = new CommandDescriptor.Builder(type1, "command");
-            type1WithCommandBuilder.AddDescription("description", "en");
-
-            var type2WithCommandBuilder = new CommandDescriptor.Builder(type2, "command");
-            type2WithCommandBuilder.AddDescription("description", "en");
-
-            var type1WithOtherBuilder = new CommandDescriptor.Builder(type1, "other");
-            type1WithOtherBuilder.AddDescription("description", "en");
-
-            var type2WithOtherBuilder = new CommandDescriptor.Builder(type2, "other");
-            type2WithOtherBuilder.AddDescription("description", "en");
-
-            yield return new object[] { type2WithCommandBuilder.Build(), type1WithCommandBuilder.Build() };
-            yield return new object[] { type1WithOtherBuilder.Build(), type1WithCommandBuilder.Build() };
-            yield return new object[] { type2WithOtherBuilder.Build(), type1WithCommandBuilder.Build() };
-        }
-
-        [Fact]
-        public void GetDescription_CultureNameIsNull_ThrowsException()
-        {
-            // arrange
-            var builder = CreateCommandDescriptorBuilder();
-            builder.AddDescription("description", "en");
-            var sut = builder.Build();
+            var sut = new CommandDescriptor("command", GetType(), texts, new List<ParameterDescriptor>());
             Action sutAction = () => sut.GetDescription(null);
 
             // act, assert
@@ -104,70 +109,20 @@ namespace Chel.Abstractions.UnitTests
         }
 
         [Fact]
-        public void GetDescription_DescriptionPresent_ReturnsDescription()
+        public void GetDescription_DescriptionHasBeenSet_ReturnsDescription()
         {
             // arrange
-            var builder = CreateCommandDescriptorBuilder();
-            builder.AddDescription("description", "en");
-            var sut = builder.Build();
+            var texts = Substitute.For<ITextResolver>();
+            texts.GetText("en").Returns("text");
+
+            var sut = new CommandDescriptor("command", GetType(), texts, new List<ParameterDescriptor>());
 
             // act
-            var description = sut.GetDescription("en");
+            var result = sut.GetDescription("en");
 
             // assert
-            Assert.Equal("description", description);
+            Assert.Equal("text", result);
         }
 
-        [Fact]
-        public void GetDescription_DescriptionNotPresent_ReturnsNull()
-        {
-            // arrange
-            var builder = CreateCommandDescriptorBuilder();
-            builder.AddDescription("description", "en");
-            var sut = builder.Build();
-
-            // act
-            var description = sut.GetDescription("fr");
-
-            // assert
-            Assert.Null(description);
-        }
-
-        [Fact]
-        public void GetDescription_LessSpecificDescriptionPresent_ReturnsLessSpecificDescription()
-        {
-            // arrange
-            var builder = CreateCommandDescriptorBuilder();
-            builder.AddDescription("description", "en");
-            var sut = builder.Build();
-
-            // act
-            var description = sut.GetDescription("en-AU");
-
-            // assert
-            Assert.Equal("description", description);
-        }
-
-        [Theory]
-        [InlineData("fr")]
-        [InlineData("en-AU")]
-        public void GetDescription_OnlyInvariantDescriptionPresent_ReturnsInvariantDescription(string cultureName)
-        {
-            // arrange
-            var builder = CreateCommandDescriptorBuilder();
-            builder.AddDescription("description", null);
-            var sut = builder.Build();
-
-            // act
-            var description = sut.GetDescription(cultureName);
-
-            // assert
-            Assert.Equal("description", description);
-        }
-
-        private CommandDescriptor.Builder CreateCommandDescriptorBuilder()
-        {
-            return new CommandDescriptor.Builder(GetType(), "command");
-        }
     }
 }

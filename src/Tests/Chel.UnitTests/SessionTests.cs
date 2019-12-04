@@ -142,7 +142,8 @@ namespace Chel.UnitTests
         {
             var parser = new Parser();
             var nameValidator = new NameValidator();
-            var registry = new CommandRegistry(nameValidator);
+            var descriptorGenerator = new CommandAttributeInspector();
+            var registry = new CommandRegistry(nameValidator, descriptorGenerator);
 
             foreach(var commandType in commandTypes)
                 registry.Register(commandType);

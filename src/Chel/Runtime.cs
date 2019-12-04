@@ -10,6 +10,7 @@ namespace Chel
     public class Runtime
     {
         private INameValidator _nameValidator = null;
+        private ICommandDescriptorGenerator _commandDescriptorGenerator = null;
         private ICommandRegistry _commandRegistry = null;
         private ICommandServices _commandServices = null;
         private ICommandParameterBinder _parameterBinder = null;
@@ -21,7 +22,8 @@ namespace Chel
         public Runtime()
         {
             _nameValidator = new NameValidator();
-            _commandRegistry = new CommandRegistry(_nameValidator);
+            _commandDescriptorGenerator = new CommandAttributeInspector();
+            _commandRegistry = new CommandRegistry(_nameValidator, _commandDescriptorGenerator);
             _commandServices = new CommandServices();
             _parameterBinder = new CommandParameterBinder();
             _parser = new Parser();

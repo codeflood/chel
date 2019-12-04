@@ -1,8 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Threading;
 using Chel.Abstractions;
+using Chel.Exceptions;
+using Chel.UnitTests.Comparers;
 using Chel.UnitTests.SampleCommands;
+using NSubstitute;
 using Xunit;
 
 namespace Chel.UnitTests
@@ -13,11 +17,24 @@ namespace Chel.UnitTests
         public void Ctor_NullNameValidator_ThrowsException()
         {
             // arrange
-            Action sutAction = () => new CommandRegistry(null);
+            var descriptorGenerator = new CommandAttributeInspector();
+            Action sutAction = () => new CommandRegistry(null, descriptorGenerator);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
             Assert.Equal("nameValidator", ex.ParamName);
+        }
+
+        [Fact]
+        public void Ctor_NullDescriptorGenerator_ThrowsException()
+        {
+            // arrange
+            var nameValidator = new NameValidator();
+            Action sutAction = () => new CommandRegistry(nameValidator, null);
+
+            // act, assert
+            var ex = Assert.Throws<ArgumentNullException>(sutAction);
+            Assert.Equal("commandDescriptorGenerator", ex.ParamName);
         }
 
         [Fact]
@@ -46,6 +63,20 @@ namespace Chel.UnitTests
         }
 
         [Fact]
+        public void Register_TypeCannotBeDescribed_ThrowsException()
+        {
+            // arrange
+            var nameValidator = new NameValidator();
+            var descriptorGenerator = Substitute.For<ICommandDescriptorGenerator>();
+            var sut = new CommandRegistry(nameValidator, descriptorGenerator);
+            Action sutAction = () => sut.Register(typeof(SampleCommand));
+
+            // act, assert
+            var ex = Assert.Throws<InvalidOperationException>(sutAction);
+            Assert.Contains("Descriptor for Chel.UnitTests.SampleCommands.SampleCommand could not be generated", ex.Message);
+        }
+
+        [Fact]
         public void Register_TypeIsMissingCommandAttribute_ThrowsException()
         {
             // arrange
@@ -53,9 +84,8 @@ namespace Chel.UnitTests
             Action sutAction = () => sut.Register(typeof(MissingAttributeSampleCommand));
 
             // act, assert
-            var ex = Assert.Throws<ArgumentException>(sutAction);
-            Assert.Equal("type", ex.ParamName);
-            Assert.Contains("Chel.UnitTests.SampleCommands.MissingAttributeSampleCommand is not attributed with CommandAttribute", ex.Message);
+            var ex = Assert.Throws<TypeNotACommandException>(sutAction);
+            Assert.Equal(typeof(MissingAttributeSampleCommand), ex.Type);
         }
 
         [Fact]
@@ -133,7 +163,7 @@ namespace Chel.UnitTests
             var resolvedDescriptor = sut.Resolve("sample");
 
             // assert
-            Assert.Equal(descriptor, resolvedDescriptor);
+            Assert.Equal(descriptor, resolvedDescriptor, new CommandDescriptorEqualityComparer());
         }
 
         [Fact]
@@ -148,7 +178,7 @@ namespace Chel.UnitTests
             var resolvedDescriptor = sut.Resolve("SAmPLE");
 
             // assert
-            Assert.Equal(descriptor, resolvedDescriptor);
+            Assert.Equal(descriptor, resolvedDescriptor, new CommandDescriptorEqualityComparer());
         }
 
         [Fact]
@@ -178,27 +208,30 @@ namespace Chel.UnitTests
             var resolvedDescriptors = sut.GetAllRegistrations();
 
             // assert
-            Assert.Equal(new[]{ descriptor1, descriptor2 }, resolvedDescriptors);
+            Assert.Equal(new[]{ descriptor1, descriptor2 }, resolvedDescriptors, new CommandDescriptorEqualityComparer());
         }
 
         private CommandRegistry CreateCommandRegistry()
         {
             var nameValidator = new NameValidator();
-            return new CommandRegistry(nameValidator);
+            var descriptorGenerator = new CommandAttributeInspector();
+            return new CommandRegistry(nameValidator, descriptorGenerator);
         }
 
         private CommandDescriptor CreateSampleCommandDescriptor()
         {
-            var builder = new CommandDescriptor.Builder(typeof(SampleCommand), "sample");
-            builder.AddDescription("description", "en");
-            return builder.Build();
+            var descriptions = new LocalisedTexts();
+            descriptions.AddText("description", "en");
+
+            return new CommandDescriptor("sample", typeof(SampleCommand), descriptions, new List<ParameterDescriptor>());
         }
 
         private CommandDescriptor CreateSampleCommand2Descriptor()
         {
-            var builder = new CommandDescriptor.Builder(typeof(SampleCommand2), "sample2");
-            builder.AddDescription("description", "en");
-            return builder.Build();
+            var descriptions = new LocalisedTexts();
+            descriptions.AddText("description", "en");
+
+            return new CommandDescriptor("sample2", typeof(SampleCommand2), descriptions, new List<ParameterDescriptor>());
         }
     }
 }

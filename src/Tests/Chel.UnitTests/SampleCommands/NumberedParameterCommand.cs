@@ -4,12 +4,15 @@ using Chel.Abstractions.Results;
 namespace Chel.UnitTests.SampleCommands
 {
     [Command("num")]
+    [Description("A sample command with numbered parameters.")]
     public class NumberedParameterCommand : ICommand
     {
-        [NumberedParameter(1)]
+        [NumberedParameter(1, "param1")]
+        [Description("The first parameter")]
         public string NumberedParameter1 { get; set; }
 
-        [NumberedParameter(2)]
+        [NumberedParameter(2, "param2")]
+        [Description("The second parameter")]
         public string NumberedParameter2 { get; set; }
 
         public NumberedParameterCommand()

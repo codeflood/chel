@@ -133,7 +133,8 @@ namespace Chel.UnitTests
         private CommandFactory CreateCommandFactory(Action<CommandRegistry, CommandServices> configurator)
         {
             var nameValidator = new NameValidator();
-            var registry = new CommandRegistry(nameValidator);
+            var descriptorGenerator = new CommandAttributeInspector();
+            var registry = new CommandRegistry(nameValidator, descriptorGenerator);
             var services = new CommandServices();
 
             configurator.Invoke(registry, services);
