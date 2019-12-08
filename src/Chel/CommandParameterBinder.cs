@@ -49,7 +49,7 @@ namespace Chel
             }
 
             if(!bound)
-                result.AddError(string.Format(Texts.UnknownNumberedParameter, parameterNumber));
+                result.AddError(string.Format(Texts.UnexpectedNumberedParameter, input.NumberedParameters[index]));
         }
 
         private void BindProperty(ICommand instance, PropertyInfo property, string value, ParameterBindResult result)

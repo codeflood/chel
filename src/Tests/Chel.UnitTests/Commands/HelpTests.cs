@@ -110,7 +110,7 @@ namespace Chel.UnitTests.Commands
             var result = sut.Execute() as FailureResult;
 
             // assert
-            Assert.Equal(new[]{ Texts.UnknownCommand }, result.Messages);
+            Assert.Equal(new[]{ "Cannot display help for unknown command boo" }, result.Messages);
         }
 
         private Help CreateSut()

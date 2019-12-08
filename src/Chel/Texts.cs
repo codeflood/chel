@@ -12,6 +12,8 @@ namespace Chel
 
         public const string CommandServiceNotRegistered = "Command service implementing {0} has not been registered";
 
+        public const string CannotDisplayHelpUnknownCommnad = "Cannot display help for unknown command {0}";
+        
         public const string DescriptorCouldNotBeGenerated = "Descriptor for {0} could not be generated";
         
         public const string ParameterDoesNotImplementICommand = "{0} does not implement ICommand";
@@ -22,8 +24,8 @@ namespace Chel
 
         public const string TextForCultureAlreadyAdded = "Text for culture {0} has already been added";
 
+        public const string UnexpectedNumberedParameter = "Unexpected numbered parameter {0}";
+
         public const string UnknownCommand = "Unknown command";
-        
-        public const string UnknownNumberedParameter = "Unknown numbered parameter {0}";
     }
 }

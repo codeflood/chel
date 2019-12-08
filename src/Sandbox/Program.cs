@@ -19,6 +19,7 @@ namespace Sandbox
 
             Console.WriteLine("Type 'exit' to exit.");
             Console.WriteLine("Type 'help' for help.");
+            Console.WriteLine();
 
             var exit = false;
             while(!exit)
@@ -35,13 +36,11 @@ namespace Sandbox
                     if(!result.Success)
                         Console.ForegroundColor = ConsoleColor.Red;
 
+                    Console.WriteLine();
                     Console.WriteLine(result);
 
                     Console.ForegroundColor = previousColor;
                 });
-                Console.WriteLine();
-                
-                //input = Console.ReadLine();
             }
         }
     }

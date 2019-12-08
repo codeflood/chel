@@ -37,7 +37,7 @@ namespace Chel.Commands
                 var successful = DetailCommand(cultureName, output);
                 if(!successful)
                     // todo: How to handle the line number; the command shouldn't know it
-                    return new FailureResult(1, new[]{ Texts.UnknownCommand });
+                    return new FailureResult(1, new[]{ string.Format(Texts.CannotDisplayHelpUnknownCommnad, CommandName) });
             }
 
             return new ValueResult(output.ToString());

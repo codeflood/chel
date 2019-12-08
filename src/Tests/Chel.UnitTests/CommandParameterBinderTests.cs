@@ -88,7 +88,7 @@ namespace Chel.UnitTests
 
             // assert
             Assert.False(result.Success);
-            Assert.Equal(new[]{ "Unknown numbered parameter 3" }, result.Errors);
+            Assert.Equal(new[]{ "Unexpected numbered parameter value3" }, result.Errors);
         }
 
         [Fact]
@@ -109,7 +109,7 @@ namespace Chel.UnitTests
 
             // assert
             Assert.False(result.Success);
-            Assert.Equal(new[]{ "Unknown numbered parameter 3", "Unknown numbered parameter 4" }, result.Errors);
+            Assert.Equal(new[]{ "Unexpected numbered parameter value3", "Unexpected numbered parameter value4" }, result.Errors);
         }
 
         // todo: different types
