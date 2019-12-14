@@ -20,6 +20,8 @@ namespace Chel
 
         public const string ParameterIsNotAttributedWithCommandAttribute = "{0} is not attributed with CommandAttribute";
 
+        public const string PropertyMissingSetter = "Property {0} on command type {1} requires a setter";
+
         public const string ServiceTypeAlreadyRegistered = "The service type {0} has already been registered";
 
         public const string TextForCultureAlreadyAdded = "Text for culture {0} has already been added";

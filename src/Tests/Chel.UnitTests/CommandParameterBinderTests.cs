@@ -112,6 +112,25 @@ namespace Chel.UnitTests
             Assert.Equal(new[]{ "Unexpected numbered parameter value3", "Unexpected numbered parameter value4" }, result.Errors);
         }
 
+        [Fact]
+        public void Bind_NoSetterOnProperty_ThrowsException()
+        {
+            // arrange
+            var sut = new CommandParameterBinder();
+            var command = new ParameterNoSetterCommand();
+            var builder = new CommandInput.Builder(1, "command");
+            builder.AddNumberedParameter("parameter");
+            var input = builder.Build();
+
+            Action sutAction = () => sut.Bind(command, input);
+
+            // act, assert
+            var ex = Assert.Throws<InvalidOperationException>(sutAction);
+
+            // assert
+            Assert.Equal("Property NoSet on command type Chel.UnitTests.SampleCommands.ParameterNoSetterCommand requires a setter", ex.Message);
+        }
+
         // todo: different types
     }
 }

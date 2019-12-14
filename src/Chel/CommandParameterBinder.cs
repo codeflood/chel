@@ -40,6 +40,9 @@ namespace Chel
                 var attribute = property.GetCustomAttributes<NumberedParameterAttribute>().FirstOrDefault();
                 if(attribute != null)
                 {
+                    if(!property.CanWrite)
+                        throw new InvalidOperationException(string.Format(Texts.PropertyMissingSetter, property.Name, instance.GetType().FullName));
+
                     if(attribute.Number == parameterNumber)
                     {
                         BindProperty(instance, property, input.NumberedParameters[index], result);
