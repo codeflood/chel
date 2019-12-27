@@ -15,6 +15,8 @@ namespace Chel
         public const string CannotDisplayHelpUnknownCommnad = "Cannot display help for unknown command {0}";
         
         public const string DescriptorCouldNotBeGenerated = "Descriptor for {0} could not be generated";
+
+        public const string MissingRequiredNumberedParameter = "Missing required numbered parameter {0}";
         
         public const string ParameterDoesNotImplementICommand = "{0} does not implement ICommand";
 

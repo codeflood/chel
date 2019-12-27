@@ -126,9 +126,42 @@ namespace Chel.UnitTests
 
             // act, assert
             var ex = Assert.Throws<InvalidOperationException>(sutAction);
+            Assert.Equal("Property NoSet on command type Chel.UnitTests.SampleCommands.ParameterNoSetterCommand requires a setter", ex.Message);
+        }
+
+        [Fact]
+        public void Bind_MissingRequiredParameter_ErrorIncludedInResult()
+        {
+            // arrange
+            var sut = new CommandParameterBinder();
+            var command = new RequiredParameterCommand();
+            var builder = new CommandInput.Builder(1, "command");
+            var input = builder.Build();
+
+            // act
+            var result = sut.Bind(command, input);
 
             // assert
-            Assert.Equal("Property NoSet on command type Chel.UnitTests.SampleCommands.ParameterNoSetterCommand requires a setter", ex.Message);
+            Assert.False(result.Success);
+            Assert.Equal(new[]{ "Missing required numbered parameter param" }, result.Errors);
+        }
+
+        [Fact]
+        public void Bind_RequiredParameterProvided_PropertyIsSet()
+        {
+            // arrange
+            var sut = new CommandParameterBinder();
+            var command = new RequiredParameterCommand();
+            var builder = new CommandInput.Builder(1, "command");
+            builder.AddNumberedParameter("val");
+            var input = builder.Build();
+
+            // act
+            var result = sut.Bind(command, input);
+
+            // assert
+            Assert.True(result.Success);
+            Assert.Equal("val", command.NumberedParameter);
         }
 
         // todo: different types

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Chel.Abstractions;
@@ -7,6 +8,8 @@ namespace Chel
 {
     public class CommandParameterBinder : ICommandParameterBinder
     {
+        private const int UnhandledParameter = -1;
+
         public ParameterBindResult Bind(ICommand instance, CommandInput input)
         {
             if(instance == null)
@@ -19,40 +22,51 @@ namespace Chel
 
             // todo: performance optimization: create a map of the properties to parameters on the command.
 
-            for(var num = 0; num < input.NumberedParameters.Count; num++)
+            var properties = instance.GetType().GetProperties();
+            var highestNumberedParameterHandled = UnhandledParameter;
+            foreach(var property in properties)
             {
-                BindNumberedParameter(instance, input, num, result);
+                var parameterNumber = BindNumberedParameter(instance, property, input, result);
+                if(parameterNumber > highestNumberedParameterHandled)
+                    highestNumberedParameterHandled = parameterNumber;
+            }
+
+            if(input.NumberedParameters.Count > 0 && highestNumberedParameterHandled < input.NumberedParameters.Count)
+            {
+                for(var i = highestNumberedParameterHandled; i < input.NumberedParameters.Count; i++)
+                {
+                    result.AddError(string.Format(Texts.UnexpectedNumberedParameter, input.NumberedParameters[i]));
+                }
             }
 
             return result;
         }
 
-        private void BindNumberedParameter(ICommand instance, CommandInput input, int index, ParameterBindResult result)
+        private int BindNumberedParameter(ICommand instance, PropertyInfo property, CommandInput input, ParameterBindResult result)
         {
-            var bound = false;
-
-            // Parameter numbers are 1 indexed, not zero.
-            var parameterNumber = index + 1;
-
-            var properties = instance.GetType().GetProperties();
-            foreach(var property in properties)
+            var attribute = property.GetCustomAttributes<NumberedParameterAttribute>().FirstOrDefault();
+            if(attribute != null)
             {
-                var attribute = property.GetCustomAttributes<NumberedParameterAttribute>().FirstOrDefault();
-                if(attribute != null)
-                {
-                    if(!property.CanWrite)
-                        throw new InvalidOperationException(string.Format(Texts.PropertyMissingSetter, property.Name, instance.GetType().FullName));
+                if(!property.CanWrite)
+                    throw new InvalidOperationException(string.Format(Texts.PropertyMissingSetter, property.Name, instance.GetType().FullName));
 
-                    if(attribute.Number == parameterNumber)
-                    {
-                        BindProperty(instance, property, input.NumberedParameters[index], result);
-                        bound = true;
-                    }
+                if(input.NumberedParameters.Count >= attribute.Number)
+                {
+                    // Parameter numbers are 1 indexed, not zero.
+                    var value = input.NumberedParameters[attribute.Number - 1];
+
+                        BindProperty(instance, property, value, result);
+                        return attribute.Number;
+                }
+                else
+                {
+                    var requiredAttribute = property.GetCustomAttributes<RequiredAttribute>().FirstOrDefault();
+                    if(requiredAttribute != null)
+                        result.AddError(string.Format(Texts.MissingRequiredNumberedParameter, attribute.PlaceholderText));
                 }
             }
 
-            if(!bound)
-                result.AddError(string.Format(Texts.UnexpectedNumberedParameter, input.NumberedParameters[index]));
+            return UnhandledParameter;
         }
 
         private void BindProperty(ICommand instance, PropertyInfo property, string value, ParameterBindResult result)
