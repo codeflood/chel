@@ -1,5 +1,6 @@
 ﻿using System;
 using Chel;
+using Chel.Commands;
 using Sandbox.Commands;
 
 namespace Sandbox
@@ -12,7 +13,7 @@ namespace Sandbox
             Console.WriteLine($"Chel sandbox {version}");
 
             var runtime = new Runtime();
-            runtime.RegisterCommandType(typeof(Nop));
+            runtime.RegisterCommandType(typeof(Echo));
             runtime.RegisterCommandType(typeof(Exit));
 
             var session = runtime.NewSession();
