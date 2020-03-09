@@ -1,6 +1,7 @@
 using System;
 using Chel.Abstractions;
 using Chel.Abstractions.Results;
+using Chel.Exceptions;
 using Chel.UnitTests.SampleCommands;
 using NSubstitute;
 using Xunit;
@@ -136,6 +137,65 @@ namespace Chel.UnitTests
             
             // assert
             Assert.Equal("ERROR (Line 1): Unexpected numbered parameter p3", executionResult.ToString());
+        }
+
+        [Fact]
+        public void Execute_ParserThrowsException_FailureResultReturned()
+        {
+            // arrange
+            var parser = Substitute.For<IParser>();
+            parser.Parse(Arg.Any<string>()).Returns(x => { throw new ParserException(1, "message"); });
+
+            var factory = Substitute.For<ICommandFactory>();
+            var binder = Substitute.For<ICommandParameterBinder>();
+
+            var sut = new Session(parser, factory, binder);
+            FailureResult executionResult = null;
+
+            // act
+            sut.Execute("command", result => executionResult = result as FailureResult);
+
+            // assert
+            Assert.Equal(1, executionResult.SourceLine);
+        }
+
+        [Fact]
+        public void Execute_FactoryThrowsException_FailureResultReturned()
+        {
+            // arrange
+            var commandBuilder = new CommandInput.Builder(1, "command");
+            var commandInput = commandBuilder.Build();
+
+            var parser = Substitute.For<IParser>();
+            parser.Parse(Arg.Any<string>()).Returns(new[]{ commandInput });
+
+            var factory = Substitute.For<ICommandFactory>();
+            factory.Create(Arg.Any<CommandInput>()).Returns(x => { throw new Exception(); });
+
+            var binder = Substitute.For<ICommandParameterBinder>();
+
+            var sut = new Session(parser, factory, binder);
+            FailureResult executionResult = null;
+
+            // act
+            sut.Execute("command", result => executionResult = result as FailureResult);
+
+            // assert
+            Assert.Equal(1, executionResult.SourceLine);
+        }
+
+        [Fact]
+        public void Execute_CommandThrowsException_FailureResultReturned()
+        {
+            // arrange
+            var sut = CreateSession(typeof(ExceptionCommand));
+            FailureResult executionResult = null;
+
+            // act
+            sut.Execute("ex", result => executionResult = result as FailureResult);
+
+            // assert
+            Assert.Equal(1, executionResult.SourceLine);
         }
 
         private Session CreateSession(params Type[] commandTypes)

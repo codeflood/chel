@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Chel.Abstractions;
 using Chel.Abstractions.Results;
+using Chel.Exceptions;
 
 namespace Chel
 {
@@ -46,27 +48,46 @@ namespace Chel
             if(resultHandler == null)
                 throw new ArgumentNullException(nameof(resultHandler));
 
-            var commandInputs = _parser.Parse(input);
+            IList<CommandInput> commandInputs = null;
+
+            try
+            {
+                commandInputs = _parser.Parse(input);
+            }
+            catch(ParserException ex)
+            {
+                var commandResult = new FailureResult(ex.SourceLine, new[] { ex.Message });
+                resultHandler(commandResult);
+                return;
+            }
 
             foreach(var commandInput in commandInputs)
             {
                 CommandResult commandResult = null;
 
-                var command = _commandFactory.Create(commandInput);
-                if(command != null)
+                try
                 {
-                    var bindingResult = _parameterBinder.Bind(command, commandInput);
+                    var command = _commandFactory.Create(commandInput);
+                    if(command != null)
+                    {
+                        var bindingResult = _parameterBinder.Bind(command, commandInput);
 
-                    if(bindingResult.Success)
-                        commandResult = command.Execute();
+                        if(bindingResult.Success)
+                            commandResult = command.Execute();
+                        else
+                            commandResult = new FailureResult(commandInput.SourceLine, bindingResult.Errors.ToArray());
+                    }
                     else
-                        commandResult = new FailureResult(commandInput.SourceLine, bindingResult.Errors.ToArray());
+                        commandResult = new FailureResult(commandInput.SourceLine, new[] { Texts.UnknownCommand });
                 }
-                else
-                    commandResult = new FailureResult(commandInput.SourceLine, new[] { Texts.UnknownCommand });
+                catch(Exception ex)
+                {
+                    commandResult = new FailureResult(commandInput.SourceLine, new[] { ex.Message });
+                }
 
                 resultHandler(commandResult);
             }
+            
         }
     }
 }

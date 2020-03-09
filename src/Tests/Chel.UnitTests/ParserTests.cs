@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Chel.Abstractions;
+using Chel.Exceptions;
 using Xunit;
 
 namespace Chel.UnitTests
@@ -162,6 +163,30 @@ namespace Chel.UnitTests
             var commandInput10 = builder10.Build();
 
             yield return new object[]{ "command ( param  param )  param ", new[] { commandInput10 } };
+        }
+
+        [Fact]
+        public void Parse_UnbalancedParenthesis_ThrowsException()
+        {
+            // arrange
+            var sut = new Parser();
+            Action sutAction = () => sut.Parse("command (param");
+
+            // act, assert
+            var exception = Assert.Throws<ParserException>(sutAction);
+            Assert.Equal("Missing )", exception.Message);
+        }
+
+        [Fact]
+        public void Parse_UnbalancedParenthesisOnSecondLine_SourceLineOfExceptionIsCorrect()
+        {
+            // arrange
+            var sut = new Parser();
+            Action sutAction = () => sut.Parse("command\ncommand (param");
+
+            // act, assert
+            var exception = Assert.Throws<ParserException>(sutAction);
+            Assert.Equal(2, exception.SourceLine);
         }
 
         private CommandInput CreateCommandInput(int sourceLine, string commandName)

@@ -2,6 +2,7 @@
 using System.IO;
 using System.Text;
 using Chel.Abstractions;
+using Chel.Exceptions;
 
 namespace Chel
 {
@@ -37,7 +38,7 @@ namespace Chel
 
         private CommandInput ParseSingleLine(StringReader reader, int sourceLine)
         {
-            var parsedBlock = ParseBlock(reader);
+            var parsedBlock = ParseBlock(reader, sourceLine);
 
             if(parsedBlock.Block == null)
                 return null;
@@ -46,7 +47,7 @@ namespace Chel
 
             while(!parsedBlock.EndOfLine)
             {
-                parsedBlock = ParseBlock(reader);
+                parsedBlock = ParseBlock(reader, sourceLine);
                 if(parsedBlock.Block != null)
                     commandInputBuilder.AddNumberedParameter(parsedBlock.Block);
             }
@@ -54,7 +55,7 @@ namespace Chel
             return commandInputBuilder.Build();
         }
 
-        private ParseBlock ParseBlock(StringReader reader)
+        private ParseBlock ParseBlock(StringReader reader, int sourceLine)
         {
             var block = new StringBuilder();
             var endOfLine = false;
@@ -69,6 +70,9 @@ namespace Chel
                 
                 if(character == -1 || (!insideParentheses && character == '\n'))
                 {
+                    if(insideParentheses)
+                        throw new ParserException(sourceLine, "Missing )");
+
                     endOfLine = true;
                     break;
                 }
