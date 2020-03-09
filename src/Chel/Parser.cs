@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using Chel.Abstractions;
@@ -61,26 +60,42 @@ namespace Chel
             var endOfLine = false;
             var ignore = false;
             var capturing = false;
+            var insideParentheses = false;
+            var escaping = false;
 
             while(!endOfLine)
             {
                 var character = reader.Read();
                 
-                if(character == -1 || character == '\n')
+                if(character == -1 || (!insideParentheses && character == '\n'))
                 {
                     endOfLine = true;
                     break;
                 }
                 else
                 {
-                    if(character == '#')
+                    if(character == '#' && !escaping)
                         ignore = true;
-                    else if(capturing && char.IsWhiteSpace((char)character))
+                    else if(capturing && !insideParentheses && char.IsWhiteSpace((char)character))
                         break;
-                    else if(!ignore && !char.IsWhiteSpace((char)character))
+                    else if(!ignore && (insideParentheses || !char.IsWhiteSpace((char)character)))
                     {
+                        var c = (char)character;
+                        if(c == '\\')
+                            escaping = true;
+                        else if(c == '(' && !escaping)
+                            insideParentheses = true;
+                        else if(c == ')' && !escaping)
+                            break;
+                        else
+                        {
+                            block.Append(c);
+
+                            if(escaping)
+                                escaping = false;
+                        }
+
                         capturing = true;
-                        block.Append((char)character);
                     }
                 }                
             }

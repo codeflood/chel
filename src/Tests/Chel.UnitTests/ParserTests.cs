@@ -119,7 +119,49 @@ namespace Chel.UnitTests
             yield return new object[]{ "command param  \n  command  param1    param2", new[] { commandInput1, commandInput3 } };
             yield return new object[]{ "command param  #comment\ncommand param1\tparam2", new[] { commandInput1, commandInput3 } };
 
-            // todo: param with spaces
+            var builder4 = new CommandInput.Builder(1, "command");
+            builder4.AddNumberedParameter("pa ram");
+            var commandInput4 = builder4.Build();
+
+            yield return new object[]{ "command (pa ram)", new[] { commandInput4 } };
+
+            var builder5 = new CommandInput.Builder(1, "command");
+            builder5.AddNumberedParameter(" param  param ");
+            var commandInput5 = builder5.Build();
+
+            yield return new object[]{ "command ( param  param )", new[] { commandInput5 } };
+
+            var builder6 = new CommandInput.Builder(1, "command");
+            builder6.AddNumberedParameter("\n\n");
+            var commandInput6 = builder6.Build();
+
+            yield return new object[]{ "command (\n\n)", new[] { commandInput6 } };
+
+            var builder7 = new CommandInput.Builder(1, "command");
+            builder7.AddNumberedParameter("(param)");
+            var commandInput7 = builder7.Build();
+
+            yield return new object[]{ @"command \(param\)", new[]{ commandInput7 } };
+
+            var builder8 = new CommandInput.Builder(1, "command");
+            builder8.AddNumberedParameter("#");
+            var commandInput8 = builder8.Build();
+
+            yield return new object[]{ @"command \#", new[]{ commandInput8 } };
+
+            var builder9 = new CommandInput.Builder(1, "command");
+            builder9.AddNumberedParameter("#");
+            builder9.AddNumberedParameter("param");
+            var commandInput9 = builder9.Build();
+
+            yield return new object[]{ @"command \# param", new[]{ commandInput9 } };
+
+            var builder10 = new CommandInput.Builder(1, "command");
+            builder10.AddNumberedParameter(" param  param ");
+            builder10.AddNumberedParameter("param");
+            var commandInput10 = builder10.Build();
+
+            yield return new object[]{ "command ( param  param )  param ", new[] { commandInput10 } };
         }
 
         private CommandInput CreateCommandInput(int sourceLine, string commandName)
