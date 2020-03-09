@@ -163,6 +163,12 @@ namespace Chel.UnitTests
             var commandInput10 = builder10.Build();
 
             yield return new object[]{ "command ( param  param )  param ", new[] { commandInput10 } };
+
+            var builder11 = new CommandInput.Builder(1, "command");
+            builder11.AddNumberedParameter("param\nparam");
+            var commandInput11 = builder11.Build();
+
+            yield return new object[]{ "command (param\nparam) ", new[] { commandInput11 } };
         }
 
         [Fact]

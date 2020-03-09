@@ -26,6 +26,7 @@ namespace Sandbox
             while(!exit)
             {
                 var input = Console.ReadLine();
+                // todo: allow SHIFT+ENTER to continue input
 
                 session.Execute(input, result => 
                 {
