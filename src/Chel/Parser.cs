@@ -11,6 +11,9 @@ namespace Chel
     /// </summary>
     public class Parser : IParser
     {
+        private int _currentSourceLine = 0;
+        private StringReader _reader = null;
+
         public IList<CommandInput> Parse(string input)
         {
             var parsedLines = new List<CommandInput>();
@@ -18,36 +21,36 @@ namespace Chel
             if(string.IsNullOrEmpty(input))
                 return parsedLines;
 
-            var reader = new StringReader(input);
-            var sourceLine = 1;
+            _reader = new StringReader(input);
+            _currentSourceLine = 1;
 
             CommandInput parsedLine = null;
 
             do
             {
-                parsedLine = ParseSingleLine(reader, sourceLine);
-                sourceLine++;
+                parsedLine = ParseCommandInput();
 
                 if(parsedLine != null)
                     parsedLines.Add(parsedLine);
             }
-            while(reader.Peek() != -1);
+            while(_reader.Peek() != -1);
 
             return parsedLines;
         }
 
-        private CommandInput ParseSingleLine(StringReader reader, int sourceLine)
+        private CommandInput ParseCommandInput()
         {
-            var parsedBlock = ParseBlock(reader, sourceLine);
+            var commandSourceLine = _currentSourceLine;
+            var parsedBlock = ParseBlock();
 
             if(parsedBlock.Block == null)
                 return null;
 
-            var commandInputBuilder = new CommandInput.Builder(sourceLine, parsedBlock.Block);
+            var commandInputBuilder = new CommandInput.Builder(commandSourceLine, parsedBlock.Block);
 
             while(!parsedBlock.EndOfLine)
             {
-                parsedBlock = ParseBlock(reader, sourceLine);
+                parsedBlock = ParseBlock();
                 if(parsedBlock.Block != null)
                     commandInputBuilder.AddNumberedParameter(parsedBlock.Block);
             }
@@ -55,23 +58,27 @@ namespace Chel
             return commandInputBuilder.Build();
         }
 
-        private ParseBlock ParseBlock(StringReader reader, int sourceLine)
+        private ParseBlock ParseBlock()
         {
             var block = new StringBuilder();
             var endOfLine = false;
             var ignore = false;
-            var capturing = false;
-            var insideParentheses = false;
+            var openingParenthesisCount = 0;
             var escaping = false;
 
             while(!endOfLine)
             {
-                var character = reader.Read();
+                var character = _reader.Read();
+
+                if(character == '\n')
+                    _currentSourceLine++;
                 
-                if(character == -1 || (!insideParentheses && character == '\n'))
+                if(character == -1 || (character == '\n' && openingParenthesisCount == 0))
                 {
-                    if(insideParentheses)
-                        throw new ParserException(sourceLine, "Missing )");
+                    if(openingParenthesisCount > 0)
+                        throw new ParserException(_currentSourceLine, Texts.MissingClosingParenthesis);
+                    else if(openingParenthesisCount < 0)
+                        throw new ParserException(_currentSourceLine, Texts.MissingOpeningParenthesis);
 
                     endOfLine = true;
                     break;
@@ -80,17 +87,29 @@ namespace Chel
                 {
                     if(character == '#' && !escaping)
                         ignore = true;
-                    else if(capturing && !insideParentheses && char.IsWhiteSpace((char)character))
+                    else if(!ignore && openingParenthesisCount == 0 && char.IsWhiteSpace((char)character))
                         break;
-                    else if(!ignore && (insideParentheses || !char.IsWhiteSpace((char)character)))
+                    else if(!ignore && (openingParenthesisCount > 0 || !char.IsWhiteSpace((char)character)))
                     {
                         var c = (char)character;
                         if(c == '\\')
                             escaping = true;
                         else if(c == '(' && !escaping)
-                            insideParentheses = true;
+                        {
+                            openingParenthesisCount++;
+
+                            if(openingParenthesisCount > 1)
+                                block.Append(c);
+                        }
                         else if(c == ')' && !escaping)
-                            break;
+                        {
+                            openingParenthesisCount--;
+                            if(openingParenthesisCount == 0)
+                                break;
+                            
+                            if(openingParenthesisCount >= 1)
+                                block.Append(c);
+                        }
                         else
                         {
                             block.Append(c);
@@ -98,19 +117,12 @@ namespace Chel
                             if(escaping)
                                 escaping = false;
                         }
-
-                        capturing = true;
                     }
                 }                
             }
 
             var parsedBlock = block.ToString();
 
-            // Trim last \r in case it was a Windows line ending
-            if(parsedBlock.Length > 0 &&
-                parsedBlock[parsedBlock.Length - 1] == '\r')
-                parsedBlock = parsedBlock.Substring(0, parsedBlock.Length - 1);
-            
             if(string.IsNullOrEmpty(parsedBlock))
                 return new ParseBlock(null, endOfLine);
 

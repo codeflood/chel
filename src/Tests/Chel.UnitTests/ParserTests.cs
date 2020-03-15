@@ -79,100 +79,244 @@ namespace Chel.UnitTests
         }
 
         [Theory]
-        [MemberData(nameof(InputWithNumberedParametersDataSource))]
-        public void Parse_InputWithNumberedParameters_ParametersParsedInOrder(string input, CommandInput[] expected)
+        [InlineData("command param")]
+        [InlineData("command   param  ")]
+        [InlineData("command\tparam")]
+        [InlineData("command \t param \t")]
+        public void Parse_SingleNumberedParameter_ParameterParsed(string input)
         {
             // arrange
             var sut = new Parser();
+            var builder = new CommandInput.Builder(1, "command");
+            builder.AddNumberedParameter("param");
+            var expectedCommand = builder.Build();
 
             // act
             var result = sut.Parse(input);
 
             // assert
-            Assert.Equal(expected, result.ToArray());
+            Assert.Equal(expectedCommand, result[0]);
         }
 
-        public static IEnumerable<object[]> InputWithNumberedParametersDataSource()
+        [Theory]
+        [InlineData("command param1 param2")]
+        [InlineData("command\tparam1\tparam2  ")]
+        [InlineData("command  \t  param1  \t  param2  \t")]
+        public void Parse_TwoNumberedParameters_ParametersParsed(string input)
         {
+            // arrange
+            var sut = new Parser();
+            var builder = new CommandInput.Builder(1, "command");
+            builder.AddNumberedParameter("param1");
+            builder.AddNumberedParameter("param2");
+            var expectedCommand = builder.Build();
+
+            // act
+            var result = sut.Parse(input);
+
+            // assert
+            Assert.Equal(expectedCommand, result[0]);
+        }
+
+        [Theory]
+        [InlineData("command param1 param2\ncommand param1 param2")]
+        [InlineData("command\tparam1\tparam2  \ncommand\tparam1\tparam2  ")]
+        [InlineData("command  \t  param1  \t  param2  \t\ncommand  \t  param1  \t  param2  \t")]
+        public void Parse_TwoCommandsTwoNumberedParameters_ParsedCommandsWithParameters(string input)
+        {
+            // arrange
+            var sut = new Parser();
+            
             var builder1 = new CommandInput.Builder(1, "command");
-            builder1.AddNumberedParameter("param");
-            var commandInput1 = builder1.Build();
+            builder1.AddNumberedParameter("param1");
+            builder1.AddNumberedParameter("param2");
+            var expectedCommand1 = builder1.Build();
 
-            yield return new object[]{ "command param", new[] { commandInput1 } };
-            yield return new object[]{ "command   param", new[] { commandInput1 } };
-            yield return new object[]{ "command\tparam", new[] { commandInput1 } };
-            yield return new object[]{ "command  \t  param  \t", new[] { commandInput1 } };
-
-            var builder2 = new CommandInput.Builder(1, "command");
+            var builder2 = new CommandInput.Builder(2, "command");
             builder2.AddNumberedParameter("param1");
             builder2.AddNumberedParameter("param2");
-            var commandInput2 = builder2.Build();
+            var expectedCommand2 = builder2.Build();
 
-            yield return new object[]{ "command param1 param2", new[] { commandInput2 } };
-            yield return new object[]{ "command  \t param1   param2", new[] { commandInput2 } };
+            // act
+            var result = sut.Parse(input);
 
-            var builder3 = new CommandInput.Builder(2, "command");
-            builder3.AddNumberedParameter("param1");
-            builder3.AddNumberedParameter("param2");
-            var commandInput3 = builder3.Build();
-
-            yield return new object[]{ "command param\ncommand param1\tparam2", new[] { commandInput1, commandInput3 } };
-            yield return new object[]{ "command param  \n  command  param1    param2", new[] { commandInput1, commandInput3 } };
-            yield return new object[]{ "command param  #comment\ncommand param1\tparam2", new[] { commandInput1, commandInput3 } };
-
-            var builder4 = new CommandInput.Builder(1, "command");
-            builder4.AddNumberedParameter("pa ram");
-            var commandInput4 = builder4.Build();
-
-            yield return new object[]{ "command (pa ram)", new[] { commandInput4 } };
-
-            var builder5 = new CommandInput.Builder(1, "command");
-            builder5.AddNumberedParameter(" param  param ");
-            var commandInput5 = builder5.Build();
-
-            yield return new object[]{ "command ( param  param )", new[] { commandInput5 } };
-
-            var builder6 = new CommandInput.Builder(1, "command");
-            builder6.AddNumberedParameter("\n\n");
-            var commandInput6 = builder6.Build();
-
-            yield return new object[]{ "command (\n\n)", new[] { commandInput6 } };
-
-            var builder7 = new CommandInput.Builder(1, "command");
-            builder7.AddNumberedParameter("(param)");
-            var commandInput7 = builder7.Build();
-
-            yield return new object[]{ @"command \(param\)", new[]{ commandInput7 } };
-
-            var builder8 = new CommandInput.Builder(1, "command");
-            builder8.AddNumberedParameter("#");
-            var commandInput8 = builder8.Build();
-
-            yield return new object[]{ @"command \#", new[]{ commandInput8 } };
-
-            var builder9 = new CommandInput.Builder(1, "command");
-            builder9.AddNumberedParameter("#");
-            builder9.AddNumberedParameter("param");
-            var commandInput9 = builder9.Build();
-
-            yield return new object[]{ @"command \# param", new[]{ commandInput9 } };
-
-            var builder10 = new CommandInput.Builder(1, "command");
-            builder10.AddNumberedParameter(" param  param ");
-            builder10.AddNumberedParameter("param");
-            var commandInput10 = builder10.Build();
-
-            yield return new object[]{ "command ( param  param )  param ", new[] { commandInput10 } };
-
-            var builder11 = new CommandInput.Builder(1, "command");
-            builder11.AddNumberedParameter("param\nparam");
-            var commandInput11 = builder11.Build();
-
-            yield return new object[]{ "command (param\nparam) ", new[] { commandInput11 } };
+            // assert
+            Assert.Equal(new[] { expectedCommand1, expectedCommand2 }, result);
         }
 
         [Fact]
-        public void Parse_UnbalancedParenthesis_ThrowsException()
+        public void Parse_ParenthesisedParameterIncludesSpaces_SpacesIncludedInParameter()
+        {
+            // arrange
+            var sut = new Parser();
+            var builder = new CommandInput.Builder(1, "command");
+            builder.AddNumberedParameter("pa ram");
+            var expectedCommand = builder.Build();
+
+            // act
+            var result = sut.Parse("command (pa ram)");
+
+            // assert
+            Assert.Equal(expectedCommand, result[0]);
+        }
+
+        [Fact]
+        public void Parse_ParameterIsOnlyNewlines_NewlinesIncludedInParameter()
+        {
+            // arrange
+            var sut = new Parser();
+            var builder = new CommandInput.Builder(1, "command");
+            builder.AddNumberedParameter("\n\n");
+            var expectedCommand = builder.Build();
+
+            // act
+            var result = sut.Parse("command (\n\n)");
+
+            // assert
+            Assert.Equal(expectedCommand, result[0]);
+        }
+
+        [Fact]
+        public void Parse_EscapedParentheses_ParenthesesIncludedInParameter()
+        {
+            // arrange
+            var sut = new Parser();
+            var builder = new CommandInput.Builder(1, "command");
+            builder.AddNumberedParameter("(param)");
+            var expectedCommand = builder.Build();
+
+            // act
+            var result = sut.Parse(@"command \(param\)");
+
+            // assert
+            Assert.Equal(expectedCommand, result[0]);
+        }
+
+        [Fact]
+        public void Parse_EscapedCommentSymbol_CommentSymbolIncludedInParameter()
+        {
+            // arrange
+            var sut = new Parser();
+            var builder = new CommandInput.Builder(1, "command");
+            builder.AddNumberedParameter("#");
+            builder.AddNumberedParameter("param");
+            var expectedCommand = builder.Build();
+
+            // act
+            var result = sut.Parse(@"command \# param");
+
+            // assert
+            Assert.Equal(expectedCommand, result[0]);
+        }
+
+        [Fact]
+        public void Parse_SomeParametersParenthesised_ParametersParsedProperly()
+        {
+            // arrange
+            var sut = new Parser();
+            var builder = new CommandInput.Builder(1, "command");
+            builder.AddNumberedParameter(" param  param ");
+            builder.AddNumberedParameter("param");
+            var expectedCommand = builder.Build();
+
+            // act
+            var result = sut.Parse("command ( param  param )  param ");
+
+            // assert
+            Assert.Equal(expectedCommand, result[0]);
+        }
+
+        [Fact]
+        public void Parse_NewlineInsideParenthesisedParameter_ParameterIncludesNewline()
+        {
+            // arrange
+            var sut = new Parser();
+            var builder = new CommandInput.Builder(1, "command");
+            builder.AddNumberedParameter("param\nparam");
+            var expectedCommand = builder.Build();
+
+            // act
+            var result = sut.Parse("command (param\nparam)");
+
+            // assert
+            Assert.Equal(expectedCommand, result[0]);
+        }
+
+        [Fact]
+        public void Parse_DoubleParenthesesInParameters_ParameterIncludesParentheses()
+        {
+            // arrange
+            var sut = new Parser();
+            var builder = new CommandInput.Builder(1, "command");
+            builder.AddNumberedParameter("(param)");
+            var expectedCommand = builder.Build();
+
+            // act
+            var result = sut.Parse("command ((param))");
+
+            // assert
+            Assert.Equal(expectedCommand, result[0]);
+        }
+
+        [Fact]
+        public void Parse_NestedParenthesesInParameters_ParameterIncludesParentheses()
+        {
+            // arrange
+            var sut = new Parser();
+            var builder = new CommandInput.Builder(1, "command");
+            builder.AddNumberedParameter("\nic  (pa ram)\nic (pa ram)");
+            var expectedCommand = builder.Build();
+
+            // act
+            var result = sut.Parse("command (\nic  (pa ram)\nic (pa ram))");
+
+            // assert
+            Assert.Equal(expectedCommand, result[0]);
+        }
+
+        [Fact]
+        public void Parse_MultipleBracketedParameters_ParametersParsedProperly()
+        {
+            // arrange
+            var sut = new Parser();
+            var builder = new CommandInput.Builder(1, "command");
+            builder.AddNumberedParameter("pa ram");
+            builder.AddNumberedParameter("pa ram");
+            var expectedCommand = builder.Build();
+
+            // act
+            var result = sut.Parse("command (pa ram) (pa ram)");
+
+            // assert
+            Assert.Equal(expectedCommand, result[0]);
+        }
+
+        [Fact]
+        public void Parse_ErrorOnLineTwo_ReportsCorrectLineNumberInError()
+        {
+            // arrange
+            var sut = new Parser();
+            Action sutAction = () => sut.Parse("command (\npa ram");
+
+            // act, assert
+            var exception = Assert.Throws<ParserException>(sutAction);
+            Assert.Equal(2, exception.SourceLine);
+        }
+
+        [Fact]
+        public void Parse_ErrorOnLineThree_ReportsCorrectLineNumberInError()
+        {
+            // arrange
+            var sut = new Parser();
+            Action sutAction = () => sut.Parse("command (\npa ram\nram");
+
+            // act, assert
+            var exception = Assert.Throws<ParserException>(sutAction);
+            Assert.Equal(3, exception.SourceLine);
+        }
+
+        [Fact]
+        public void Parse_MissingClosingParenthesis_ThrowsException()
         {
             // arrange
             var sut = new Parser();
@@ -180,7 +324,19 @@ namespace Chel.UnitTests
 
             // act, assert
             var exception = Assert.Throws<ParserException>(sutAction);
-            Assert.Equal("Missing )", exception.Message);
+            Assert.Equal(Texts.MissingClosingParenthesis, exception.Message);
+        }
+
+        [Fact]
+        public void Parse_MissingOpeningParenthesis_ThrowsException()
+        {
+            // arrange
+            var sut = new Parser();
+            Action sutAction = () => sut.Parse("command param )");
+
+            // act, assert
+            var exception = Assert.Throws<ParserException>(sutAction);
+            Assert.Equal(Texts.MissingOpeningParenthesis, exception.Message);
         }
 
         [Fact]

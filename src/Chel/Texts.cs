@@ -16,6 +16,10 @@ namespace Chel
         
         public const string DescriptorCouldNotBeGenerated = "Descriptor for {0} could not be generated";
 
+        public const string MissingClosingParenthesis = "Missing closing parenthesis )";
+
+        public const string MissingOpeningParenthesis = "Missing opening parenthesis (";
+
         public const string MissingRequiredNumberedParameter = "Missing required numbered parameter {0}";
         
         public const string ParameterDoesNotImplementICommand = "{0} does not implement ICommand";
