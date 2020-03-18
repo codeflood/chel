@@ -32,6 +32,16 @@ Parameters can have multiple mappings to account for short and long formats. Use
     [ParameterAlias("f")]
     public bool Flag { get; set; }
 
+### Required Parameters ###
+
+A parameter can be marked as required by annotating it with the `Required` attribute.
+
+    [Required]
+    [NumberedParameter(1, "param")]
+    public string NumberedParameter { get; set; }
+
+Required parameters must be provided when the command is invoked, otherwise an error will occur.
+
 ## Descriptions ##
 
 To support the help system, command implementations can add the `Description` attribute to the class and all parameters.

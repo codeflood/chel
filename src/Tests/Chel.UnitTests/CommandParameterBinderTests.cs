@@ -113,6 +113,62 @@ namespace Chel.UnitTests
         }
 
         [Fact]
+        public void Bind_NamedParameterOnCommand_BindsProperty()
+        {
+            // arrange
+            var sut = new CommandParameterBinder();
+            var command = new NamedParameterCommand();
+            var builder = new CommandInput.Builder(1, "nam");
+            builder.AddNamedParameter("param1", "value1");
+            var input = builder.Build();
+            
+            // act
+            var result = sut.Bind(command, input);
+
+            // assert
+            Assert.True(result.Success);
+            Assert.Equal("value1", command.NamedParameter1);
+        }
+
+        [Fact]
+        public void Bind_MultipleNamedParametersOnCommand_BindsProperty()
+        {
+            // arrange
+            var sut = new CommandParameterBinder();
+            var command = new NamedParameterCommand();
+            var builder = new CommandInput.Builder(1, "nam");
+            builder.AddNamedParameter("param1", "value1");
+            builder.AddNamedParameter("param2", "value2");
+            var input = builder.Build();
+            
+            // act
+            var result = sut.Bind(command, input);
+
+            // assert
+            Assert.True(result.Success);
+            Assert.Equal("value1", command.NamedParameter1);
+            Assert.Equal("value2", command.NamedParameter2);
+        }
+
+        [Fact]
+        public void Bind_NamedParameterNotOnCommand_ErrorIncludedInResult()
+        {
+            // arrange
+            var sut = new CommandParameterBinder();
+            var command = new NamedParameterCommand();
+            var builder = new CommandInput.Builder(1, "nam");
+            builder.AddNamedParameter("invalid", "value");
+            var input = builder.Build();
+
+            // act
+            var result = sut.Bind(command, input);
+
+            // assert
+            Assert.False(result.Success);
+            Assert.Equal(new[]{ "Unexpected named parameter invalid" }, result.Errors);
+        }
+
+        [Fact]
         public void Bind_NoSetterOnProperty_ThrowsException()
         {
             // arrange
@@ -130,7 +186,7 @@ namespace Chel.UnitTests
         }
 
         [Fact]
-        public void Bind_MissingRequiredParameter_ErrorIncludedInResult()
+        public void Bind_MissingRequiredNumberedParameter_ErrorIncludedInResult()
         {
             // arrange
             var sut = new CommandParameterBinder();
@@ -144,6 +200,23 @@ namespace Chel.UnitTests
             // assert
             Assert.False(result.Success);
             Assert.Equal(new[]{ "Missing required numbered parameter param" }, result.Errors);
+        }
+
+        [Fact]
+        public void Bind_MissingRequiredNamedParameter_ThrowsException()
+        {
+            // arrange
+            var sut = new CommandParameterBinder();
+            var command = new RequiredNamedParameterCommand();
+            var builder = new CommandInput.Builder(1, "command");
+            var input = builder.Build();
+
+            // act
+            var result = sut.Bind(command, input);
+
+            // assert
+            Assert.False(result.Success);
+            Assert.Equal(new[]{ "Missing required named parameter param" }, result.Errors);
         }
 
         [Fact]

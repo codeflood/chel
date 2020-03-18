@@ -23,6 +23,11 @@ namespace Chel.Abstractions
         /// </summary>
         public IReadOnlyList<string> NumberedParameters { get; private set; }
 
+        /// <summary>
+        /// Gets the named parameters for the command.
+        /// </summary>
+        public IReadOnlyDictionary<string, string> NamedParameters { get; private set; }
+
         private CommandInput()
         {
         }
@@ -42,6 +47,18 @@ namespace Chel.Abstractions
                         return false;
                 }
 
+                if(NamedParameters.Count != other.NamedParameters.Count)
+                    return false;
+
+                foreach(var parameter in NamedParameters)
+                {
+                    if(!other.NamedParameters.ContainsKey(parameter.Key))
+                        return false;
+
+                    if(!other.NamedParameters[parameter.Key].Equals(parameter.Value))
+                        return false;
+                }
+
                 return
                     SourceLine == other.SourceLine && 
                     string.Compare(CommandName, other.CommandName, true) == 0;
@@ -52,14 +69,19 @@ namespace Chel.Abstractions
 
         public override int GetHashCode()
         {
-            var numberedParametersHash = 0;
+            var hash = 0;
             foreach(var parameter in NumberedParameters)
             {
-                numberedParametersHash += parameter.GetHashCode();
+                hash += parameter.GetHashCode();
+            }
+
+            foreach(var parameter in NamedParameters)
+            {
+                hash += StringComparer.OrdinalIgnoreCase.GetHashCode(parameter.Key) + parameter.Value.GetHashCode();
             }
 
             return
-                numberedParametersHash +
+                hash +
                 SourceLine.GetHashCode() + 
                 CommandName.ToLower().GetHashCode();
         }
@@ -72,6 +94,7 @@ namespace Chel.Abstractions
             private int _sourceLine = -1;
             private string _commandName = null;
             private List<string> _numberedParameters = null;
+            private Dictionary<string, string> _namedParameters = null;
 
             /// <summary>
             /// Create a new instance.
@@ -93,6 +116,7 @@ namespace Chel.Abstractions
                 _commandName = commandName;
 
                 _numberedParameters = new List<string>();
+                _namedParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             }
 
             /// <summary>
@@ -107,13 +131,36 @@ namespace Chel.Abstractions
                 _numberedParameters.Add(value);
             }
 
+            /// <summary>
+            /// Add a named parameter to the command input.
+            /// </summary>
+            /// <param name="name">The name of the parameter to add.</param>
+            /// <param name="value">The value of the parameter to add.</param>
+            public void AddNamedParameter(string name, string value)
+            {
+                if(name == null)
+                    throw new ArgumentNullException(nameof(name));
+
+                if(string.IsNullOrWhiteSpace(name))
+                    throw new ArgumentException(nameof(name) + " cannot be empty or whitespace", nameof(name));
+
+                if(value == null)
+                    throw new ArgumentNullException(nameof(value));
+
+                if(_namedParameters.ContainsKey(name))
+                    throw new ArgumentException(name + " has already been added", nameof(name));
+
+                _namedParameters.Add(name, value);
+            }
+
             public CommandInput Build()
             {
                 var commandInput = new CommandInput()
                 {
                     SourceLine = _sourceLine,
                     CommandName = _commandName,
-                    NumberedParameters = new List<string>(_numberedParameters)
+                    NumberedParameters = new List<string>(_numberedParameters),
+                    NamedParameters = new Dictionary<string, string>(_namedParameters, StringComparer.OrdinalIgnoreCase)
                 };
 
                 return commandInput;

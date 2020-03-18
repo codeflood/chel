@@ -48,10 +48,25 @@ namespace Chel
 
             var commandInputBuilder = new CommandInput.Builder(commandSourceLine, parsedBlock.Block);
 
-            while(!parsedBlock.EndOfLine)
+            while(!parsedBlock.IsEndOfLine)
             {
                 parsedBlock = ParseBlock();
-                if(parsedBlock.Block != null)
+                
+                if(parsedBlock.IsName)
+                {
+                    var parameterName = parsedBlock.Block;
+
+                    if(string.IsNullOrWhiteSpace(parameterName))
+                        throw new ParserException(commandSourceLine, Texts.MissingParameterName);
+
+                    parsedBlock = ParseBlock();
+
+                    if(parsedBlock.Block != null)
+                        commandInputBuilder.AddNamedParameter(parameterName, parsedBlock.Block);
+                    else
+                        commandInputBuilder.AddNumberedParameter(parameterName);
+                }
+                else if(parsedBlock.Block != null)
                     commandInputBuilder.AddNumberedParameter(parsedBlock.Block);
             }
             
@@ -61,12 +76,14 @@ namespace Chel
         private ParseBlock ParseBlock()
         {
             var block = new StringBuilder();
-            var endOfLine = false;
+            var isEndOfLine = false;
+            var isName = false;
             var ignore = false;
             var openingParenthesisCount = 0;
             var escaping = false;
+            var startOfBlock = true;
 
-            while(!endOfLine)
+            while(!isEndOfLine)
             {
                 var character = _reader.Read();
 
@@ -80,7 +97,7 @@ namespace Chel
                     else if(openingParenthesisCount < 0)
                         throw new ParserException(_currentSourceLine, Texts.MissingOpeningParenthesis);
 
-                    endOfLine = true;
+                    isEndOfLine = true;
                     break;
                 }
                 else
@@ -92,8 +109,10 @@ namespace Chel
                     else if(!ignore && (openingParenthesisCount > 0 || !char.IsWhiteSpace((char)character)))
                     {
                         var c = (char)character;
-                        if(c == '\\')
+                        if(c == '\\' && !escaping)
                             escaping = true;
+                        else if(c == '-' && startOfBlock && !escaping)
+                            isName = true;
                         else if(c == '(' && !escaping)
                         {
                             openingParenthesisCount++;
@@ -116,6 +135,8 @@ namespace Chel
 
                             if(escaping)
                                 escaping = false;
+
+                            startOfBlock = false;
                         }
                     }
                 }                
@@ -124,9 +145,9 @@ namespace Chel
             var parsedBlock = block.ToString();
 
             if(string.IsNullOrEmpty(parsedBlock))
-                return new ParseBlock(null, endOfLine);
+                parsedBlock = null;
 
-            return new ParseBlock(parsedBlock, endOfLine);
+            return new ParseBlock(parsedBlock, isEndOfLine: isEndOfLine, isName: isName);
         }
     }
 }

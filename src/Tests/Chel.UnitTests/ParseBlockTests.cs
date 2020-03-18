@@ -8,24 +8,43 @@ namespace Chel.UnitTests
         [Fact]
         public void Ctor_BlockIsNull_DoesNotThrow()
         {
-            Action sutAction = () => new ParseBlock(null, false);
+            Action sutAction = () => new ParseBlock(null);
         }
 
         [Fact]
         public void Ctor_BlockIsEmpty_DoesNotThrow()
         {
-            var sut = new ParseBlock("", false);
+            var sut = new ParseBlock("");
         }
 
         [Fact]
-        public void Ctor_WhenCalled_SetsProperties()
+        public void Ctor_WhenCalled_SetsProperty()
         {
             // arrange, act
-            var sut = new ParseBlock("param", true);
+            var sut = new ParseBlock("param");
 
             // assert
             Assert.Equal("param", sut.Block);
-            Assert.True(sut.EndOfLine);
+        }
+
+        [Fact]
+        public void Ctor_EndOfLineIsTrue_SetsProperty()
+        {
+            // arrange, act
+            var sut = new ParseBlock("param", isEndOfLine: true);
+
+            // assert
+            Assert.True(sut.IsEndOfLine);
+        }
+
+        [Fact]
+        public void Ctor_NameIsTrue_SetsProperty()
+        {
+            // arrange, act
+            var sut = new ParseBlock("param", isName: true);
+
+            // assert
+            Assert.True(sut.IsName);
         }
     }
 }

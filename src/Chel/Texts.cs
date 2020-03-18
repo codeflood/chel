@@ -20,6 +20,10 @@ namespace Chel
 
         public const string MissingOpeningParenthesis = "Missing opening parenthesis (";
 
+        public const string MissingParameterName = "Missing parameter name after -";
+
+        public const string MissingRequiredNamedParameter = "Missing required named parameter {0}";
+
         public const string MissingRequiredNumberedParameter = "Missing required numbered parameter {0}";
         
         public const string ParameterDoesNotImplementICommand = "{0} does not implement ICommand";
@@ -32,6 +36,8 @@ namespace Chel
 
         public const string TextForCultureAlreadyAdded = "Text for culture {0} has already been added";
 
+        public const string UnexpectedNamedParameter = "Unexpected named parameter {0}";
+        
         public const string UnexpectedNumberedParameter = "Unexpected numbered parameter {0}";
 
         public const string UnknownCommand = "Unknown command";

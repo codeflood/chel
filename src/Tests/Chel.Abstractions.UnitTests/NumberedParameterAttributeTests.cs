@@ -30,16 +30,20 @@ namespace Chel.Abstractions.UnitTests
             Assert.Equal("placeholderText", ex.ParamName);
         }
 
-        [Fact]
-        public void Ctor_PlaceholderTextIsEmpty_ThrowsException()
+        [Theory]
+        [InlineData("")]
+        [InlineData(" ")]
+        [InlineData("\r")]
+        [InlineData("\n")]
+        public void Ctor_PlaceholderTextIsEmpty_ThrowsException(string placeholder)
         {
             // arrange
-            Action sutAction = () => new NumberedParameterAttribute(1, "");
+            Action sutAction = () => new NumberedParameterAttribute(1, placeholder);
 
             // act, assert
             var ex = Assert.Throws<ArgumentException>(sutAction);
             Assert.Equal("placeholderText", ex.ParamName);
-            Assert.Contains("placeholderText cannot be empty", ex.Message);
+            Assert.Contains("placeholderText cannot be empty or whitespace", ex.Message);
         }
 
         [Fact]

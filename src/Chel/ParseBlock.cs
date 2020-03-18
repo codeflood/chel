@@ -1,17 +1,18 @@
-using System;
-
 namespace Chel
 {
     internal class ParseBlock
     {
         public string Block { get; }
 
-        public bool EndOfLine { get; }
+        public bool IsEndOfLine { get; }
 
-        public ParseBlock(string block, bool endOfLine)
+        public bool IsName { get; }
+
+        public ParseBlock(string block, bool isEndOfLine = false, bool isName = false)
         {
             Block = block;
-            EndOfLine = endOfLine;
+            IsEndOfLine = isEndOfLine;
+            IsName = isName;
         }
     }
 }

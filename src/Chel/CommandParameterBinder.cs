@@ -22,13 +22,27 @@ namespace Chel
 
             // todo: performance optimization: create a map of the properties to parameters on the command.
 
+            var namedParameterInputKeys = input.NamedParameters.Keys.ToList();
+
             var properties = instance.GetType().GetProperties();
             var highestNumberedParameterHandled = UnhandledParameter;
             foreach(var property in properties)
             {
+                var namedParameterBound = BindNamedParameter(instance, property, input, result);
+                if(namedParameterBound != null)
+                    namedParameterInputKeys.RemoveAll(x => StringComparer.OrdinalIgnoreCase.Equals(x, namedParameterBound));
+
                 var parameterNumber = BindNumberedParameter(instance, property, input, result);
                 if(parameterNumber > highestNumberedParameterHandled)
                     highestNumberedParameterHandled = parameterNumber;
+            }
+
+            if(namedParameterInputKeys.Count > 0)
+            {
+                foreach(var name in namedParameterInputKeys)
+                {
+                    result.AddError(string.Format(Texts.UnexpectedNamedParameter, name));
+                }
             }
 
             if(input.NumberedParameters.Count > 0 && highestNumberedParameterHandled < input.NumberedParameters.Count)
@@ -55,8 +69,8 @@ namespace Chel
                     // Parameter numbers are 1 indexed, not zero.
                     var value = input.NumberedParameters[attribute.Number - 1];
 
-                        BindProperty(instance, property, value, result);
-                        return attribute.Number;
+                    BindProperty(instance, property, value, result);
+                    return attribute.Number;
                 }
                 else
                 {
@@ -67,6 +81,31 @@ namespace Chel
             }
 
             return UnhandledParameter;
+        }
+
+        private string BindNamedParameter(ICommand instance, PropertyInfo property, CommandInput input, ParameterBindResult result)
+        {
+            var attribute = property.GetCustomAttributes<NamedParameterAttribute>().FirstOrDefault();
+            if(attribute == null)
+                return null;
+
+            if(!property.CanWrite)
+                throw new InvalidOperationException(string.Format(Texts.PropertyMissingSetter, property.Name, instance.GetType().FullName));
+
+            if(input.NamedParameters.ContainsKey(attribute.Name))                
+            {
+                var value = input.NamedParameters[attribute.Name];
+                BindProperty(instance, property, value, result);
+                return attribute.Name;
+            }
+            else
+            {
+                var requiredAttribute = property.GetCustomAttributes<RequiredAttribute>().FirstOrDefault();
+                if(requiredAttribute != null)
+                    result.AddError(string.Format(Texts.MissingRequiredNamedParameter, attribute.Name));
+            }
+
+            return null;
         }
 
         private void BindProperty(ICommand instance, PropertyInfo property, string value, ParameterBindResult result)

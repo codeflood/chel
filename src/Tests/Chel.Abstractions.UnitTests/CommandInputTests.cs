@@ -70,6 +70,82 @@ namespace Chel.Abstractions.UnitTests
         }
 
         [Fact]
+        public void Equals_NamedParametersAreDifferent_ReturnsFalse()
+        {
+            // arrange
+            var builder1 = new CommandInput.Builder(1, "command");
+            builder1.AddNamedParameter("name1", "value");
+            var sut1 = builder1.Build();
+
+            var builder2 = new CommandInput.Builder(1, "command");
+            builder2.AddNamedParameter("name2", "value");
+            var sut2 = builder2.Build();
+
+            // act
+            var result = sut1.Equals(sut2);
+
+            // assert
+            Assert.False(result);
+        }
+
+        [Fact]
+        public void Equals_NamedParametersValuesAreDifferent_ReturnsFalse()
+        {
+            // arrange
+            var builder1 = new CommandInput.Builder(1, "command");
+            builder1.AddNamedParameter("name", "value1");
+            var sut1 = builder1.Build();
+
+            var builder2 = new CommandInput.Builder(1, "command");
+            builder2.AddNamedParameter("name", "value2");
+            var sut2 = builder2.Build();
+
+            // act
+            var result = sut1.Equals(sut2);
+
+            // assert
+            Assert.False(result);
+        }
+
+        [Fact]
+        public void Equals_NamedParametersAreEqual_ReturnsTrue()
+        {
+            // arrange
+            var builder1 = new CommandInput.Builder(1, "command");
+            builder1.AddNamedParameter("name", "value");
+            var sut1 = builder1.Build();
+
+            var builder2 = new CommandInput.Builder(1, "command");
+            builder2.AddNamedParameter("name", "value");
+            var sut2 = builder1.Build();
+
+            // act
+            var result = sut1.Equals(sut2);
+
+            // assert
+            Assert.True(result);
+        }
+
+        [Fact]
+        public void Equals_DifferentCasingNamedParametersAreEqual_ReturnsTrue()
+        {
+            // arrange
+            var builder1 = new CommandInput.Builder(1, "command");
+            builder1.AddNamedParameter("name", "value");
+            var sut1 = builder1.Build();
+
+            var builder2 = new CommandInput.Builder(1, "command");
+            builder2.AddNamedParameter("NAME", "value");
+            var sut2 = builder1.Build();
+
+            // act
+            var result = sut1.Equals(sut2);
+
+            // assert
+            Assert.True(result);
+        }
+
+        [Fact]
         public void GetHashCode_CommandsAreSame_HashCodesAreSame()
         {
             // arrange
@@ -101,6 +177,65 @@ namespace Chel.Abstractions.UnitTests
 
             // assert
             Assert.NotEqual(hashcode1, hashcode2);
+        }
+
+        [Fact]
+        public void GetHashCode_NumberedParametersAreSame_HashCodesAreSame()
+        {
+            // arrange
+            var builder1 = new CommandInput.Builder(2, "command");
+            builder1.AddNumberedParameter("p1");
+            var sut1 = builder1.Build();
+
+            var builder2 = new CommandInput.Builder(2, "command");
+            builder2.AddNumberedParameter("p1");
+            var sut2 = builder2.Build();
+
+            // act
+            var hashcode1 = sut1.GetHashCode();
+            var hashcode2 = sut2.GetHashCode();
+
+            // assert
+            Assert.Equal(hashcode1, hashcode2);
+        }
+
+        [Fact]
+        public void GetHashCode_NamedParameterMissingFromOneCommand_HashCodesAreDifferent()
+        {
+            // arrange
+            var builder1 = new CommandInput.Builder(2, "command");
+            builder1.AddNamedParameter("name", "value");
+            var sut1 = builder1.Build();
+
+            var builder2 = new CommandInput.Builder(2, "command");
+            var sut2 = builder2.Build();
+
+            // act
+            var hashcode1 = sut1.GetHashCode();
+            var hashcode2 = sut2.GetHashCode();
+
+            // assert
+            Assert.NotEqual(hashcode1, hashcode2);
+        }
+
+        [Fact]
+        public void GetHashCode_NamedParametersAreSame_HashCodesAreSame()
+        {
+            // arrange
+            var builder1 = new CommandInput.Builder(2, "command");
+            builder1.AddNamedParameter("name", "value");
+            var sut1 = builder1.Build();
+
+            var builder2 = new CommandInput.Builder(2, "command");
+            builder2.AddNamedParameter("name", "value");
+            var sut2 = builder2.Build();
+
+            // act
+            var hashcode1 = sut1.GetHashCode();
+            var hashcode2 = sut2.GetHashCode();
+
+            // assert
+            Assert.Equal(hashcode1, hashcode2);
         }
 
         [Theory]

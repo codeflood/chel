@@ -31,8 +31,8 @@ namespace Chel.Abstractions
             if(placeholderText == null)
                 throw new ArgumentNullException(nameof(placeholderText));
 
-            if(placeholderText.Equals(string.Empty))
-                throw new ArgumentException(string.Format(Texts.ArgumentCannotBeEmpty, nameof(placeholderText)), nameof(placeholderText));
+            if(string.IsNullOrWhiteSpace(placeholderText))
+                throw new ArgumentException(string.Format(Texts.ArgumentCannotBeEmptyOrWhitespace, nameof(placeholderText)), nameof(placeholderText));
 
             Number = number;
             PlaceholderText = placeholderText;

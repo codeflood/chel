@@ -4,6 +4,8 @@ namespace Chel.Abstractions
     {
         public const string ArgumentCannotBeEmpty = "{0} cannot be empty";
 
+        public const string ArgumentCannotBeEmptyOrWhitespace = "{0} cannot be empty or whitespace";
+
         public const string ArgumentCannotBeNull = "{0} cannot be null";
 
         public const string ArgumentNotValidCulture = "{0} is not a valid culture";
