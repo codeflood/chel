@@ -26,7 +26,7 @@ namespace Chel.Commands
 
         public CommandResult Execute()
         {
-            // todo: temporary implementation.
+            // todo: temporary implementation. Help should output a hash, once we have those in the type system.
             var cultureName = Thread.CurrentThread.CurrentCulture.Name;
             var output = new StringBuilder();
 
@@ -59,12 +59,20 @@ namespace Chel.Commands
             if(command == null)
                 return false;
 
+            output.Append(Texts.HelpUsage);
+            output.Append(": ");
             output.Append(command.CommandName);
 
             foreach(var numberedParameter in command.NumberedParameters)
             {
                 output.Append(" ");
-                output.Append(numberedParameter.PlaceholderText);
+                AppendParameterUsage(numberedParameter.PlaceholderText, numberedParameter.Required, output);
+            }
+
+            foreach(var namedParameter in command.NamedParameters)
+            {
+                output.Append(" ");
+                AppendNamedParameterUsage(namedParameter.Value.Name, namedParameter.Value.ValuePlaceholderText, namedParameter.Value.Required, output);
             }
 
             output.Append(Environment.NewLine);
@@ -73,11 +81,48 @@ namespace Chel.Commands
 
             foreach(var numberedParameter in command.NumberedParameters)
             {
-                output.Append($"{numberedParameter.PlaceholderText, -20}");
-                output.AppendLine(numberedParameter.GetDescription(cultureName));
+                var description = numberedParameter.GetDescription(cultureName);
+                AppendParameterDetail(numberedParameter.PlaceholderText, description, numberedParameter.Required, output);
+            }
+
+            foreach(var namedParameter in command.NamedParameters)
+            {
+                var description = namedParameter.Value.GetDescription(cultureName);
+                var segment = $"-{namedParameter.Value.Name} <{namedParameter.Value.ValuePlaceholderText}>";
+                AppendParameterDetail(segment, description, namedParameter.Value.Required, output);
             }
 
             return true;
+        }
+
+        private void AppendParameterUsage(string name, bool required, StringBuilder output)
+        {
+            if(!required)
+                output.Append("[");
+
+            output.Append(name);
+
+            if(!required)
+                output.Append("]");
+        }
+
+        private void AppendNamedParameterUsage(string name, string valuePlaceholder, bool required, StringBuilder output)
+        {
+            var segment = $"-{name} <{valuePlaceholder}>";
+            AppendParameterUsage(segment, required, output);
+        }
+
+        private void AppendParameterDetail(string name, string description, bool required, StringBuilder output)
+        {
+            output.Append($"{name, -20}");
+
+            if(required)
+            {
+                output.Append(Texts.Required);
+                output.Append(". ");
+            }
+                
+            output.AppendLine(description);
         }
     }
 }

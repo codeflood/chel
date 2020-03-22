@@ -23,7 +23,7 @@ namespace Chel.UnitTests.Commands
         public void Execute_NoParametersSet_ListsAllCommands()
         {
             // arrange
-            var sut = CreateSut();
+            var sut = CreateSut(typeof(Help), typeof(NumberedParameterCommand));
 
             // act
             var result = sut.Execute() as ValueResult;
@@ -37,7 +37,7 @@ namespace Chel.UnitTests.Commands
         public void Execute_NoParametersSet_DisplaysDescriptions()
         {
             // arrange
-            var sut = CreateSut();
+            var sut = CreateSut(typeof(Help), typeof(NumberedParameterCommand));
 
             // act
             var result = sut.Execute() as ValueResult;
@@ -69,14 +69,14 @@ namespace Chel.UnitTests.Commands
         public void Execute_CommandNameParameterSet_DisplaysDetailsForCommand()
         {
             // arrange
-            var sut = CreateSut();
+            var sut = CreateSut(typeof(Help), typeof(NumberedParameterCommand));
             sut.CommandName = "num";
 
             // act
             var result = sut.Execute() as ValueResult;
 
             // assert
-            Assert.Contains("num param1 param2", result.Value);
+            Assert.Contains("usage: num [param1] [param2]", result.Value);
             Assert.Contains("A sample command with numbered parameters.", result.Value);
             Assert.Matches(@"param1\s+The first parameter", result.Value);
             Assert.Matches(@"param2\s+The second parameter", result.Value);
@@ -86,14 +86,14 @@ namespace Chel.UnitTests.Commands
         public void Execute_CommandNameParameterSetUppercase_DisplaysDetailsForCommand()
         {
             // arrange
-            var sut = CreateSut();
+            var sut = CreateSut(typeof(Help), typeof(NumberedParameterCommand));
             sut.CommandName = "NUM";
 
             // act
             var result = sut.Execute() as ValueResult;
 
             // assert
-            Assert.Contains("num param1 param2", result.Value);
+            Assert.Contains("usage: num [param1] [param2]", result.Value);
             Assert.Contains("A sample command with numbered parameters.", result.Value);
             Assert.Matches(@"param1\s+The first parameter", result.Value);
             Assert.Matches(@"param2\s+The second parameter", result.Value);
@@ -103,7 +103,7 @@ namespace Chel.UnitTests.Commands
         public void Execute_CommandNameParameterSetCommandNotRegistered_ReturnsFailureResult()
         {
             // arrange
-            var sut = CreateSut();
+            var sut = CreateSut(typeof(Help), typeof(NumberedParameterCommand));
             sut.CommandName = "boo";
 
             // act
@@ -113,13 +113,46 @@ namespace Chel.UnitTests.Commands
             Assert.Equal(new[]{ "Cannot display help for unknown command boo" }, result.Messages);
         }
 
-        private Help CreateSut()
+        [Fact]
+        public void Execute_CommandIncludesRequiredParameter_RequiredParametersShownInOutput()
+        {
+            // arrange
+            var sut = CreateSut(typeof(RequiredParameterCommand));
+            sut.CommandName = "command";
+
+            // act
+            var result = sut.Execute() as ValueResult;
+
+            // assert
+            Assert.Contains("usage: command param", result.Value);
+            Assert.Matches(@"param\s+Required. The first parameter", result.Value);
+        }
+
+        [Fact]
+        public void Execute_CommandIncludesRequiredNamedParameter_NamedParametersShownInUsage()
+        {
+            // arrange
+            var sut = CreateSut(typeof(RequiredNamedParameterCommand));
+            sut.CommandName = "command";
+
+            // act
+            var result = sut.Execute() as ValueResult;
+
+            // assert
+            Assert.Contains("usage: command -param <value>", result.Value);
+            Assert.Matches(@"-param <value>\s+Required. A required parameter.", result.Value);
+        }
+
+        private Help CreateSut(params Type[] commandTypes)
         {
             var nameValidator = new NameValidator();
             var descriptorGenerator = new CommandAttributeInspector();
             var registry = new CommandRegistry(nameValidator, descriptorGenerator);
-            registry.Register(typeof(Help));
-            registry.Register(typeof(NumberedParameterCommand));
+
+            foreach(var type in commandTypes)
+            {
+                registry.Register(type);
+            }
 
             return new Help(registry);
         }

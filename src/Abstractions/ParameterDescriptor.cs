@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Reflection;
 
 namespace Chel.Abstractions
@@ -17,11 +16,17 @@ namespace Chel.Abstractions
         public PropertyInfo Property { get; }
 
         /// <summary>
+        /// Gets whether the parameter is required or not.
+        /// </summary>
+        public bool Required { get; }
+
+        /// <summary>
         /// Create a new instance.
         /// </summary>
         /// <param name="property">The property the parameter will be bound to.</param>
         /// <param name="descriptions">The descriptions for the parameter.</param>
-        protected ParameterDescriptor(PropertyInfo property, ITextResolver descriptions)
+        /// <param name="required">Indicates whether the parameter is required or not.</param>
+        protected ParameterDescriptor(PropertyInfo property, ITextResolver descriptions, bool required)
         {
             if(property == null)
                 throw new ArgumentNullException(nameof(property));
@@ -31,6 +36,7 @@ namespace Chel.Abstractions
 
             Property = property;
             _descriptions = descriptions;
+            Required = required;
         }
 
         /// <summary>

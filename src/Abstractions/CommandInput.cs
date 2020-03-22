@@ -153,6 +153,9 @@ namespace Chel.Abstractions
                 _namedParameters.Add(name, value);
             }
 
+            /// <summary>
+            /// Builds a <see cref="CommandInput" /> instance from the set data.
+            /// </summary>
             public CommandInput Build()
             {
                 var commandInput = new CommandInput()

@@ -16,6 +16,8 @@ namespace Chel
         
         public const string DescriptorCouldNotBeGenerated = "Descriptor for {0} could not be generated";
 
+        public const string HelpUsage = "usage";
+
         public const string MissingClosingParenthesis = "Missing closing parenthesis )";
 
         public const string MissingOpeningParenthesis = "Missing opening parenthesis (";
@@ -32,6 +34,8 @@ namespace Chel
 
         public const string PropertyMissingSetter = "Property {0} on command type {1} requires a setter";
 
+        public const string Required = "Required";
+        
         public const string ServiceTypeAlreadyRegistered = "The service type {0} has already been registered";
 
         public const string TextForCultureAlreadyAdded = "Text for culture {0} has already been added";

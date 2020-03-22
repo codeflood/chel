@@ -25,8 +25,9 @@ namespace Chel.Abstractions
         /// <param name="placeholderText">The placeholder text for the parameter.</param>
         /// <param name="property">The property the parameter will be bound to.</param>
         /// <param name="descriptions">The descriptions for the parameter.</param>
-        public NumberedParameterDescriptor(int number, string placeholderText, PropertyInfo property, ITextResolver descriptions)
-            : base(property, descriptions)
+        /// <param name="required">Indicates whether the parameter is required or not.</param>
+        public NumberedParameterDescriptor(int number, string placeholderText, PropertyInfo property, ITextResolver descriptions, bool required)
+            : base(property, descriptions, required)
         {
             if(number <= 0)
                 throw new ArgumentException(string.Format(Texts.ArgumentMustBeGreaterThanZero, nameof(number)), nameof(number));

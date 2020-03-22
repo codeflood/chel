@@ -223,7 +223,8 @@ namespace Chel.UnitTests
             var descriptions = new LocalisedTexts();
             descriptions.AddText("description", "en");
 
-            return new CommandDescriptor("sample", typeof(SampleCommand), descriptions, new List<ParameterDescriptor>());
+            var builder =  new CommandDescriptor.Builder("sample", typeof(SampleCommand), descriptions);
+            return builder.Build();
         }
 
         private CommandDescriptor CreateSampleCommand2Descriptor()
@@ -231,7 +232,8 @@ namespace Chel.UnitTests
             var descriptions = new LocalisedTexts();
             descriptions.AddText("description", "en");
 
-            return new CommandDescriptor("sample2", typeof(SampleCommand2), descriptions, new List<ParameterDescriptor>());
+            var builder = new CommandDescriptor.Builder("sample2", typeof(SampleCommand2), descriptions);
+            return builder.Build();
         }
     }
 }

@@ -1,6 +1,6 @@
 using Chel.Abstractions.Results;
 
-namespace Sandbox.Commands
+namespace Chel.Sandbox.Results
 {
     public class ExitResult : CommandResult
     {

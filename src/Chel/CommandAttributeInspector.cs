@@ -22,14 +22,12 @@ namespace Chel
                 throw new TypeNotACommandException(commandType);
 
             var descriptions = ExtractDescriptions(commandType);
-            var parameterDescriptors = ExtractParameters(commandType);
 
-            return new CommandDescriptor(
-                commandAttribute.CommandName,
-                commandType,
-                descriptions,
-                new List<ParameterDescriptor>(parameterDescriptors)
-            );
+            var builder = new CommandDescriptor.Builder(commandAttribute.CommandName, commandType, descriptions);
+
+            AddParameters(commandType, builder);
+            
+            return builder.Build();
         }
 
         private CommandAttribute ExtractCommandAttribute(Type type)
@@ -57,25 +55,44 @@ namespace Chel
             return descriptions;
         }
 
-        private IEnumerable<ParameterDescriptor> ExtractParameters(Type type)
+        private void AddParameters(Type type, CommandDescriptor.Builder builder)
         {
             var properties = type.GetProperties();
             foreach(var property in properties)
             {
+                var requiredAttribute = property.GetCustomAttributes(typeof(RequiredAttribute), true).FirstOrDefault();
+                var descriptions = ExtractDescriptions(property);
+
                 var attribute = property.GetCustomAttributes(typeof(NumberedParameterAttribute), true).FirstOrDefault();
                 if(attribute != null)
                 {
                     var numberedParameterAttribute = attribute as NumberedParameterAttribute;
-                    var descriptions = ExtractDescriptions(property);
-
-                    yield return new NumberedParameterDescriptor(
+                    var descriptor = new NumberedParameterDescriptor(
                         numberedParameterAttribute.Number,
                         numberedParameterAttribute.PlaceholderText,
                         property,
-                        descriptions
+                        descriptions,
+                        requiredAttribute != null
                     );
+                    builder.AddNumberedParameter(descriptor);
+                }
+
+                attribute = property.GetCustomAttributes(typeof(NamedParameterAttribute), true).FirstOrDefault();
+                if(attribute != null)
+                {
+                    var namedParameterAttribute = attribute as NamedParameterAttribute;
+                    var descriptor = new NamedParameterDescriptor(
+                        namedParameterAttribute.Name,
+                        namedParameterAttribute.ValuePlaceholderText,
+                        property,
+                        descriptions,
+                        requiredAttribute != null
+                    );
+                    builder.AddNamedParameter(descriptor);
                 }
             }
         }
+
+
     }
 }

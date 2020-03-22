@@ -1,7 +1,8 @@
 using Chel.Abstractions;
 using Chel.Abstractions.Results;
+using Chel.Sandbox.Results;
 
-namespace Sandbox.Commands
+namespace Chel.Sandbox.Commands
 {
     [Command("exit")]
     [Description("Exit the sandbox.")]

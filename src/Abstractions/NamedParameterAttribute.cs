@@ -14,10 +14,16 @@ namespace Chel.Abstractions
         public string Name { get; }
 
         /// <summary>
+        /// Gets the placeholder text for the parameter value.
+        /// </summary>
+        public string ValuePlaceholderText { get; }
+
+        /// <summary>
         /// Create a new instance.
         /// </summary>
         /// <param name="name">The name of the named parameter to bind.</param>
-        public NamedParameterAttribute(string name)
+        /// <param name="valuePlaceholderText">The placeholder text for the parameter value.</param>
+        public NamedParameterAttribute(string name, string valuePlaceholderText)
         {
             if(name == null)
                 throw new ArgumentNullException(nameof(name));
@@ -25,7 +31,14 @@ namespace Chel.Abstractions
             if(string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException(nameof(name) + " cannot be empty or whitespace", nameof(name));
 
+            if(valuePlaceholderText == null)
+                throw new ArgumentNullException(nameof(valuePlaceholderText));
+
+            if(string.IsNullOrWhiteSpace(valuePlaceholderText))
+                throw new ArgumentException(nameof(valuePlaceholderText) + " cannot be empty or whitespace", nameof(valuePlaceholderText));
+
             Name = name;
+            ValuePlaceholderText = valuePlaceholderText;
         }
     }
 }

@@ -98,5 +98,57 @@ namespace Chel.UnitTests
             Assert.Equal(typeof(NumberedParameterCommand).GetProperty("NumberedParameter2"), numberedParameterDescriptor2.Property);
             Assert.Equal("The second parameter", numberedParameterDescriptor2.GetDescription(""));
         }
+
+        [Fact]
+        public void DescribeCommand_CommandHasNamedParameters_ReturnsDescriptor()
+        {
+            // arrange
+            var sut = new CommandAttributeInspector();
+
+            // act
+            var descriptor = sut.DescribeCommand(typeof(NamedParameterCommand));
+
+            // assert
+            Assert.Equal(typeof(NamedParameterCommand), descriptor.ImplementingType);
+            Assert.Equal("nam", descriptor.CommandName);
+
+            var namedParameterDescriptor1 = descriptor.NamedParameters["param1"];
+            Assert.Equal("param1", namedParameterDescriptor1.Name);
+            Assert.Equal("value1", namedParameterDescriptor1.ValuePlaceholderText);
+            Assert.Equal(typeof(NamedParameterCommand).GetProperty("NamedParameter1"), namedParameterDescriptor1.Property);
+            Assert.Equal("The param1 parameter", namedParameterDescriptor1.GetDescription(""));
+
+            var namedParameterDescriptor2 = descriptor.NamedParameters["param2"];
+            Assert.Equal("param2", namedParameterDescriptor2.Name);
+            Assert.Equal("value2", namedParameterDescriptor2.ValuePlaceholderText);
+            Assert.Equal(typeof(NamedParameterCommand).GetProperty("NamedParameter2"), namedParameterDescriptor2.Property);
+            Assert.Equal("The param2 parameter", namedParameterDescriptor2.GetDescription(""));
+        }
+        
+        [Fact]
+        public void DescribeCommand_CommandHasRequiredParameter_ReturnedDescriptorIncludesRequiredParameter()
+        {
+            // arrange
+            var sut = new CommandAttributeInspector();
+
+            // act
+            var descriptor = sut.DescribeCommand(typeof(RequiredParameterCommand));
+
+            // assert
+            Assert.True(descriptor.NumberedParameters[0].Required);
+        }
+
+        [Fact]
+        public void DescribeCommand_CommandDoesNotContainRequiredParameter_ReturnedDescriptorHasNoRequiredParameter()
+        {
+            // arrange
+            var sut = new CommandAttributeInspector();
+
+            // act
+            var descriptor = sut.DescribeCommand(typeof(NumberedParameterCommand));
+
+            // assert
+            Assert.False(descriptor.NumberedParameters[0].Required);
+        }
     }
 }

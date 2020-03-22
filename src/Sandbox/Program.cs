@@ -1,9 +1,9 @@
 ﻿using System;
-using Chel;
 using Chel.Commands;
-using Sandbox.Commands;
+using Chel.Sandbox.Commands;
+using Chel.Sandbox.Results;
 
-namespace Sandbox
+namespace Chel.Sandbox
 {
     class Program
     {
@@ -14,6 +14,7 @@ namespace Sandbox
 
             var runtime = new Runtime();
             runtime.RegisterCommandType(typeof(Echo));
+            runtime.RegisterCommandType(typeof(Chel.Sandbox.Commands.Random));
             runtime.RegisterCommandType(typeof(Exit));
 
             var session = runtime.NewSession();
