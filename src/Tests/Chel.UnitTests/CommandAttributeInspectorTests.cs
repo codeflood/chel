@@ -173,6 +173,19 @@ namespace Chel.UnitTests
             Assert.Equal(typeof(FlagParameterCommand).GetProperty("Param2"), flagParameterDescriptor2.Property);
         }
 
-        // todo: command with flag param and required attribute whch is not allowed
+        [Fact]
+        public void DescribeCommand_CommandHasRequiredFlagParameter_ThrowsException()
+        {
+            // arrange
+            var sut = new CommandAttributeInspector();
+            var type = typeof(RequiredFlagParameterCommand);
+            var property = type.GetProperty("Flag");
+            Action sutAction = () => sut.DescribeCommand(type);
+
+            // act, assert
+            var ex = Assert.Throws<InvalidParameterDefinitionException>(sutAction);
+            Assert.Equal(property, ex.Property);
+            Assert.Contains("Flag parameters cannot be marked as required", ex.Message);
+        }
     }
 }

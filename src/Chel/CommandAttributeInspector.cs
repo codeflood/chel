@@ -94,6 +94,13 @@ namespace Chel
                 attribute = property.GetCustomAttribute(typeof(FlagParameterAttribute), true);
                 if(attribute != null)
                 {
+                    if(requiredAttribute != null)
+                    {
+                        var typeName = type.FullName;
+                        var propertyPath = $"{typeName}.{property.Name}";
+                        throw new InvalidParameterDefinitionException(property, string.Format(Texts.FlagParametersCannotBeRequired, propertyPath));
+                    }
+
                     var flagParameterAttribute = attribute as FlagParameterAttribute;
                     var descriptor = new FlagParameterDescriptor(
                         flagParameterAttribute.Name,
@@ -105,7 +112,5 @@ namespace Chel
                 }
             }
         }
-
-
     }
 }

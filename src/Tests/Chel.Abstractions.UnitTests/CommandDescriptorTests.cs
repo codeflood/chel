@@ -38,6 +38,5 @@ namespace Chel.Abstractions.UnitTests
             // assert
             Assert.Equal("text", result);
         }
-
     }
 }

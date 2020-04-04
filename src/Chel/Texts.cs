@@ -22,6 +22,8 @@ namespace Chel
 
         public const string DescriptorForCommandCouldNotBeResolved = "Descriptor for command {0} could not be resolved";
 
+        public const string FlagParametersCannotBeRequired = "Flag parameters cannot be marked as required ({0})";
+
         public const string HelpUsage = "usage";
 
         public const string MissingClosingParenthesis = "Missing closing parenthesis )";

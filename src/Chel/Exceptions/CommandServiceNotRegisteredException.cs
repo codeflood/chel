@@ -10,7 +10,7 @@ namespace Chel
         /// <summary>
         /// Gets the <see cref="Type" /> of the service that was not registered.
         /// </summary>
-        public Type CommandServiceType { get; private set; }
+        public Type CommandServiceType { get; }
         
         /// <summary>
         /// Create a new instance.
