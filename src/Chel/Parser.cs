@@ -52,22 +52,8 @@ namespace Chel
             {
                 parsedBlock = ParseBlock();
                 
-                if(parsedBlock.IsName)
-                {
-                    var parameterName = parsedBlock.Block;
-
-                    if(string.IsNullOrWhiteSpace(parameterName))
-                        throw new ParserException(commandSourceLine, Texts.MissingParameterName);
-
-                    parsedBlock = ParseBlock();
-
-                    if(parsedBlock.Block != null)
-                        commandInputBuilder.AddNamedParameter(parameterName, parsedBlock.Block);
-                    else
-                        commandInputBuilder.AddNumberedParameter(parameterName);
-                }
-                else if(parsedBlock.Block != null)
-                    commandInputBuilder.AddNumberedParameter(parsedBlock.Block);
+                if(parsedBlock.Block != null)
+                    commandInputBuilder.AddParameter(parsedBlock.Block);
             }
             
             return commandInputBuilder.Build();
@@ -77,11 +63,9 @@ namespace Chel
         {
             var block = new StringBuilder();
             var isEndOfLine = false;
-            var isName = false;
             var ignore = false;
             var openingParenthesisCount = 0;
             var escaping = false;
-            var startOfBlock = true;
 
             while(!isEndOfLine)
             {
@@ -111,8 +95,6 @@ namespace Chel
                         var c = (char)character;
                         if(c == '\\' && !escaping)
                             escaping = true;
-                        else if(c == '-' && startOfBlock && !escaping)
-                            isName = true;
                         else if(c == '(' && !escaping)
                         {
                             openingParenthesisCount++;
@@ -135,8 +117,6 @@ namespace Chel
 
                             if(escaping)
                                 escaping = false;
-
-                            startOfBlock = false;
                         }
                     }
                 }                
@@ -147,7 +127,7 @@ namespace Chel
             if(string.IsNullOrEmpty(parsedBlock))
                 parsedBlock = null;
 
-            return new ParseBlock(parsedBlock, isEndOfLine: isEndOfLine, isName: isName);
+            return new ParseBlock(parsedBlock, isEndOfLine: isEndOfLine);
         }
     }
 }

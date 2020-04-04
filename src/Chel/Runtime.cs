@@ -25,7 +25,7 @@ namespace Chel
             _commandDescriptorGenerator = new CommandAttributeInspector();
             _commandRegistry = new CommandRegistry(_nameValidator, _commandDescriptorGenerator);
             _commandServices = new CommandServices();
-            _parameterBinder = new CommandParameterBinder();
+            _parameterBinder = new CommandParameterBinder(_commandRegistry);
             _parser = new Parser();
 
             _commandRegistry.Register(typeof(Help));

@@ -83,21 +83,6 @@ namespace Chel
             return (CommandAttribute)attributes.FirstOrDefault();
         }
 
-        private List<ParameterDescriptor> DescribeCommandParameters(Type type)
-        {
-            var parameters = new List<ParameterDescriptor>();
-
-            var properties = type.GetProperties();
-            foreach(var property in properties)
-            {
-
-            }
-
-            return parameters;
-        }
-
-        
-
         /// <summary>
         /// Resolve a <see cref="CommandDescriptor" /> for a given command name.
         /// </summary>

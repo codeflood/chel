@@ -13,8 +13,14 @@ namespace Chel
         public const string CommandServiceNotRegistered = "Command service implementing {0} has not been registered";
 
         public const string CannotDisplayHelpUnknownCommnad = "Cannot display help for unknown command {0}";
+
+        public const string CannotRepeatFlagParameter = "Cannot repeat flag parameter {0}";
+
+        public const string CannotRepeatNamedParameter = "Cannot repeat named parameter {0}";
         
         public const string DescriptorCouldNotBeGenerated = "Descriptor for {0} could not be generated";
+
+        public const string DescriptorForCommandCouldNotBeResolved = "Descriptor for command {0} could not be resolved";
 
         public const string HelpUsage = "usage";
 
@@ -27,6 +33,8 @@ namespace Chel
         public const string MissingRequiredNamedParameter = "Missing required named parameter {0}";
 
         public const string MissingRequiredNumberedParameter = "Missing required numbered parameter {0}";
+
+        public const string MissingValueForNamedParameter = "Missing value for named parameter {0}";
         
         public const string ParameterDoesNotImplementICommand = "{0} does not implement ICommand";
 
@@ -40,7 +48,9 @@ namespace Chel
 
         public const string TextForCultureAlreadyAdded = "Text for culture {0} has already been added";
 
-        public const string UnexpectedNamedParameter = "Unexpected named parameter {0}";
+        public const string UnknownFlagParameter = "Unknown flag parameter {0}";
+
+        public const string UnknownNamedParameter = "Unknown named parameter {0}";
         
         public const string UnexpectedNumberedParameter = "Unexpected numbered parameter {0}";
 

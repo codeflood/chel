@@ -116,13 +116,13 @@ namespace Chel.UnitTests
             Assert.Equal("param1", namedParameterDescriptor1.Name);
             Assert.Equal("value1", namedParameterDescriptor1.ValuePlaceholderText);
             Assert.Equal(typeof(NamedParameterCommand).GetProperty("NamedParameter1"), namedParameterDescriptor1.Property);
-            Assert.Equal("The param1 parameter", namedParameterDescriptor1.GetDescription(""));
+            Assert.Equal("The param1 parameter.", namedParameterDescriptor1.GetDescription(""));
 
             var namedParameterDescriptor2 = descriptor.NamedParameters["param2"];
             Assert.Equal("param2", namedParameterDescriptor2.Name);
             Assert.Equal("value2", namedParameterDescriptor2.ValuePlaceholderText);
             Assert.Equal(typeof(NamedParameterCommand).GetProperty("NamedParameter2"), namedParameterDescriptor2.Property);
-            Assert.Equal("The param2 parameter", namedParameterDescriptor2.GetDescription(""));
+            Assert.Equal("The param2 parameter.", namedParameterDescriptor2.GetDescription(""));
         }
         
         [Fact]
@@ -150,5 +150,29 @@ namespace Chel.UnitTests
             // assert
             Assert.False(descriptor.NumberedParameters[0].Required);
         }
+
+        [Fact]
+        public void DescribeCommand_CommandHasFlagParameters_ReturnsDescriptor()
+        {
+            // arrange
+            var sut = new CommandAttributeInspector();
+
+            // act
+            var descriptor = sut.DescribeCommand(typeof(FlagParameterCommand));
+
+            // assert
+            Assert.Equal(typeof(FlagParameterCommand), descriptor.ImplementingType);
+            Assert.Equal("command", descriptor.CommandName);
+
+            var flagParameterDescriptor1 = descriptor.FlagParameters[0];
+            Assert.Equal("p1", flagParameterDescriptor1.Name);
+            Assert.Equal(typeof(FlagParameterCommand).GetProperty("Param1"), flagParameterDescriptor1.Property);
+
+            var flagParameterDescriptor2 = descriptor.FlagParameters[1];
+            Assert.Equal("p2", flagParameterDescriptor2.Name);
+            Assert.Equal(typeof(FlagParameterCommand).GetProperty("Param2"), flagParameterDescriptor2.Property);
+        }
+
+        // todo: command with flag param and required attribute whch is not allowed
     }
 }

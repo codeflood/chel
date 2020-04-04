@@ -1,14 +1,29 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.ComponentModel;
 using System.Reflection;
 using Chel.Abstractions;
 
 namespace Chel
 {
+    /// <summary>
+    /// The default implementation of <see cref="ICommandParameterBinder" />.
+    /// </summary>
     public class CommandParameterBinder : ICommandParameterBinder
     {
-        private const int UnhandledParameter = -1;
+        private ICommandRegistry _commandRegistry = null;
+
+        /// <summary>
+        /// Create a new instance.
+        /// </summary>
+        /// <param name="commandRegistry">The <see cref="ICommandRegistry" /> used to resolve commands.</param>
+        public CommandParameterBinder(ICommandRegistry commandRegistry)
+        {
+            if(commandRegistry == null)
+                throw new ArgumentNullException(nameof(commandRegistry));
+
+            _commandRegistry = commandRegistry;
+        }
 
         public ParameterBindResult Bind(ICommand instance, CommandInput input)
         {
@@ -20,92 +35,176 @@ namespace Chel
 
             var result = new ParameterBindResult();
 
-            // todo: performance optimization: create a map of the properties to parameters on the command.
+            var descriptor = _commandRegistry.Resolve(input.CommandName);
+            if(descriptor == null)
+                throw new InvalidOperationException(string.Format(Texts.DescriptorForCommandCouldNotBeResolved, input.CommandName));
 
-            var namedParameterInputKeys = input.NamedParameters.Keys.ToList();
+            var parameters = new List<string>(input.Parameters);
 
-            var properties = instance.GetType().GetProperties();
-            var highestNumberedParameterHandled = UnhandledParameter;
-            foreach(var property in properties)
+            BindFlagParameters(instance, descriptor, parameters, result);
+            BindNamedParameters(instance, descriptor, parameters, result);
+
+            AssertNoNamedOrFlagParameters(parameters, result);
+
+            BindNumberedParameters(instance, descriptor, parameters, result);       
+
+            // Anything left over was unexpected
+            foreach(var parameter in parameters)
             {
-                var namedParameterBound = BindNamedParameter(instance, property, input, result);
-                if(namedParameterBound != null)
-                    namedParameterInputKeys.RemoveAll(x => StringComparer.OrdinalIgnoreCase.Equals(x, namedParameterBound));
-
-                var parameterNumber = BindNumberedParameter(instance, property, input, result);
-                if(parameterNumber > highestNumberedParameterHandled)
-                    highestNumberedParameterHandled = parameterNumber;
-            }
-
-            if(namedParameterInputKeys.Count > 0)
-            {
-                foreach(var name in namedParameterInputKeys)
-                {
-                    result.AddError(string.Format(Texts.UnexpectedNamedParameter, name));
-                }
-            }
-
-            if(input.NumberedParameters.Count > 0 && highestNumberedParameterHandled < input.NumberedParameters.Count)
-            {
-                for(var i = highestNumberedParameterHandled; i < input.NumberedParameters.Count; i++)
-                {
-                    result.AddError(string.Format(Texts.UnexpectedNumberedParameter, input.NumberedParameters[i]));
-                }
+                result.AddError(string.Format(Texts.UnexpectedNumberedParameter, parameter));
             }
 
             return result;
         }
 
-        private int BindNumberedParameter(ICommand instance, PropertyInfo property, CommandInput input, ParameterBindResult result)
+        private void BindFlagParameters(ICommand instance, CommandDescriptor descriptor, List<string> parameters, ParameterBindResult result)
         {
-            var attribute = property.GetCustomAttributes<NumberedParameterAttribute>().FirstOrDefault();
-            if(attribute != null)
+            foreach(var describedParameter in descriptor.FlagParameters)
             {
-                if(!property.CanWrite)
-                    throw new InvalidOperationException(string.Format(Texts.PropertyMissingSetter, property.Name, instance.GetType().FullName));
+                var flagParameterMarker = "-" + describedParameter.Name;
+                var markerIndex = FindParameterMarker(flagParameterMarker, parameters);
 
-                if(input.NumberedParameters.Count >= attribute.Number)
+                if(markerIndex < 0)
+                    continue;
+                
+                AssertWritableProperty(describedParameter, instance);
+                BindProperty(instance, describedParameter.Property, "True", result);
+
+                // Make sure there's no duplicates
+                var repeatParameter = false;
+                while(markerIndex >= 0)
                 {
-                    // Parameter numbers are 1 indexed, not zero.
-                    var value = input.NumberedParameters[attribute.Number - 1];
+                    parameters.RemoveAt(markerIndex);
+                    markerIndex = FindParameterMarker(flagParameterMarker, parameters);
+                    if(markerIndex >= 0)
+                        repeatParameter = true;
+                }
+                
+                if(repeatParameter)
+                    result.AddError(string.Format(Texts.CannotRepeatFlagParameter, describedParameter.Name));
+            }
+        }
 
-                    BindProperty(instance, property, value, result);
-                    return attribute.Number;
+        private void BindNamedParameters(ICommand instance, CommandDescriptor descriptor, List<string> parameters, ParameterBindResult result)
+        {
+            foreach(var describedParameter in descriptor.NamedParameters.Values)
+            {
+                var namedParameterMarker = "-" + describedParameter.Name;
+                var markerIndex = FindParameterMarker(namedParameterMarker, parameters);
+
+                if(markerIndex >= 0)
+                {
+                    if(markerIndex + 2 > parameters.Count)
+                    {
+                        result.AddError(string.Format(Texts.MissingValueForNamedParameter, describedParameter.Name));
+                        parameters.RemoveAt(markerIndex);
+                        continue;
+                    }
+
+                    var value = parameters[markerIndex + 1];
+                    if(value.StartsWith("-"))
+                    {
+                        // This is a name marker, which cannot be a value.
+                        result.AddError(string.Format(Texts.MissingValueForNamedParameter, describedParameter.Name));
+                        parameters.RemoveAt(markerIndex);
+                        continue;
+                    }
+
+                    value = UnescapeValue(value);
+
+                    AssertWritableProperty(describedParameter, instance);
+                    BindProperty(instance, describedParameter.Property, value, result);
+
+                    // Make sure there's no duplicates
+                    var repeatParameter = false;
+                    while(markerIndex >= 0)
+                    {
+                        if(markerIndex + 2 <= parameters.Count)
+                            parameters.RemoveAt(markerIndex + 1);
+
+                        parameters.RemoveAt(markerIndex);
+                        markerIndex = FindParameterMarker(namedParameterMarker, parameters);
+                        if(markerIndex >= 0)
+                            repeatParameter = true;
+                    }
+                    
+                    if(repeatParameter)
+                        result.AddError(string.Format(Texts.CannotRepeatNamedParameter, describedParameter.Name));
                 }
                 else
                 {
-                    var requiredAttribute = property.GetCustomAttributes<RequiredAttribute>().FirstOrDefault();
-                    if(requiredAttribute != null)
-                        result.AddError(string.Format(Texts.MissingRequiredNumberedParameter, attribute.PlaceholderText));
+                    if(describedParameter.Required)
+                        result.AddError(string.Format(Texts.MissingRequiredNamedParameter, describedParameter.Name));
+                }
+            }
+        }
+
+        private void BindNumberedParameters(ICommand instance, CommandDescriptor descriptor, List<string> parameters, ParameterBindResult result)
+        {
+            var boundParameterIndexes = new List<int>();
+
+            foreach(var describedParameter in descriptor.NumberedParameters)
+            {
+                if(parameters.Count >= describedParameter.Number)
+                {
+                    // Parameter numbers are 1 indexed, not zero.
+                    var value = parameters[describedParameter.Number - 1];
+                    value = UnescapeValue(value);
+
+                    AssertWritableProperty(describedParameter, instance);
+                    BindProperty(instance, describedParameter.Property, value, result);
+                    boundParameterIndexes.Add(describedParameter.Number - 1);
+                }
+                else
+                {
+                    if(describedParameter.Required)
+                        result.AddError(string.Format(Texts.MissingRequiredNumberedParameter, describedParameter.PlaceholderText));
                 }
             }
 
-            return UnhandledParameter;
+            boundParameterIndexes.Reverse();
+            foreach(var index in boundParameterIndexes)
+                parameters.RemoveAt(index);
         }
 
-        private string BindNamedParameter(ICommand instance, PropertyInfo property, CommandInput input, ParameterBindResult result)
+        private void AssertNoNamedOrFlagParameters(List<string> parameters, ParameterBindResult result)
         {
-            var attribute = property.GetCustomAttributes<NamedParameterAttribute>().FirstOrDefault();
-            if(attribute == null)
-                return null;
-
-            if(!property.CanWrite)
-                throw new InvalidOperationException(string.Format(Texts.PropertyMissingSetter, property.Name, instance.GetType().FullName));
-
-            if(input.NamedParameters.ContainsKey(attribute.Name))                
+            for(var i = parameters.Count - 1; i >= 0; i--)
             {
-                var value = input.NamedParameters[attribute.Name];
-                BindProperty(instance, property, value, result);
-                return attribute.Name;
-            }
-            else
-            {
-                var requiredAttribute = property.GetCustomAttributes<RequiredAttribute>().FirstOrDefault();
-                if(requiredAttribute != null)
-                    result.AddError(string.Format(Texts.MissingRequiredNamedParameter, attribute.Name));
-            }
+                if(parameters[i].StartsWith("-"))
+                {
+                    // If the following parameter starts with a dash, we'll treat this one as a flag parameter.
+                    
+                    if(parameters.Count > i + 1)
+                    {
+                        result.AddError(string.Format(Texts.UnknownNamedParameter, parameters[i].Substring(1)));
+                        parameters.RemoveAt(i + 1);
+                    }
+                    else
+                        result.AddError(string.Format(Texts.UnknownFlagParameter, parameters[i].Substring(1)));
 
-            return null;
+                    parameters.RemoveAt(i);
+                }
+            }
+        }
+
+        private int FindParameterMarker(string marker, List<string> parameters)
+        {
+            return parameters.FindIndex(x => x.Equals(marker, StringComparison.OrdinalIgnoreCase));
+        }
+
+        private void AssertWritableProperty(ParameterDescriptor descriptor, object instance)
+        {
+            if(!descriptor.Property.CanWrite)
+                throw new InvalidOperationException(string.Format(Texts.PropertyMissingSetter, descriptor.Property.Name, instance.GetType().FullName));
+        }
+
+        private string UnescapeValue(string parameterValue)
+        {
+            if(parameterValue.StartsWith(@"\"))
+                return parameterValue.Substring(1);
+
+            return parameterValue;
         }
 
         private void BindProperty(ICommand instance, PropertyInfo property, string value, ParameterBindResult result)
@@ -114,6 +213,11 @@ namespace Chel
                 property.SetValue(instance, value);
             else
             {
+                // temporary implementation. Remove this part when the type converter part below is enabled
+                var converter = TypeDescriptor.GetConverter(property.PropertyType);
+                if (converter != null)
+                    property.SetValue(instance, converter.ConvertFrom(value));
+
                 //result.AddError(string.Format(Texts.))
 
                 /*

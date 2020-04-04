@@ -1,7 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Threading;
 using Chel.Abstractions;
 using Chel.Exceptions;
 using Chel.UnitTests.Comparers;

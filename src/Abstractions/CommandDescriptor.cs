@@ -30,6 +30,11 @@ namespace Chel.Abstractions
         /// </summary>
         public IReadOnlyDictionary<string, NamedParameterDescriptor> NamedParameters { get; private set; }
 
+        /// <summary>
+        /// Gets the flag parameters of the command.
+        /// </summary>
+        public IReadOnlyList<FlagParameterDescriptor> FlagParameters { get; private set; }
+
         private CommandDescriptor(string commandName, Type implementingType, ITextResolver descriptions)
         {
             CommandName = commandName;
@@ -61,6 +66,7 @@ namespace Chel.Abstractions
             private ITextResolver _descriptions = null;
             private List<NumberedParameterDescriptor> _numberedParameters = new List<NumberedParameterDescriptor>();
             private Dictionary<string, NamedParameterDescriptor> _namedParameters = new Dictionary<string, NamedParameterDescriptor>(StringComparer.OrdinalIgnoreCase);
+            private List<FlagParameterDescriptor> _flagParameters = new List<FlagParameterDescriptor>();
 
             /// <summary>
             /// Create a new instance.
@@ -119,6 +125,22 @@ namespace Chel.Abstractions
             }
 
             /// <summary>
+            /// Adds a flag parameter descriptor.
+            /// </summary>
+            /// <param name="descriptor">The descriptor to add.</param>
+            public void AddFlagParameter(FlagParameterDescriptor descriptor)
+            {
+                if(descriptor == null)
+                    throw new ArgumentNullException(nameof(descriptor));
+
+                var found = _flagParameters.Exists(x => string.Equals(x.Name, descriptor.Name, StringComparison.OrdinalIgnoreCase));
+                if(found)
+                    throw new InvalidOperationException(Texts.DescriptorAlreadyAdded);
+
+                _flagParameters.Add(descriptor);
+            }
+
+            /// <summary>
             /// Builds a <see cref="CommandDescriptor" /> instance from the set data.
             /// </summary>
             public CommandDescriptor Build()
@@ -126,7 +148,8 @@ namespace Chel.Abstractions
                 var descriptor = new CommandDescriptor(_commandName, _implementingType, _descriptions)
                 {
                     NumberedParameters = new List<NumberedParameterDescriptor>(_numberedParameters),
-                    NamedParameters = new Dictionary<string, NamedParameterDescriptor>(_namedParameters)
+                    NamedParameters = new Dictionary<string, NamedParameterDescriptor>(_namedParameters),
+                    FlagParameters = new List<FlagParameterDescriptor>(_flagParameters)
                 };
 
                 return descriptor;

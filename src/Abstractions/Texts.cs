@@ -18,6 +18,8 @@ namespace Chel.Abstractions
 
         public const string ErrorOnLine = "ERROR (Line {0})";
 
+        public const string FlagParametersCannotBeRequired = "Flag parameters cannot be required";
+
         public const string InvalidCommandNameNull = "The command name null is invalid";
 
         public const string InvalidCommandNameWithParameter = "The command name '{0}' is invalid";

@@ -75,6 +75,12 @@ namespace Chel.Commands
                 AppendNamedParameterUsage(namedParameter.Value.Name, namedParameter.Value.ValuePlaceholderText, namedParameter.Value.Required, output);
             }
 
+            foreach(var flagParameter in command.FlagParameters)
+            {
+                output.Append(" ");
+                AppendParameterUsage($"-{flagParameter.Name}", false, output);
+            }
+
             output.Append(Environment.NewLine);
             output.AppendLine(command.GetDescription(cultureName));
             output.Append(Environment.NewLine);
@@ -90,6 +96,12 @@ namespace Chel.Commands
                 var description = namedParameter.Value.GetDescription(cultureName);
                 var segment = $"-{namedParameter.Value.Name} <{namedParameter.Value.ValuePlaceholderText}>";
                 AppendParameterDetail(segment, description, namedParameter.Value.Required, output);
+            }
+
+            foreach(var flagParameter in command.FlagParameters)
+            {
+                var description = flagParameter.GetDescription(cultureName);
+                AppendParameterDetail($"-{flagParameter.Name}", description, false, output);
             }
 
             return true;
@@ -124,5 +136,19 @@ namespace Chel.Commands
                 
             output.AppendLine(description);
         }
+
+        /*
+        Possible alternative output; group optional parameters together. Example :=
+
+        usage: command reqNum -reqNam <value> [options]
+        The command description
+
+        reqNum              A numbered parameter
+        -reqNam <value>     A named parameter
+
+        options:
+        -optionalNamed <value> An optional named parameter
+        -f1                 A flag parameter
+        */
     }
 }

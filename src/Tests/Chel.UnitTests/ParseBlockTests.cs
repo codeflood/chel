@@ -36,15 +36,5 @@ namespace Chel.UnitTests
             // assert
             Assert.True(sut.IsEndOfLine);
         }
-
-        [Fact]
-        public void Ctor_NameIsTrue_SetsProperty()
-        {
-            // arrange, act
-            var sut = new ParseBlock("param", isName: true);
-
-            // assert
-            Assert.True(sut.IsName);
-        }
     }
 }

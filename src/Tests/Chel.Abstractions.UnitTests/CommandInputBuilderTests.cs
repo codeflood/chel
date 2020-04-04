@@ -43,80 +43,11 @@ namespace Chel.Abstractions.UnitTests
         }
 
         [Fact]
-        public void AddNumberedParameter_ParameterIsNull_ThrowsException()
+        public void AddParameter_ParameterIsNull_ThrowsException()
         {
             // arrange
             var sut = new CommandInput.Builder(1, "command");
-            Action sutAction = () => sut.AddNumberedParameter(null);
-
-            // act, assert
-            var ex = Assert.Throws<ArgumentNullException>(sutAction);
-            Assert.Equal("value", ex.ParamName);
-        }
-
-        [Fact]
-        public void AddNamedParameter_ParameterNameIsNull_ThrowsException()
-        {
-            // arrange
-            var sut = new CommandInput.Builder(1, "command");
-            Action sutAction = () => sut.AddNamedParameter(null, "value");
-
-            // act, assert
-            var ex = Assert.Throws<ArgumentNullException>(sutAction);
-            Assert.Equal("name", ex.ParamName);
-        }
-
-        [Theory]
-        [InlineData("")]
-        [InlineData(" ")]
-        [InlineData("\r")]
-        [InlineData("\n")]
-        public void AddNamedParameter_ParameterNameIsEmptyOrWhiteSpace_ThrowsException(string name)
-        {
-            // arrange
-            var sut = new CommandInput.Builder(1, "command");
-            Action sutAction = () => sut.AddNamedParameter(name, "value");
-
-            // act, assert
-            var ex = Assert.Throws<ArgumentException>(sutAction);
-            Assert.Equal("name", ex.ParamName);
-            Assert.Contains("name cannot be empty or whitespace", ex.Message);
-        }
-
-        [Fact]
-        public void AddNamedParameter_ParameterAlreadyAdded_ThrowsException()
-        {
-            // arrange
-            var sut = new CommandInput.Builder(1, "command");
-            sut.AddNamedParameter("pname", "value1");
-            Action sutAction = () => sut.AddNamedParameter("pname", "value2");
-
-            // act, assert
-            var ex = Assert.Throws<ArgumentException>(sutAction);
-            Assert.Equal("name", ex.ParamName);
-            Assert.Contains("pname has already been added", ex.Message);
-        }
-
-        [Fact]
-        public void AddNamedParameter_ParameterAlreadyAddedWithDifferentCase_ThrowsException()
-        {
-            // arrange
-            var sut = new CommandInput.Builder(1, "command");
-            sut.AddNamedParameter("pname", "value1");
-            Action sutAction = () => sut.AddNamedParameter("PNAME", "value2");
-
-            // act, assert
-            var ex = Assert.Throws<ArgumentException>(sutAction);
-            Assert.Equal("name", ex.ParamName);
-            Assert.Contains("PNAME has already been added", ex.Message);
-        }
-
-        [Fact]
-        public void AddNamedParameter_ParameterValueIsNull_ThrowsException()
-        {
-            // arrange
-            var sut = new CommandInput.Builder(1, "command");
-            Action sutAction = () => sut.AddNamedParameter("name", null);
+            Action sutAction = () => sut.AddParameter(null);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -138,51 +69,19 @@ namespace Chel.Abstractions.UnitTests
         }
 
         [Fact]
-        public void Build_AfterAddNumberedParameterCalled_ReturnsCommandInputWithNumberedParameter()
+        public void Build_AfterAddParameterCalled_ReturnsCommandInputWithNumberedParameter()
         {
             // arrange
             var sut = new CommandInput.Builder(3, "command");
-            sut.AddNumberedParameter("value1");
-            sut.AddNumberedParameter("value2");
+            sut.AddParameter("value1");
+            sut.AddParameter("value2");
 
             // act
             var commandInput = sut.Build();
 
             // assert
-            Assert.Equal("value1", commandInput.NumberedParameters[0]);
-            Assert.Equal("value2", commandInput.NumberedParameters[1]);
-        }
-
-        [Fact]
-        public void Build_AfterAddNamedParameterCalled_ReturnsCommandInputWithNamedParameter()
-        {
-            // arrange
-            var sut = new CommandInput.Builder(3, "command");
-            sut.AddNamedParameter("name1", "value1");
-            sut.AddNamedParameter("name2", "value2");
-
-            // act
-            var commandInput = sut.Build();
-
-            // assert
-            Assert.Equal("value1", commandInput.NamedParameters["name1"]);
-            Assert.Equal("value2", commandInput.NamedParameters["name2"]);
-        }
-
-        [Fact]
-        public void Build_AfterAddNamedParameterCalled_CanAccessParameterWithDifferentCasing()
-        {
-            // arrange
-            var sut = new CommandInput.Builder(3, "command");
-            sut.AddNamedParameter("name1", "value1");
-            sut.AddNamedParameter("name2", "value2");
-
-            // act
-            var commandInput = sut.Build();
-
-            // assert
-            Assert.Equal("value1", commandInput.NamedParameters["Name1"]);
-            Assert.Equal("value2", commandInput.NamedParameters["NAME2"]);
+            Assert.Equal("value1", commandInput.Parameters[0]);
+            Assert.Equal("value2", commandInput.Parameters[1]);
         }
 
         [Theory]
@@ -190,17 +89,17 @@ namespace Chel.Abstractions.UnitTests
         [InlineData("\r")]
         [InlineData("\n")]
         [InlineData(" ")]
-        public void Build_EmptyOrWhiteSpaceNamedParameters_ReturnsCommandInputWithNamedParameter(string value)
+        public void Build_EmptyOrWhiteSpaceParameter_ReturnsCommandInputWithParameter(string value)
         {
             // arrange
             var sut = new CommandInput.Builder(3, "command");
-            sut.AddNamedParameter("name", value);
+            sut.AddParameter(value);
 
             // act
             var commandInput = sut.Build();
 
             // assert
-            Assert.Equal(value, commandInput.NamedParameters["name"]);
+            Assert.Contains(value, commandInput.Parameters);
         }
     }
 }

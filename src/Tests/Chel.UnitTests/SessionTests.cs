@@ -210,7 +210,7 @@ namespace Chel.UnitTests
 
             var services = new CommandServices();
             var factory = new CommandFactory(registry, services);
-            var binder = new CommandParameterBinder();
+            var binder = new CommandParameterBinder(registry);
 
             return new Session(parser, factory, binder);
         }

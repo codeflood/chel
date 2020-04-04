@@ -126,6 +126,50 @@ namespace Chel.Abstractions.UnitTests
         }
 
         [Fact]
+        public void AddFlagParameter_DescriptorIsNull_ThrowsException()
+        {
+            // arrange
+            var sut = new CommandDescriptor.Builder("command", GetType(), Substitute.For<ITextResolver>());
+            Action sutAction = () => sut.AddFlagParameter(null);
+
+            // act, assert
+            var ex = Assert.Throws<ArgumentNullException>(sutAction);
+            Assert.Equal("descriptor", ex.ParamName);
+        }
+
+        [Fact]
+        public void AddFlagParameter_DescriptorAlreadyAdded_ThrowsException()
+        {
+            // arrange
+            var sut = new CommandDescriptor.Builder("command", GetType(), Substitute.For<ITextResolver>());
+            var property = CreateProperty();
+            var descriptor1 = new FlagParameterDescriptor("name", property, Substitute.For<ITextResolver>(), false);
+            var descriptor2 = new FlagParameterDescriptor("name", property, Substitute.For<ITextResolver>(), false);
+            sut.AddFlagParameter(descriptor1);
+            Action sutAction = () => sut.AddFlagParameter(descriptor2);
+
+            // act, assert
+            var ex = Assert.Throws<InvalidOperationException>(sutAction);
+            Assert.Contains("Descriptor has already been added.", ex.Message);
+        }
+
+        [Fact]
+        public void AddFlagParameter_DescriptorAlreadyAddedWithDifferentCasing_ThrowsException()
+        {
+            // arrange
+            var sut = new CommandDescriptor.Builder("command", GetType(), Substitute.For<ITextResolver>());
+            var property = CreateProperty();
+            var descriptor1 = new FlagParameterDescriptor("name", property, Substitute.For<ITextResolver>(), false);
+            var descriptor2 = new FlagParameterDescriptor("NAME", property, Substitute.For<ITextResolver>(), false);
+            sut.AddFlagParameter(descriptor1);
+            Action sutAction = () => sut.AddFlagParameter(descriptor2);
+
+            // act, assert
+            var ex = Assert.Throws<InvalidOperationException>(sutAction);
+            Assert.Contains("Descriptor has already been added.", ex.Message);
+        }
+
+        [Fact]
         public void Build_WhenCalled_ReturnsCommandDescriptor()
         {
             // arrange
@@ -173,6 +217,23 @@ namespace Chel.Abstractions.UnitTests
             // assert
             Assert.Equal(1, commandDescriptor.NamedParameters.Count);
             Assert.Equal(descriptor, commandDescriptor.NamedParameters["name"]);
+        }
+
+        [Fact]
+        public void Build_AfterFlagParameterAdded_ReturnsCommandDescriptorWithFlagParameter()
+        {
+            // arrange
+            var sut = new CommandDescriptor.Builder("command", GetType(), Substitute.For<ITextResolver>());
+            var property = CreateProperty();
+            var descriptor = new FlagParameterDescriptor("name", property, Substitute.For<ITextResolver>(), false);
+            sut.AddFlagParameter(descriptor);
+
+            // act
+            var commandDescriptor = sut.Build();
+
+            // assert
+            Assert.Equal(1, commandDescriptor.FlagParameters.Count);
+            Assert.Equal(descriptor, commandDescriptor.FlagParameters[0]);
         }
 
         private PropertyInfo CreateProperty()

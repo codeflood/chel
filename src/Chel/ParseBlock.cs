@@ -6,13 +6,10 @@ namespace Chel
 
         public bool IsEndOfLine { get; }
 
-        public bool IsName { get; }
-
-        public ParseBlock(string block, bool isEndOfLine = false, bool isName = false)
+        public ParseBlock(string block, bool isEndOfLine = false)
         {
             Block = block;
             IsEndOfLine = isEndOfLine;
-            IsName = isName;
         }
     }
 }

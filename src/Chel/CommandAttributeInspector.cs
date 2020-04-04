@@ -60,10 +60,10 @@ namespace Chel
             var properties = type.GetProperties();
             foreach(var property in properties)
             {
-                var requiredAttribute = property.GetCustomAttributes(typeof(RequiredAttribute), true).FirstOrDefault();
+                var requiredAttribute = property.GetCustomAttribute(typeof(RequiredAttribute), true);
                 var descriptions = ExtractDescriptions(property);
 
-                var attribute = property.GetCustomAttributes(typeof(NumberedParameterAttribute), true).FirstOrDefault();
+                var attribute = property.GetCustomAttribute(typeof(NumberedParameterAttribute), true);
                 if(attribute != null)
                 {
                     var numberedParameterAttribute = attribute as NumberedParameterAttribute;
@@ -77,7 +77,7 @@ namespace Chel
                     builder.AddNumberedParameter(descriptor);
                 }
 
-                attribute = property.GetCustomAttributes(typeof(NamedParameterAttribute), true).FirstOrDefault();
+                attribute = property.GetCustomAttribute(typeof(NamedParameterAttribute), true);
                 if(attribute != null)
                 {
                     var namedParameterAttribute = attribute as NamedParameterAttribute;
@@ -89,6 +89,19 @@ namespace Chel
                         requiredAttribute != null
                     );
                     builder.AddNamedParameter(descriptor);
+                }
+
+                attribute = property.GetCustomAttribute(typeof(FlagParameterAttribute), true);
+                if(attribute != null)
+                {
+                    var flagParameterAttribute = attribute as FlagParameterAttribute;
+                    var descriptor = new FlagParameterDescriptor(
+                        flagParameterAttribute.Name,
+                        property,
+                        descriptions,
+                        requiredAttribute != null
+                    );
+                    builder.AddFlagParameter(descriptor);
                 }
             }
         }

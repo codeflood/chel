@@ -143,6 +143,38 @@ namespace Chel.UnitTests.Commands
             Assert.Matches(@"-param <value>\s+Required. A required parameter.", result.Value);
         }
 
+        [Fact]
+        public void Execute_CommandIncludesNamedParameter_NamedParametersShownInUsage()
+        {
+            // arrange
+            var sut = CreateSut(typeof(NamedParameterCommand));
+            sut.CommandName = "nam";
+
+            // act
+            var result = sut.Execute() as ValueResult;
+
+            // assert
+            Assert.Contains("usage: nam [-param1 <value1>] [-param2 <value2>]", result.Value);
+            Assert.Matches(@"-param1 <value1>\s+The param1 parameter.", result.Value);
+            Assert.Matches(@"-param2 <value2>\s+The param2 parameter.", result.Value);
+        }
+
+        [Fact]
+        public void Execute_CommandIncludesFlagParameter_FlagParametersShownInUsage()
+        {
+            // arrange
+            var sut = CreateSut(typeof(FlagParameterCommand));
+            sut.CommandName = "command";
+
+            // act
+            var result = sut.Execute() as ValueResult;
+
+            // assert
+            Assert.Contains("usage: command [-p1] [-p2]", result.Value);
+            Assert.Matches(@"-p1\s+The p1 parameter.", result.Value);
+            Assert.Matches(@"-p2\s+The p2 parameter.", result.Value);
+        }
+
         private Help CreateSut(params Type[] commandTypes)
         {
             var nameValidator = new NameValidator();
