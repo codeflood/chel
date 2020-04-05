@@ -61,7 +61,7 @@ namespace Chel
         {
             foreach(var describedParameter in descriptor.FlagParameters)
             {
-                var flagParameterMarker = "-" + describedParameter.Name;
+                var flagParameterMarker = Symbols.ParameterName + describedParameter.Name;
                 var markerIndex = FindParameterMarker(flagParameterMarker, parameters);
 
                 if(markerIndex < 0)
@@ -89,7 +89,7 @@ namespace Chel
         {
             foreach(var describedParameter in descriptor.NamedParameters.Values)
             {
-                var namedParameterMarker = "-" + describedParameter.Name;
+                var namedParameterMarker = Symbols.ParameterName + describedParameter.Name;
                 var markerIndex = FindParameterMarker(namedParameterMarker, parameters);
 
                 if(markerIndex >= 0)
@@ -102,7 +102,7 @@ namespace Chel
                     }
 
                     var value = parameters[markerIndex + 1];
-                    if(value.StartsWith("-"))
+                    if(value.StartsWith(Symbols.ParameterName))
                     {
                         // This is a name marker, which cannot be a value.
                         result.AddError(string.Format(Texts.MissingValueForNamedParameter, describedParameter.Name));
@@ -188,7 +188,7 @@ namespace Chel
         {
             for(var i = parameters.Count - 1; i >= 0; i--)
             {
-                if(parameters[i].StartsWith("-"))
+                if(parameters[i].StartsWith(Symbols.ParameterName))
                 {
                     // If the following parameter starts with a dash, we'll treat this one as a flag parameter.
                     
@@ -218,7 +218,7 @@ namespace Chel
 
         private string UnescapeValue(string parameterValue)
         {
-            if(parameterValue.StartsWith(@"\"))
+            if(parameterValue.StartsWith(Symbols.Escape.ToString()))
                 return parameterValue.Substring(1);
 
             return parameterValue;

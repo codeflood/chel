@@ -86,23 +86,23 @@ namespace Chel
                 }
                 else
                 {
-                    if(character == '#' && !escaping)
+                    if(character == Symbols.Comment && !escaping)
                         ignore = true;
                     else if(!ignore && openingParenthesisCount == 0 && char.IsWhiteSpace((char)character))
                         break;
                     else if(!ignore && (openingParenthesisCount > 0 || !char.IsWhiteSpace((char)character)))
                     {
                         var c = (char)character;
-                        if(c == '\\' && !escaping)
+                        if(c == Symbols.Escape && !escaping)
                             escaping = true;
-                        else if(c == '(' && !escaping)
+                        else if(c == Symbols.BlockStart && !escaping)
                         {
                             openingParenthesisCount++;
 
                             if(openingParenthesisCount > 1)
                                 block.Append(c);
                         }
-                        else if(c == ')' && !escaping)
+                        else if(c == Symbols.BlockEnd && !escaping)
                         {
                             openingParenthesisCount--;
                             if(openingParenthesisCount == 0)

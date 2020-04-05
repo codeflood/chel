@@ -16,7 +16,7 @@ namespace Chel
             if(string.IsNullOrWhiteSpace(name))
                 return false;
 
-            if(name.StartsWith("-"))
+            if(name.StartsWith(Symbols.ParameterName))
                 return false;
 
             return true;
