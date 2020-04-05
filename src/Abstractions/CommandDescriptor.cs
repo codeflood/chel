@@ -104,7 +104,7 @@ namespace Chel.Abstractions
 
                 var existing = _numberedParameters.Find(x => x.Number == descriptor.Number);
                 if(existing != null)
-                    throw new InvalidOperationException(Texts.DescriptorAlreadyAdded);
+                    throw new InvalidOperationException(string.Format(Texts.DescriptorAlreadyAdded, existing.Number));
 
                 _numberedParameters.Add(descriptor);
             }
@@ -119,7 +119,7 @@ namespace Chel.Abstractions
                     throw new ArgumentNullException(nameof(descriptor));
 
                 if(_namedParameters.ContainsKey(descriptor.Name))
-                    throw new InvalidOperationException(Texts.DescriptorAlreadyAdded);
+                    throw new InvalidOperationException(string.Format(Texts.DescriptorAlreadyAdded, descriptor.Name));
 
                 _namedParameters.Add(descriptor.Name, descriptor);
             }
@@ -135,7 +135,7 @@ namespace Chel.Abstractions
 
                 var found = _flagParameters.Exists(x => string.Equals(x.Name, descriptor.Name, StringComparison.OrdinalIgnoreCase));
                 if(found)
-                    throw new InvalidOperationException(Texts.DescriptorAlreadyAdded);
+                    throw new InvalidOperationException(string.Format(Texts.DescriptorAlreadyAdded, descriptor.Name));
 
                 _flagParameters.Add(descriptor);
             }

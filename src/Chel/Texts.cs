@@ -26,6 +26,10 @@ namespace Chel
 
         public const string HelpUsage = "usage";
 
+        public const string InvalidParameterValueForNamedParameter = "Invalid parameter value '{0}' for named parameter '{1}'.";
+
+        public const string InvalidParameterValueForNumberedParameter = "Invalid parameter value '{0}' for numbered parameter '{1}'.";
+
         public const string MissingClosingParenthesis = "Missing closing parenthesis )";
 
         public const string MissingOpeningParenthesis = "Missing opening parenthesis (";

@@ -78,7 +78,7 @@ namespace Chel.Abstractions.UnitTests
 
             // act, assert
             var ex = Assert.Throws<InvalidOperationException>(sutAction);
-            Assert.Contains("Descriptor has already been added.", ex.Message);
+            Assert.Contains("Descriptor '1' has already been added.", ex.Message);
         }
 
         [Fact]
@@ -106,7 +106,7 @@ namespace Chel.Abstractions.UnitTests
 
             // act, assert
             var ex = Assert.Throws<InvalidOperationException>(sutAction);
-            Assert.Contains("Descriptor has already been added.", ex.Message);
+            Assert.Contains("Descriptor 'name' has already been added.", ex.Message);
         }
 
         [Fact]
@@ -122,7 +122,7 @@ namespace Chel.Abstractions.UnitTests
 
             // act, assert
             var ex = Assert.Throws<InvalidOperationException>(sutAction);
-            Assert.Contains("Descriptor has already been added.", ex.Message);
+            Assert.Contains("Descriptor 'NAME' has already been added.", ex.Message);
         }
 
         [Fact]
@@ -150,7 +150,7 @@ namespace Chel.Abstractions.UnitTests
 
             // act, assert
             var ex = Assert.Throws<InvalidOperationException>(sutAction);
-            Assert.Contains("Descriptor has already been added.", ex.Message);
+            Assert.Contains("Descriptor 'name' has already been added.", ex.Message);
         }
 
         [Fact]
@@ -166,7 +166,7 @@ namespace Chel.Abstractions.UnitTests
 
             // act, assert
             var ex = Assert.Throws<InvalidOperationException>(sutAction);
-            Assert.Contains("Descriptor has already been added.", ex.Message);
+            Assert.Contains("Descriptor 'NAME' has already been added.", ex.Message);
         }
 
         [Fact]

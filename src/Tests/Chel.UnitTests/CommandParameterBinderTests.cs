@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Chel.Abstractions;
 using Chel.UnitTests.SampleCommands;
 using Xunit;
@@ -169,6 +170,22 @@ namespace Chel.UnitTests
             // assert
             Assert.True(result.Success);
             Assert.Equal("val-ue", command.NumberedParameter1);
+        }
+
+        [Fact]
+        public void Bind_NumberedParameterInvalidValue_ErrorIncludedInResult()
+        {
+            // arrange
+            var sut = CreateCommandParameterBinder(typeof(NumericNumberedParameterCommand));
+            var command = new NumericNumberedParameterCommand();
+            var input = CreateCommandInput("command", "3000000000");
+
+            // act
+            var result = sut.Bind(command, input);
+
+            // assert
+            Assert.False(result.Success);
+            Assert.Contains("Invalid parameter value '3000000000' for numbered parameter 'num'.", result.Errors);
         }
 
         [Fact]
@@ -572,6 +589,276 @@ namespace Chel.UnitTests
             Assert.True(command.FlagParameter);
             Assert.Equal("num1", command.NumberedParameter);
             Assert.Equal("value1", command.NamedParameter);
+        }
+
+        [InlineData("True", true)]
+        [InlineData("true", true)]
+        [InlineData("TRUE", true)]
+        [InlineData("False", false)]
+        [InlineData("false", false)]
+        [InlineData("FALSE", false)]
+        [Theory]
+        public void Bind_BoolTypeParameter_BindsParameter(string value, bool expected)
+        {
+            // arrange
+            var sut = CreateCommandParameterBinder(typeof(ParameterTypesCommand));
+            var command = new ParameterTypesCommand();
+            var input = CreateCommandInput("command", "-bool", value);
+
+            // act
+            var result = sut.Bind(command, input);
+
+            // assert
+            Assert.True(result.Success);
+            Assert.Equal(expected, command.Bool);
+        }
+
+        [InlineData("0", 0x0)]
+        [InlineData("1", 0x1)]
+        [InlineData("4", 0x4)]        
+        [InlineData("15", 0xf)]
+        [InlineData("0xf", 0xf)]
+        [InlineData("255", 0xff)]
+        [InlineData("0xff", 0xff)]        
+        [Theory]
+        public void Bind_ByteTypeParameter_BindsParameter(string value, byte expected)
+        {
+            // arrange
+            var sut = CreateCommandParameterBinder(typeof(ParameterTypesCommand));
+            var command = new ParameterTypesCommand();
+            var input = CreateCommandInput("command", "-byte", value);
+
+            // act
+            var result = sut.Bind(command, input);
+
+            // assert
+            Assert.True(result.Success);
+            Assert.Equal(expected, command.Byte);
+        }
+
+        /*[MemberData(nameof(Bind_ByteArrayTypeParameter_BindsParameter_Data))]
+        [Theory]
+        public void Bind_ByteArrayTypeParameter_BindsParameter(string value, byte[] expected)
+        {
+            // arrange
+            var sut = CreateCommandParameterBinder(typeof(ParameterTypesCommand));
+            var command = new ParameterTypesCommand();
+            var input = CreateCommandInput("command", "-bytearray", value);
+
+            // act
+            var result = sut.Bind(command, input);
+
+            // assert
+            Assert.True(result.Success);
+            Assert.Equal(expected, command.ByteArray);
+        }
+
+        public static IEnumerable<object[]> Bind_ByteArrayTypeParameter_BindsParameter_Data()
+        {
+            yield return new object[] { "0", new byte[]{ 0x0 } };
+            yield return new object[] { "0x112233", new byte[]{ 0x11, 0x22, 0x33 } };
+            yield return new object[] { "0xffffffffffff1234567890", new byte[]{ 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x12, 0x34, 0x56, 0x78, 0x90 } };
+        }*/
+
+        [InlineData("0", 0)]
+        [InlineData("1", 1)]
+        [InlineData("1000020", 1000020)]
+        [InlineData(@"\-2147483648", int.MinValue)]
+        [InlineData("2147483647", int.MaxValue)]
+        [Theory]
+        public void Bind_IntTypeParameter_BindsParameter(string value, int expected)
+        {
+            // arrange
+            var sut = CreateCommandParameterBinder(typeof(ParameterTypesCommand));
+            var command = new ParameterTypesCommand();
+            var input = CreateCommandInput("command", "-int", value);
+
+            // act
+            var result = sut.Bind(command, input);
+
+            // assert
+            Assert.True(result.Success);
+            Assert.Equal(expected, command.Int);
+        }
+
+        [InlineData("0.234", 0.234)]
+        [InlineData("17.98235", 17.98235)]
+        [InlineData("62534486.927846453", 62534486.927846453)]
+        [Theory]
+        public void Bind_FloatTypeParameter_BindsParameter(string value, float expected)
+        {
+            // arrange
+            var sut = CreateCommandParameterBinder(typeof(ParameterTypesCommand));
+            var command = new ParameterTypesCommand();
+            var input = CreateCommandInput("command", "-float", value);
+
+            // act
+            var result = sut.Bind(command, input);
+
+            // assert
+            Assert.True(result.Success);
+            Assert.Equal(expected, command.Float);
+        }
+
+        [InlineData("0.1234567890", 0.1234567890)]
+        [InlineData("1234567890.1234567890", 1234567890.1234567890)]
+        [Theory]
+        public void Bind_DoubleTypeParameter_BindsParameter(string value, double expected)
+        {
+            // arrange
+            var sut = CreateCommandParameterBinder(typeof(ParameterTypesCommand));
+            var command = new ParameterTypesCommand();
+            var input = CreateCommandInput("command", "-double", value);
+
+            // act
+            var result = sut.Bind(command, input);
+
+            // assert
+            Assert.True(result.Success);
+            Assert.Equal(expected, command.Double);
+        }
+
+        [MemberData(nameof(Bind_DateTypeParameter_BindsParameter_Data))]
+        [Theory]
+        public void Bind_DateTypeParameter_BindsParameter(string value, DateTime expected)
+        {
+            // arrange
+            var sut = CreateCommandParameterBinder(typeof(ParameterTypesCommand));
+            var command = new ParameterTypesCommand();
+            var input = CreateCommandInput("command", "-date", value);
+
+            // act
+            var result = sut.Bind(command, input);
+
+            // assert
+            Assert.True(result.Success);
+            Assert.Equal(expected, command.Date);
+        }
+
+        public static IEnumerable<object[]> Bind_DateTypeParameter_BindsParameter_Data()
+        {
+            yield return new object[] { "1900-01-01", new DateTime(1900, 1, 1) };
+            yield return new object[] { "1900-01-01T13:12:11", new DateTime(1900, 1, 1, 13, 12, 11) };
+            yield return new object[] { "2578-12-31", new DateTime(2578, 12, 31) };
+            yield return new object[] { "2578-12-31T23:45:45", new DateTime(2578, 12, 31, 23, 45, 45) };
+        }
+
+        [MemberData(nameof(Bind_TimeSpanTypeParameter_BindsParameter_Data))]
+        [Theory]
+        public void Bind_TimeSpanTypeParameter_BindsParameter(string value, TimeSpan expected)
+        {
+            // arrange
+            var sut = CreateCommandParameterBinder(typeof(ParameterTypesCommand));
+            var command = new ParameterTypesCommand();
+            var input = CreateCommandInput("command", "-time", value);
+
+            // act
+            var result = sut.Bind(command, input);
+
+            // assert
+            Assert.True(result.Success);
+            Assert.Equal(expected, command.Time);
+        }
+
+        public static IEnumerable<object[]> Bind_TimeSpanTypeParameter_BindsParameter_Data()
+        {
+            yield return new object[] { "00:00:00.003", TimeSpan.FromMilliseconds(3) };
+            yield return new object[] { "00:00:00", TimeSpan.Zero };
+            yield return new object[] { "00:00:01", TimeSpan.FromSeconds(1) };
+            yield return new object[] { "23:27:27.27", new TimeSpan(0, 23, 27, 27, 270) };
+            yield return new object[] { "27.23:27:27.27", new TimeSpan(27, 23, 27, 27, 270) };
+        }
+
+        [MemberData(nameof(Bind_GuidTypeParameter_BindsParameter_Data))]
+        [Theory]
+        public void Bind_GuidTypeParameter_BindsParameter(string value, Guid expected)
+        {
+            // arrange
+            var sut = CreateCommandParameterBinder(typeof(ParameterTypesCommand));
+            var command = new ParameterTypesCommand();
+            var input = CreateCommandInput("command", "-guid", value);
+
+            // act
+            var result = sut.Bind(command, input);
+
+            // assert
+            Assert.True(result.Success);
+            Assert.Equal(expected, command.Guid);
+        }
+
+        public static IEnumerable<object[]> Bind_GuidTypeParameter_BindsParameter_Data()
+        {
+            yield return new object[] { "00000000-0000-0000-0000-000000000000", new Guid("00000000-0000-0000-0000-000000000000") };
+            yield return new object[] { "ffffffff-ffff-ffff-ffff-ffffffffffff", new Guid("ffffffff-ffff-ffff-ffff-ffffffffffff") };
+            yield return new object[] { "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF", new Guid("FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF") };
+            yield return new object[] { "12341234-1234-1234-1234-123412341234", new Guid("12341234-1234-1234-1234-123412341234") };
+            yield return new object[] { "{12341234-1234-1234-1234-123412341234}", new Guid("12341234-1234-1234-1234-123412341234") };
+            yield return new object[] { "12341234123412341234123412341234", new Guid("12341234-1234-1234-1234-123412341234") };
+        }
+
+        [MemberData(nameof(Bind_GuidTypeParameterInvalidValue_ErrorIncludedInResult_Data))]
+        [Theory]
+        public void Bind_GuidTypeParameterInvalidValue_ErrorIncludedInResult(string value)
+        {
+            // arrange
+            var sut = CreateCommandParameterBinder(typeof(ParameterTypesCommand));
+            var command = new ParameterTypesCommand();
+            var input = CreateCommandInput("command", "-guid", value);
+
+            // act
+            var result = sut.Bind(command, input);
+
+            // assert
+            Assert.False(result.Success);
+            Assert.Contains($"Invalid parameter value '{value}' for named parameter 'guid'.", result.Errors);
+        }
+
+        public static IEnumerable<object[]> Bind_GuidTypeParameterInvalidValue_ErrorIncludedInResult_Data()
+        {
+            yield return new object[] { "000000-0000-0000-0000-000000000000" };
+            yield return new object[] { "ffffzfff-ffff-ffff-ffff-ffffffffffff" };
+        }
+
+        [InlineData("byte", "z")]
+        [InlineData("int", "abc")]
+        [InlineData("float", "abc")]
+        [InlineData("double", "abc")]
+        [InlineData("date", "1984-13-42")]
+        [InlineData("date", "1984-10-10T27:75:75")]
+        [InlineData("time", "abc")]
+        [InlineData("guid", "abc")]
+        [Theory]
+        public void Bind_InvalidValue_ErrorIncludedInResult(string parameter, string value)
+        {
+            // arrange
+            var sut = CreateCommandParameterBinder(typeof(ParameterTypesCommand));
+            var command = new ParameterTypesCommand();
+            var input = CreateCommandInput("command", "-" + parameter, value);
+
+            // act
+            var result = sut.Bind(command, input);
+
+            // assert
+            Assert.False(result.Success);
+            Assert.Contains($"Invalid parameter value '{value}' for named parameter '{parameter}'.", result.Errors);
+        }
+
+        [Fact]
+        public void Bind_PropertyHasTypeConverter_BindsParameter()
+        {
+            // arrange
+            var guid1 = Guid.NewGuid();
+            var guid2 = Guid.NewGuid();
+            var sut = CreateCommandParameterBinder(typeof(ParameterTypesCommand));
+            var command = new ParameterTypesCommand();
+            var input = CreateCommandInput("command", "-guidarray", $"{guid1}|{guid2}");
+
+            // act
+            var result = sut.Bind(command, input);
+
+            // assert
+            Assert.True(result.Success);
+            Assert.Equal(command.GuidArray, new[]{ guid1, guid2 });
         }
 
         private CommandParameterBinder CreateCommandParameterBinder(params Type[] commandTypes)

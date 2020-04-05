@@ -113,7 +113,15 @@ namespace Chel
                     value = UnescapeValue(value);
 
                     AssertWritableProperty(describedParameter, instance);
-                    BindProperty(instance, describedParameter.Property, value, result);
+
+                    try
+                    {
+                        BindProperty(instance, describedParameter.Property, value, result);
+                    }
+                    catch(Exception)
+                    {
+                        result.AddError(string.Format(Texts.InvalidParameterValueForNamedParameter, value, describedParameter.Name));
+                    }
 
                     // Make sure there's no duplicates
                     var repeatParameter = false;
@@ -152,7 +160,16 @@ namespace Chel
                     value = UnescapeValue(value);
 
                     AssertWritableProperty(describedParameter, instance);
-                    BindProperty(instance, describedParameter.Property, value, result);
+
+                    try
+                    {
+                        BindProperty(instance, describedParameter.Property, value, result);
+                    }
+                    catch(Exception)
+                    {
+                        result.AddError(string.Format(Texts.InvalidParameterValueForNumberedParameter, value, describedParameter.PlaceholderText));
+                    }
+
                     boundParameterIndexes.Add(describedParameter.Number - 1);
                 }
                 else
@@ -213,14 +230,6 @@ namespace Chel
                 property.SetValue(instance, value);
             else
             {
-                // temporary implementation. Remove this part when the type converter part below is enabled
-                var converter = TypeDescriptor.GetConverter(property.PropertyType);
-                if (converter != null)
-                    property.SetValue(instance, converter.ConvertFrom(value));
-
-                //result.AddError(string.Format(Texts.))
-
-                /*
                 // Find an appropriate type converter.
                 TypeConverter converter = null;
 
@@ -236,8 +245,7 @@ namespace Chel
                     converter = TypeDescriptor.GetConverter(property.PropertyType);
 
                 if (converter != null)
-                    property.SetValue(hostObject, converter.ConvertFrom(value));
-                    */
+                    property.SetValue(instance, converter.ConvertFrom(value));
             }
         }
     }
