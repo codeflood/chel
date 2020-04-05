@@ -636,29 +636,25 @@ namespace Chel.UnitTests
             Assert.Equal(expected, command.Byte);
         }
 
-        /*[MemberData(nameof(Bind_ByteArrayTypeParameter_BindsParameter_Data))]
+        [InlineData("Value1", SampleEnum.Value1)]
+        [InlineData("Value2", SampleEnum.Value2)]
+        [InlineData("value2", SampleEnum.Value2)]
+        [InlineData("VALUE2", SampleEnum.Value2)]
         [Theory]
-        public void Bind_ByteArrayTypeParameter_BindsParameter(string value, byte[] expected)
+        public void Bind_EnumTypeParameter_BindsParameter(string value, SampleEnum expected)
         {
             // arrange
             var sut = CreateCommandParameterBinder(typeof(ParameterTypesCommand));
             var command = new ParameterTypesCommand();
-            var input = CreateCommandInput("command", "-bytearray", value);
+            var input = CreateCommandInput("command", "-enum", value);
 
             // act
             var result = sut.Bind(command, input);
 
             // assert
             Assert.True(result.Success);
-            Assert.Equal(expected, command.ByteArray);
+            Assert.Equal(expected, command.Enum);
         }
-
-        public static IEnumerable<object[]> Bind_ByteArrayTypeParameter_BindsParameter_Data()
-        {
-            yield return new object[] { "0", new byte[]{ 0x0 } };
-            yield return new object[] { "0x112233", new byte[]{ 0x11, 0x22, 0x33 } };
-            yield return new object[] { "0xffffffffffff1234567890", new byte[]{ 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x12, 0x34, 0x56, 0x78, 0x90 } };
-        }*/
 
         [InlineData("0", 0)]
         [InlineData("1", 1)]
@@ -679,6 +675,25 @@ namespace Chel.UnitTests
             // assert
             Assert.True(result.Success);
             Assert.Equal(expected, command.Int);
+        }
+
+        [InlineData("0", '0')]
+        [InlineData("Z", 'Z')]
+        [InlineData("+", '+')]
+        [Theory]
+        public void Bind_CharTypeParameter_BindsParameter(string value, char expected)
+        {
+            // arrange
+            var sut = CreateCommandParameterBinder(typeof(ParameterTypesCommand));
+            var command = new ParameterTypesCommand();
+            var input = CreateCommandInput("command", "-char", value);
+
+            // act
+            var result = sut.Bind(command, input);
+
+            // assert
+            Assert.True(result.Success);
+            Assert.Equal(expected, command.Char);
         }
 
         [InlineData("0.234", 0.234)]
@@ -820,6 +835,8 @@ namespace Chel.UnitTests
         }
 
         [InlineData("byte", "z")]
+        [InlineData("byte", "1111")]
+        [InlineData("char", "aa")]
         [InlineData("int", "abc")]
         [InlineData("float", "abc")]
         [InlineData("double", "abc")]

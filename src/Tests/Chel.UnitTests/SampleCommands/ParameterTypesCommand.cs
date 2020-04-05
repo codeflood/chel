@@ -14,8 +14,11 @@ namespace Chel.UnitTests.SampleCommands
         [NamedParameter("byte", "value")]
         public byte Byte { get; set; }
 
-        [NamedParameter("bytearray", "value")]
-        public byte[] ByteArray { get; set; }
+        [NamedParameter("char", "value")]
+        public char Char { get; set; }
+
+        [NamedParameter("enum", "value")]
+        public SampleEnum Enum { get; set; }
 
         [NamedParameter("int", "value")]
         public int Int { get; set; }
