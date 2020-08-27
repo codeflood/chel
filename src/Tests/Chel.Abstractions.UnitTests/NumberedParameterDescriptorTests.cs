@@ -21,7 +21,7 @@ namespace Chel.Abstractions.UnitTests
             // act, assert
             var ex = Assert.Throws<ArgumentException>(sutAction);
             Assert.Equal("number", ex.ParamName);
-            Assert.Contains("number must be greater than 0", ex.Message);
+            Assert.Contains("'number' must be greater than 0", ex.Message);
         }
 
         [Fact]
@@ -48,7 +48,7 @@ namespace Chel.Abstractions.UnitTests
             // act, assert
             var ex = Assert.Throws<ArgumentException>(sutAction);
             Assert.Equal("placeholderText", ex.ParamName);
-            Assert.Contains("placeholderText cannot be empty", ex.Message);
+            Assert.Contains("'placeholderText' cannot be empty", ex.Message);
         }
 
         [Fact]

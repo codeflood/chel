@@ -11,23 +11,29 @@ namespace Chel.Commands
     public class Help : ICommand
     {
         private ICommandRegistry _commandRegistry;
+        private IPhraseDictionary _phraseDictionary;
 
         [NumberedParameter(1, "command")]
         [Description("The name of the command the display help for.")]
         public string CommandName { get; set; }
 
-        public Help(ICommandRegistry commandRegistry)
+        public Help(ICommandRegistry commandRegistry, IPhraseDictionary phraseDictionary)
         {
             if(commandRegistry == null)
                 throw new ArgumentNullException(nameof(commandRegistry));
 
+            if(phraseDictionary == null)
+                throw new ArgumentNullException(nameof(phraseDictionary));
+
             _commandRegistry = commandRegistry;
+            _phraseDictionary = phraseDictionary;
         }
 
         public CommandResult Execute()
         {
-            // todo: temporary implementation. Help should output a hash, once we have those in the type system.
             var cultureName = Thread.CurrentThread.CurrentCulture.Name;
+
+            // todo: temporary implementation. Help should output a hash, once we have those in the type system.
             var output = new StringBuilder();
 
             if(string.IsNullOrEmpty(CommandName))
@@ -45,7 +51,9 @@ namespace Chel.Commands
 
         private void ListCommands(string cultureName, StringBuilder output)
         {
-            output.Append($"{Texts.AvailableCommands}:{Environment.NewLine}");
+            output.Append(_phraseDictionary.GetPhrase(Texts.PhraseKeys.AvailableCommands, cultureName));
+            output.Append(":");
+            output.Append(Environment.NewLine);
 
             foreach(var descriptor in _commandRegistry.GetAllRegistrations())
             {
@@ -59,7 +67,7 @@ namespace Chel.Commands
             if(command == null)
                 return false;
 
-            output.Append(Texts.HelpUsage);
+            output.Append(_phraseDictionary.GetPhrase(Texts.PhraseKeys.Usage, cultureName));
             output.Append(": ");
             output.Append(command.CommandName);
 
@@ -88,20 +96,20 @@ namespace Chel.Commands
             foreach(var numberedParameter in command.NumberedParameters)
             {
                 var description = numberedParameter.GetDescription(cultureName);
-                AppendParameterDetail(numberedParameter.PlaceholderText, description, numberedParameter.Required, output);
+                AppendParameterDetail(numberedParameter.PlaceholderText, description, numberedParameter.Required, cultureName, output);
             }
 
             foreach(var namedParameter in command.NamedParameters)
             {
                 var description = namedParameter.Value.GetDescription(cultureName);
                 var segment = $"-{namedParameter.Value.Name} <{namedParameter.Value.ValuePlaceholderText}>";
-                AppendParameterDetail(segment, description, namedParameter.Value.Required, output);
+                AppendParameterDetail(segment, description, namedParameter.Value.Required, cultureName, output);
             }
 
             foreach(var flagParameter in command.FlagParameters)
             {
                 var description = flagParameter.GetDescription(cultureName);
-                AppendParameterDetail($"-{flagParameter.Name}", description, false, output);
+                AppendParameterDetail($"-{flagParameter.Name}", description, false, cultureName, output);
             }
 
             return true;
@@ -124,13 +132,13 @@ namespace Chel.Commands
             AppendParameterUsage(segment, required, output);
         }
 
-        private void AppendParameterDetail(string name, string description, bool required, StringBuilder output)
+        private void AppendParameterDetail(string name, string description, bool required, string cultureName, StringBuilder output)
         {
             output.Append($"{name, -20}");
 
             if(required)
             {
-                output.Append(Texts.Required);
+                output.Append(_phraseDictionary.GetPhrase(Texts.PhraseKeys.Required, cultureName));
                 output.Append(". ");
             }
                 

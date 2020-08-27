@@ -56,7 +56,7 @@ namespace Chel.UnitTests
 
             // act, assert
             var ex = Assert.Throws<InvalidOperationException>(sutAction);
-            Assert.Contains("Descriptor for command num could not be resolved", ex.Message);
+            Assert.Contains("Descriptor for command 'num' could not be resolved", ex.Message);
         }
 
         [Fact]
@@ -105,7 +105,7 @@ namespace Chel.UnitTests
 
             // assert
             Assert.False(result.Success);
-            Assert.Equal(new[]{ "Unexpected numbered parameter value3" }, result.Errors);
+            Assert.Equal(new[]{ "Unexpected numbered parameter 'value3'" }, result.Errors);
         }
 
         [Fact]
@@ -121,7 +121,7 @@ namespace Chel.UnitTests
 
             // assert
             Assert.False(result.Success);
-            Assert.Equal(new[]{ "Unexpected numbered parameter value3", "Unexpected numbered parameter value4" }, result.Errors);
+            Assert.Equal(new[]{ "Unexpected numbered parameter 'value3'", "Unexpected numbered parameter 'value4'" }, result.Errors);
         }
 
         [Fact]
@@ -153,7 +153,7 @@ namespace Chel.UnitTests
 
             // assert
             Assert.False(result.Success);
-            Assert.Equal(new[]{ "Unknown flag parameter value" }, result.Errors);
+            Assert.Equal(new[]{ "Unknown flag parameter 'value'" }, result.Errors);
         }
 
         [Fact]
@@ -233,7 +233,7 @@ namespace Chel.UnitTests
 
             // assert
             Assert.False(result.Success);
-            Assert.Equal(new[]{ "Missing value for named parameter param1" }, result.Errors);
+            Assert.Equal(new[]{ "Missing value for named parameter 'param1'" }, result.Errors);
         }
 
         [Fact]
@@ -265,7 +265,7 @@ namespace Chel.UnitTests
 
             // assert
             Assert.False(result.Success);
-            Assert.Equal(new[]{ "Missing value for named parameter param1", "Unknown flag parameter value1" }, result.Errors);
+            Assert.Equal(new[]{ "Missing value for named parameter 'param1'", "Unknown flag parameter 'value1'" }, result.Errors);
         }
 
         [Fact]
@@ -315,7 +315,7 @@ namespace Chel.UnitTests
 
             // assert
             Assert.False(result.Success);
-            Assert.Equal(new[]{ "Cannot repeat named parameter param1" }, result.Errors);
+            Assert.Equal(new[]{ "Cannot repeat named parameter 'param1'" }, result.Errors);
         }
 
         [Fact]
@@ -331,7 +331,7 @@ namespace Chel.UnitTests
 
             // assert
             Assert.False(result.Success);
-            Assert.Equal(new[]{ "Cannot repeat named parameter param1" }, result.Errors);
+            Assert.Equal(new[]{ "Cannot repeat named parameter 'param1'" }, result.Errors);
         }
 
         [Fact]
@@ -347,7 +347,7 @@ namespace Chel.UnitTests
 
             // assert
             Assert.False(result.Success);
-            Assert.Equal(new[]{ "Cannot repeat named parameter param1" }, result.Errors);
+            Assert.Equal(new[]{ "Cannot repeat named parameter 'param1'" }, result.Errors);
         }
 
         [Fact]
@@ -363,7 +363,7 @@ namespace Chel.UnitTests
 
             // assert
             Assert.False(result.Success);
-            Assert.Equal(new[]{ "Unknown named parameter invalid" }, result.Errors);
+            Assert.Equal(new[]{ "Unknown named parameter 'invalid'" }, result.Errors);
         }
 
         [Fact]
@@ -396,7 +396,7 @@ namespace Chel.UnitTests
 
             // assert
             Assert.False(result.Success);
-            Assert.Equal(new[]{ "Unknown flag parameter unknown2", "Unknown flag parameter unknown1" }, result.Errors);
+            Assert.Equal(new[]{ "Unknown flag parameter 'unknown2'", "Unknown flag parameter 'unknown1'" }, result.Errors);
         }
 
         [Fact]
@@ -412,7 +412,7 @@ namespace Chel.UnitTests
 
             // assert
             Assert.False(result.Success);
-            Assert.Equal(new[]{ "Cannot repeat flag parameter p1" }, result.Errors);
+            Assert.Equal(new[]{ "Cannot repeat flag parameter 'p1'" }, result.Errors);
         }
 
         [Fact]
@@ -428,7 +428,7 @@ namespace Chel.UnitTests
 
             // assert
             Assert.False(result.Success);
-            Assert.Equal(new[]{ "Cannot repeat flag parameter p1" }, result.Errors);
+            Assert.Equal(new[]{ "Cannot repeat flag parameter 'p1'" }, result.Errors);
         }
 
         [Fact]
@@ -444,7 +444,7 @@ namespace Chel.UnitTests
 
             // assert
             Assert.False(result.Success);
-            Assert.Equal(new[]{ "Cannot repeat flag parameter p1" }, result.Errors);
+            Assert.Equal(new[]{ "Cannot repeat flag parameter 'p1'" }, result.Errors);
         }
 
         [Fact]
@@ -475,7 +475,7 @@ namespace Chel.UnitTests
 
             // assert
             Assert.False(result.Success);
-            Assert.Equal(new[]{ "Missing required numbered parameter param" }, result.Errors);
+            Assert.Equal(new[]{ "Missing required numbered parameter 'param'" }, result.Errors);
         }
 
         [Fact]
@@ -491,7 +491,7 @@ namespace Chel.UnitTests
 
             // assert
             Assert.False(result.Success);
-            Assert.Equal(new[]{ "Missing required named parameter param" }, result.Errors);
+            Assert.Equal(new[]{ "Missing required named parameter 'param'" }, result.Errors);
         }
 
         [Fact]

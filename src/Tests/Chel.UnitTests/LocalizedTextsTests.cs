@@ -28,7 +28,7 @@ namespace Chel.UnitTests
             // act, assert
             var ex = Assert.Throws<ArgumentException>(sutAction);
             Assert.Equal("text", ex.ParamName);
-            Assert.Contains("text cannot be empty", ex.Message);
+            Assert.Contains("Parameter 'text' cannot be empty", ex.Message);
         }
 
         [Fact]
@@ -55,7 +55,7 @@ namespace Chel.UnitTests
 
             // act, assert
             var ex = Assert.Throws<InvalidOperationException>(sutAction);
-            Assert.Contains("Text for culture en has already been added", ex.Message);
+            Assert.Contains("Text for culture 'en' has already been added", ex.Message);
         }
 
         [Fact]

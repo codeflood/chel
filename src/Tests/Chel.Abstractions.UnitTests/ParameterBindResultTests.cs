@@ -27,7 +27,7 @@ namespace Chel.Abstractions.UnitTests
             // act, assert
             var ex = Assert.Throws<ArgumentException>(sutAction);
             Assert.Equal("error", ex.ParamName);
-            Assert.Contains("error cannot be empty", ex.Message);
+            Assert.Contains("'error' cannot be empty", ex.Message);
         }
 
         [Fact]

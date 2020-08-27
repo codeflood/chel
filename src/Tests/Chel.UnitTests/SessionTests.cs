@@ -136,7 +136,7 @@ namespace Chel.UnitTests
             sut.Execute("num p1 p2 p3", result => executionResult = result as FailureResult);
             
             // assert
-            Assert.Equal("ERROR (Line 1): Unexpected numbered parameter p3", executionResult.ToString());
+            Assert.Equal("ERROR (Line 1): Unexpected numbered parameter 'p3'", executionResult.ToString());
         }
 
         [Fact]

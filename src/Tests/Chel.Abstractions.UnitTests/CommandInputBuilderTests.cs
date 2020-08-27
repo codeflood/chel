@@ -16,7 +16,7 @@ namespace Chel.Abstractions.UnitTests
             // act, assert
             var ex = Assert.Throws<ArgumentException>(sutAction);
             Assert.Equal("sourceLine", ex.ParamName);
-            Assert.Contains("sourceLine must be greater than 0", ex.Message);
+            Assert.Contains("'sourceLine' must be greater than 0", ex.Message);
         }
 
         [Fact]
@@ -39,7 +39,7 @@ namespace Chel.Abstractions.UnitTests
             // act, assert
             var ex = Assert.Throws<ArgumentException>(sutAction);
             Assert.Equal("commandName", ex.ParamName);
-            Assert.Contains("commandName cannot be empty", ex.Message);
+            Assert.Contains("'commandName' cannot be empty", ex.Message);
         }
 
         [Fact]

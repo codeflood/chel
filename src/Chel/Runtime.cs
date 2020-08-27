@@ -15,6 +15,7 @@ namespace Chel
         private ICommandServices _commandServices = null;
         private ICommandParameterBinder _parameterBinder = null;
         private IParser _parser = null;
+        private IPhraseDictionary _phraseDictionary = null;
 
         /// <summary>
         /// Create a new instance.
@@ -27,9 +28,11 @@ namespace Chel
             _commandServices = new CommandServices();
             _parameterBinder = new CommandParameterBinder(_commandRegistry);
             _parser = new Parser();
+            _phraseDictionary = new PhraseDictionary();
 
             _commandRegistry.Register(typeof(Help));
             _commandServices.Register(_commandRegistry);
+            _commandServices.Register(_phraseDictionary);
         }
 
         /// <summary>

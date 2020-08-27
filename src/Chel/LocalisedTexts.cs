@@ -48,7 +48,7 @@ namespace Chel
                 throw new ArgumentNullException(nameof(text));
 
             if(string.IsNullOrEmpty(text))
-                throw new ArgumentException(string.Format(Texts.ArgumentCannotBeEmpty, nameof(text)), nameof(text));
+                throw new ArgumentException(string.Format(Texts.ParameterCannotBeEmpty, nameof(text)), nameof(text));
 
             var key = cultureName ?? CultureInfo.InvariantCulture.Name;
 

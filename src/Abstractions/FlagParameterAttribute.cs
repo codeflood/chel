@@ -23,7 +23,7 @@ namespace Chel.Abstractions
                 throw new ArgumentNullException(nameof(name));
 
             if(string.IsNullOrWhiteSpace(name))
-                throw new ArgumentException(nameof(name) + " cannot be empty or whitespace", nameof(name));
+                throw new ArgumentException(string.Format(Texts.ArgumentCannotBeEmptyOrWhitespace, nameof(name)), nameof(name));
 
             Name = name;
         }

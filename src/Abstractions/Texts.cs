@@ -2,17 +2,17 @@ namespace Chel.Abstractions
 {
     internal static class Texts
     {
-        public const string ArgumentCannotBeEmpty = "{0} cannot be empty";
+        public const string ArgumentCannotBeEmpty = "'{0}' cannot be empty";
 
-        public const string ArgumentCannotBeEmptyOrWhitespace = "{0} cannot be empty or whitespace";
+        public const string ArgumentCannotBeEmptyOrWhitespace = "'{0}' cannot be empty or whitespace";
 
-        public const string ArgumentCannotBeNull = "{0} cannot be null";
+        public const string ArgumentCannotBeNull = "'{0}' cannot be null";
 
-        public const string ArgumentNotValidCulture = "{0} is not a valid culture";
+        public const string ArgumentNotValidCulture = "'{0}' is not a valid culture";
 
-        public const string ArgumentMustBeGreaterThanZero = "{0} must be greater than 0";
+        public const string ArgumentMustBeGreaterThanZero = "'{0}' must be greater than 0";
 
-        public const string ArgumentCannotBeNullOrEmpty = "{0} cannot be null or empty";
+        public const string ArgumentCannotBeNullOrEmpty = "'{0}' cannot be null or empty";
 
         public const string DescriptorAlreadyAdded = "Descriptor '{0}' has already been added.";
 
