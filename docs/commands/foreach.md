@@ -8,7 +8,7 @@ This command iterates a list or map and allows a block of script to be executed 
 
 In the case of a map, the element in the `~` variable contains a `key` property which is the key of the element, and a `value` property which is the value.
 
-    set mymap {
+    var mymap {
         a:b
         c:d
     }
