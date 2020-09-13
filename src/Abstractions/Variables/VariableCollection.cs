@@ -7,6 +7,7 @@ namespace Chel.Abstractions.Variables
     /// <summary>
     /// A collection of variables.
     /// </summary>
+    /// <remark>This class is internal to prevent custom commands using it directly.</remark>
     internal class VariableCollection
     {
         private Dictionary<string, Variable> _variables;

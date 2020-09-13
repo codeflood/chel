@@ -5,6 +5,7 @@ namespace Chel.Abstractions.Variables
     /// <summary>
     /// A single value variable.
     /// </summary>
+    /// <remark>This class is internal to prevent custom commands using it directly.</remark>
     internal class ValueVariable : Variable
     {
         /// <summary>

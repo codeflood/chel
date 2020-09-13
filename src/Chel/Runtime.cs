@@ -1,5 +1,6 @@
 using System;
 using Chel.Abstractions;
+using Chel.Abstractions.Variables;
 using Chel.Commands;
 
 namespace Chel
@@ -9,30 +10,33 @@ namespace Chel
     /// </summary>
     public class Runtime
     {
-        private INameValidator _nameValidator = null;
-        private ICommandDescriptorGenerator _commandDescriptorGenerator = null;
         private ICommandRegistry _commandRegistry = null;
         private ICommandServices _commandServices = null;
         private ICommandParameterBinder _parameterBinder = null;
         private IParser _parser = null;
-        private IPhraseDictionary _phraseDictionary = null;
+        private IScopedObjectRegistry _sessionObjectTypes = null;
 
         /// <summary>
         /// Create a new instance.
         /// </summary>
         public Runtime()
         {
-            _nameValidator = new NameValidator();
-            _commandDescriptorGenerator = new CommandAttributeInspector();
-            _commandRegistry = new CommandRegistry(_nameValidator, _commandDescriptorGenerator);
+            var nameValidator = new NameValidator();
+            var commandDescriptorGenerator = new CommandAttributeInspector();
+            _commandRegistry = new CommandRegistry(nameValidator, commandDescriptorGenerator);
+
             _commandServices = new CommandServices();
             _parameterBinder = new CommandParameterBinder(_commandRegistry);
             _parser = new Parser();
-            _phraseDictionary = new PhraseDictionary();
+            
+            _sessionObjectTypes = new ScopedObjectRegistry();
+            _sessionObjectTypes.Register<VariableCollection>();
 
             _commandRegistry.Register(typeof(Help));
+            _commandRegistry.Register(typeof(Var));
+
             _commandServices.Register(_commandRegistry);
-            _commandServices.Register(_phraseDictionary);
+            _commandServices.Register<IPhraseDictionary>(new PhraseDictionary());
         }
 
         /// <summary>
@@ -61,11 +65,22 @@ namespace Chel
         }
 
         /// <summary>
+        /// Register a session scoped service.
+        /// </summary>
+        /// <typeparam name="T">The type of the service being registered.</typeparam>
+        public void RegisterSessionService<T>()
+        {
+            _sessionObjectTypes.Register<T>();
+        }
+
+        /// <summary>
         /// Creates a new <see cref="ISession" />.
         /// </summary>
         public ISession NewSession()
         {
-            var factory = new CommandFactory(_commandRegistry, _commandServices);
+            var sessionObjects = _sessionObjectTypes.CreateScope();
+            var factory = new CommandFactory(_commandRegistry, _commandServices, sessionObjects);
+            
             return new Session(_parser, factory, _parameterBinder);
         }
     }

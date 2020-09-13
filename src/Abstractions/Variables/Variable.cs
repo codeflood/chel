@@ -5,6 +5,7 @@ namespace Chel.Abstractions.Variables
     /// <summary>
     /// Base class for variables.
     /// </summary>
+    /// <remark>This class is internal to prevent custom commands using it directly.</remark>
     internal abstract class Variable
     {
         /// <summary>

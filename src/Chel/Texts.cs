@@ -2,9 +2,9 @@ namespace Chel
 {
     internal static class Texts
     {
-        public const string CommandNameAlreadyUsed = "Command name '{0}' on command type {1} is already used on command type {2}";
+        public const string CommandDependencyNotRegistered = "Command dependency implementing {0} has not been registered";
 
-        public const string CommandServiceNotRegistered = "Command service implementing {0} has not been registered";
+        public const string CommandNameAlreadyUsed = "Command name '{0}' on command type {1} is already used on command type {2}";
 
         public const string CannotDisplayHelpUnknownCommnad = "Cannot display help for unknown command '{0}'";
 
@@ -46,6 +46,8 @@ namespace Chel
 
         public const string TypeIsNotACommand = "{0} is not a command";
 
+        public const string TypeRequiresParameterlessConstructor = "Type {0} requires a parameterless constructor";
+
         public const string UnknownFlagParameter = "Unknown flag parameter '{0}'";
 
         public const string UnknownNamedParameter = "Unknown named parameter '{0}'";
@@ -58,9 +60,13 @@ namespace Chel
 
             public const string AvailableCommands = "AVAILABLE COMMANDS";
 
+            public const string NoVariablesSet = "NO VARIABLES SET";
+
             public const string Required = "REQUIRED";
 
             public const string Usage = "USAGE";
+
+            public const string VariableNotSet = "VARIABLE NOT SET";
         }
     }
 }

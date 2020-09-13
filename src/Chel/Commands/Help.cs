@@ -13,6 +13,8 @@ namespace Chel.Commands
         private ICommandRegistry _commandRegistry;
         private IPhraseDictionary _phraseDictionary;
 
+        private string _executionCultureName = string.Empty;
+
         [NumberedParameter(1, "command")]
         [Description("The name of the command the display help for.")]
         public string CommandName { get; set; }
@@ -31,16 +33,16 @@ namespace Chel.Commands
 
         public CommandResult Execute()
         {
-            var cultureName = Thread.CurrentThread.CurrentCulture.Name;
+            _executionCultureName = Thread.CurrentThread.CurrentCulture.Name;
 
             // todo: temporary implementation. Help should output a hash, once we have those in the type system.
             var output = new StringBuilder();
 
             if(string.IsNullOrEmpty(CommandName))
-                ListCommands(cultureName, output);
+                ListCommands(output);
             else
             {
-                var successful = DetailCommand(cultureName, output);
+                var successful = DetailCommand(output);
                 if(!successful)
                     // todo: How to handle the line number; the command shouldn't know it
                     return new FailureResult(1, new[]{ string.Format(Texts.CannotDisplayHelpUnknownCommnad, CommandName) });
@@ -49,25 +51,25 @@ namespace Chel.Commands
             return new ValueResult(output.ToString());
         }
 
-        private void ListCommands(string cultureName, StringBuilder output)
+        private void ListCommands(StringBuilder output)
         {
-            output.Append(_phraseDictionary.GetPhrase(Texts.PhraseKeys.AvailableCommands, cultureName));
+            output.Append(_phraseDictionary.GetPhrase(Texts.PhraseKeys.AvailableCommands, _executionCultureName));
             output.Append(":");
             output.Append(Environment.NewLine);
 
             foreach(var descriptor in _commandRegistry.GetAllRegistrations())
             {
-                output.Append($"{descriptor.CommandName, -25}{descriptor.GetDescription(cultureName)}{Environment.NewLine}");
+                output.Append($"{descriptor.CommandName, Constants.FirstColumnWidth}{descriptor.GetDescription(_executionCultureName)}{Environment.NewLine}");
             }
         }
 
-        private bool DetailCommand(string cultureName, StringBuilder output)
+        private bool DetailCommand(StringBuilder output)
         {
             var command = _commandRegistry.Resolve(CommandName);
             if(command == null)
                 return false;
 
-            output.Append(_phraseDictionary.GetPhrase(Texts.PhraseKeys.Usage, cultureName));
+            output.Append(_phraseDictionary.GetPhrase(Texts.PhraseKeys.Usage, _executionCultureName));
             output.Append(": ");
             output.Append(command.CommandName);
 
@@ -90,26 +92,26 @@ namespace Chel.Commands
             }
 
             output.Append(Environment.NewLine);
-            output.AppendLine(command.GetDescription(cultureName));
+            output.AppendLine(command.GetDescription(_executionCultureName));
             output.Append(Environment.NewLine);
 
             foreach(var numberedParameter in command.NumberedParameters)
             {
-                var description = numberedParameter.GetDescription(cultureName);
-                AppendParameterDetail(numberedParameter.PlaceholderText, description, numberedParameter.Required, cultureName, output);
+                var description = numberedParameter.GetDescription(_executionCultureName);
+                AppendParameterDetail(numberedParameter.PlaceholderText, description, numberedParameter.Required, _executionCultureName, output);
             }
 
             foreach(var namedParameter in command.NamedParameters)
             {
-                var description = namedParameter.Value.GetDescription(cultureName);
+                var description = namedParameter.Value.GetDescription(_executionCultureName);
                 var segment = $"-{namedParameter.Value.Name} <{namedParameter.Value.ValuePlaceholderText}>";
-                AppendParameterDetail(segment, description, namedParameter.Value.Required, cultureName, output);
+                AppendParameterDetail(segment, description, namedParameter.Value.Required, _executionCultureName, output);
             }
 
             foreach(var flagParameter in command.FlagParameters)
             {
-                var description = flagParameter.GetDescription(cultureName);
-                AppendParameterDetail($"-{flagParameter.Name}", description, false, cultureName, output);
+                var description = flagParameter.GetDescription(_executionCultureName);
+                AppendParameterDetail($"-{flagParameter.Name}", description, false, _executionCultureName, output);
             }
 
             return true;
@@ -134,7 +136,7 @@ namespace Chel.Commands
 
         private void AppendParameterDetail(string name, string description, bool required, string cultureName, StringBuilder output)
         {
-            output.Append($"{name, -20}");
+            output.Append($"{name, Constants.FirstColumnWidth}");
 
             if(required)
             {

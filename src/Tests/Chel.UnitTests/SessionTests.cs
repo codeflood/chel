@@ -209,7 +209,8 @@ namespace Chel.UnitTests
                 registry.Register(commandType);
 
             var services = new CommandServices();
-            var factory = new CommandFactory(registry, services);
+            var scopedObjects = new ScopedObjectRegistry();
+            var factory = new CommandFactory(registry, services, scopedObjects);
             var binder = new CommandParameterBinder(registry);
 
             return new Session(parser, factory, binder);
