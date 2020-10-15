@@ -1,6 +1,8 @@
 using System;
 using Chel.Abstractions;
 using Chel.Abstractions.Results;
+using Chel.Abstractions.Variables;
+using Chel.Exceptions;
 using Chel.UnitTests.SampleCommands;
 using Chel.UnitTests.SampleObjects;
 using Chel.UnitTests.Services;
@@ -54,7 +56,7 @@ namespace Chel.UnitTests
         public void Create_InputIsNull_ThrowsException()
         {
             // arrange
-            var sut = CreateCommandFactory((registry, services, sessionObjects) => {});
+            var sut = CreateCommandFactory();
             Action sutAction = () => sut.Create(null);
 
             // act, assert
@@ -66,7 +68,7 @@ namespace Chel.UnitTests
         public void Create_CommandNotRegistered_ReturnsNull()
         {
             // arrange
-            var sut = CreateCommandFactory((registry, services, sessionObjects) => {});
+            var sut = CreateCommandFactory();
             var input = CreateCommandInput(1, "command");
 
             // act
@@ -80,7 +82,7 @@ namespace Chel.UnitTests
         public void Create_CommandRegistered_ReturnsCommandInstance()
         {
             // arrange
-            var sut = CreateCommandFactory((registry, service, sessionObjectss) =>
+            var sut = CreateCommandFactory(commandRegistryConfigurator: registry =>
             {
                 registry.Register(typeof(SampleCommand));
             });
@@ -97,10 +99,9 @@ namespace Chel.UnitTests
         public void Create_MultipleCalls_ReturnsNewInstanceOnEachCall()
         {
             // arrange
-            var sut = CreateCommandFactory((registry, services, sessionObjects) =>
-            {
-                registry.Register(typeof(SampleCommand));
-            });
+            var sut = CreateCommandFactory(
+                commandRegistryConfigurator: registry =>registry.Register(typeof(SampleCommand))
+            );
             var input = CreateCommandInput(1, "sample");
 
             // act
@@ -115,11 +116,10 @@ namespace Chel.UnitTests
         public void Create_CommandRequiresRegisteredService_ReturnsCommandInstance()
         {
             // arrange
-            var sut = CreateCommandFactory((registry, services, sessionObjects) =>
-            {
-                registry.Register(typeof(ServiceDependencyCommand));
-                services.Register<ISampleService>(new SampleService());
-            });
+            var sut = CreateCommandFactory(
+                commandRegistryConfigurator: registry => registry.Register(typeof(ServiceDependencyCommand)),
+                commandServicesConfigurator: services => services.Register<ISampleService>(new SampleService())
+            );
             var input = CreateCommandInput(1, "alpha");
 
             // act
@@ -134,10 +134,9 @@ namespace Chel.UnitTests
         public void Create_CommandRequiresNotRegisteredService_ThrowsException()
         {
             // arrange
-            var sut = CreateCommandFactory((registry, services, sessionObjects) =>
-            {
-                registry.Register(typeof(ServiceDependencyCommand));
-            });
+            var sut = CreateCommandFactory(
+                commandRegistryConfigurator: registry => registry.Register(typeof(ServiceDependencyCommand))
+            );
             var input = CreateCommandInput(1, "alpha");
             Action sutAction = () => sut.Create(input);
 
@@ -150,11 +149,10 @@ namespace Chel.UnitTests
         public void Create_CommandRequiresRegisteredSessionObject_ReturnsCommandInstance()
         {
             // arrange
-            var sut = CreateCommandFactory((registry, services, sessionObjects) =>
-            {
-                registry.Register(typeof(SessionObjectCommand));
-                sessionObjects.Register<GoodObject>();
-            });
+            var sut = CreateCommandFactory(
+                commandRegistryConfigurator: registry => registry.Register(typeof(SessionObjectCommand)),
+                scopedObjectRegistryConfigurator: sessionObjects => sessionObjects.Register<GoodObject>()
+            );
             var input = CreateCommandInput(1, "alpha");
 
             // act
@@ -169,12 +167,11 @@ namespace Chel.UnitTests
         public void Create_CommandRequiresServiceAndSessionObject_ReturnsCommandInstance()
         {
             // arrange
-            var sut = CreateCommandFactory((registry, services, sessionObjects) =>
-            {
-                registry.Register(typeof(ServiceAndSessionObjectCommand));
-                services.Register<ISampleService>(new SampleService());
-                sessionObjects.Register<GoodObject>();
-            });
+            var sut = CreateCommandFactory(
+                commandRegistryConfigurator: registry => registry.Register(typeof(ServiceAndSessionObjectCommand)),
+                commandServicesConfigurator: services => services.Register<ISampleService>(new SampleService()),
+                scopedObjectRegistryConfigurator: sessionObjects => sessionObjects.Register<GoodObject>()
+            );
             var input = CreateCommandInput(1, "alpha");
 
             // act
@@ -185,15 +182,28 @@ namespace Chel.UnitTests
             Assert.IsType<SuccessResult>(result);
         }
 
-        private CommandFactory CreateCommandFactory(Action<CommandRegistry, CommandServices, ScopedObjectRegistry> configurator)
+        private CommandFactory CreateCommandFactory(
+            Action<CommandRegistry> commandRegistryConfigurator = null,
+            Action<CommandServices> commandServicesConfigurator = null,
+            Action<ScopedObjectRegistry> scopedObjectRegistryConfigurator = null)
         {
             var nameValidator = new NameValidator();
             var descriptorGenerator = new CommandAttributeInspector();
             var registry = new CommandRegistry(nameValidator, descriptorGenerator);
-            var services = new CommandServices();
-            var sessionObjects = new ScopedObjectRegistry();
 
-            configurator.Invoke(registry, services, sessionObjects);
+            if(commandRegistryConfigurator != null)
+                commandRegistryConfigurator.Invoke(registry);
+
+            var services = new CommandServices();
+
+            if(commandServicesConfigurator != null)
+                commandServicesConfigurator.Invoke(services);
+
+            var sessionObjects = new ScopedObjectRegistry();
+            sessionObjects.Register<VariableCollection>();
+
+            if(scopedObjectRegistryConfigurator != null)
+                scopedObjectRegistryConfigurator.Invoke(sessionObjects);
 
             return new CommandFactory(registry, services, sessionObjects);
         }

@@ -12,8 +12,8 @@ namespace Chel
     {
         private ICommandRegistry _commandRegistry = null;
         private ICommandServices _commandServices = null;
-        private ICommandParameterBinder _parameterBinder = null;
         private IParser _parser = null;
+        private IVariableReplacer _variableReplacer = null;
         private IScopedObjectRegistry _sessionObjectTypes = null;
 
         /// <summary>
@@ -26,8 +26,8 @@ namespace Chel
             _commandRegistry = new CommandRegistry(nameValidator, commandDescriptorGenerator);
 
             _commandServices = new CommandServices();
-            _parameterBinder = new CommandParameterBinder(_commandRegistry);
             _parser = new Parser();
+            _variableReplacer = new VariableReplacer();
             
             _sessionObjectTypes = new ScopedObjectRegistry();
             _sessionObjectTypes.Register<VariableCollection>();
@@ -80,8 +80,11 @@ namespace Chel
         {
             var sessionObjects = _sessionObjectTypes.CreateScope();
             var factory = new CommandFactory(_commandRegistry, _commandServices, sessionObjects);
+
+            var variables = sessionObjects.Resolve(typeof(VariableCollection)) as VariableCollection;
+            var parameterBinder = new CommandParameterBinder(_commandRegistry, _variableReplacer, variables);
             
-            return new Session(_parser, factory, _parameterBinder);
+            return new Session(_parser, factory, parameterBinder);
         }
     }
 }

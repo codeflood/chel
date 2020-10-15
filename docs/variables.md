@@ -63,16 +63,6 @@ Variables can be substituted in any call and are denoted by wrapping the variabl
 
     command $variable$
 
-Even the command name can be substituted from a variable.
-
-    $commandName$ param
-
-A command substituted from a variable cannot include parameters in the variable value. Map splatting and subscripts make it redundant to add additional parameters to a variable substituted as a command name.
-
-    # not allowed
-    var commandName (command -name value)
-    $commandName$ # error
-
 To use a single value of a list instead of the whole list, append a colon (`:`) and the 1 based index of the value you want to use.
 
     command $list:1$
@@ -80,8 +70,8 @@ To use a single value of a list instead of the whole list, append a colon (`:`) 
 Indexes can also be negative which counts from the end of the list. -1 is the last element, -2 the second last, etc.
 
     var foo (27 12 35 95)
-    $foo:1$ # 27
-    $foo:-1$ 95
+    command $foo:1$ # 27
+    command $foo:-1$ # 95
 
 To use just a single value of a map during substitution, append a colon (`:`) and the key.
 

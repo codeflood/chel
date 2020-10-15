@@ -2,6 +2,8 @@ namespace Chel
 {
     internal static class Texts
     {
+        public const string ArgumentCannotContainEmptyElement = "'{0}' cannot contain an empty element";
+
         public const string CommandDependencyNotRegistered = "Command dependency implementing {0} has not been registered";
 
         public const string CommandNameAlreadyUsed = "Command name '{0}' on command type {1} is already used on command type {2}";
@@ -55,6 +57,10 @@ namespace Chel
         public const string UnexpectedNumberedParameter = "Unexpected numbered parameter '{0}'";
 
         public const string UnknownCommand = "Unknown command";
+
+        public const string UnpairedVariableToken = "Unpaired variable token $";
+
+        public const string VariableIsUnset = "Variable ${0}$ is not set";
 
         public class PhraseKeys {
 

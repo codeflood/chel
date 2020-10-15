@@ -1,5 +1,4 @@
 using System;
-using Chel.Abstractions;
 using Chel.UnitTests.Services;
 using Xunit;
 

@@ -3,26 +3,40 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Reflection;
 using Chel.Abstractions;
+using Chel.Abstractions.Variables;
+using Chel.Exceptions;
 
 namespace Chel
 {
     /// <summary>
     /// The default implementation of <see cref="ICommandParameterBinder" />.
     /// </summary>
-    public class CommandParameterBinder : ICommandParameterBinder
+    internal class CommandParameterBinder : ICommandParameterBinder
     {
         private ICommandRegistry _commandRegistry = null;
+        private VariableCollection _variables = null;
+        private IVariableReplacer _variableReplacer = null;
 
         /// <summary>
         /// Create a new instance.
         /// </summary>
         /// <param name="commandRegistry">The <see cref="ICommandRegistry" /> used to resolve commands.</param>
-        public CommandParameterBinder(ICommandRegistry commandRegistry)
+        /// <param name="variableReplacer">The <see cref="IVariableReplacer" /> used to replace variables.</param>
+        /// <param name="variables">The variables available for substitution.</param>
+        public CommandParameterBinder(ICommandRegistry commandRegistry, IVariableReplacer variableReplacer, VariableCollection variables)
         {
             if(commandRegistry == null)
                 throw new ArgumentNullException(nameof(commandRegistry));
 
+            if(variableReplacer == null)
+                throw new ArgumentNullException(nameof(variableReplacer));
+
+            if(variables == null)
+                throw new ArgumentNullException(nameof(variables));
+
             _commandRegistry = commandRegistry;
+            _variableReplacer = variableReplacer;
+            _variables = variables;
         }
 
         public ParameterBindResult Bind(ICommand instance, CommandInput input)
@@ -226,8 +240,25 @@ namespace Chel
 
         private void BindProperty(ICommand instance, PropertyInfo property, string value, ParameterBindResult result)
         {
-            if (property.PropertyType.IsAssignableFrom(value.GetType()))
-                property.SetValue(instance, value);
+            var bindingValue = value;
+
+            try
+            {
+                bindingValue = _variableReplacer.ReplaceVariables(_variables, value);
+            }
+            catch(UnsetVariableException ex)
+            {
+                result.AddError(ex.Message);
+                return;
+            }
+            catch(ArgumentException ex)
+            {
+                result.AddError(ex.Message);
+                return;
+            }
+
+            if (property.PropertyType.IsAssignableFrom(bindingValue.GetType()))
+                property.SetValue(instance, bindingValue);
             else
             {
                 // Find an appropriate type converter.
@@ -245,7 +276,7 @@ namespace Chel
                     converter = TypeDescriptor.GetConverter(property.PropertyType);
 
                 if (converter != null)
-                    property.SetValue(instance, converter.ConvertFrom(value));
+                    property.SetValue(instance, converter.ConvertFrom(bindingValue));
             }
         }
     }

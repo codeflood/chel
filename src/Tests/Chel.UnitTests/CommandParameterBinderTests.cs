@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Chel.Abstractions;
+using Chel.Abstractions.Variables;
 using Chel.UnitTests.SampleCommands;
 using Xunit;
 
@@ -12,11 +13,39 @@ namespace Chel.UnitTests
         public void Ctor_CommandRegistryIsNull_ThrowsException()
         {
             // arrange
-            Action sutAction = () => new CommandParameterBinder(null);
+            Action sutAction = () => new CommandParameterBinder(null, new VariableReplacer(), new VariableCollection());
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
             Assert.Equal("commandRegistry", ex.ParamName);
+        }
+
+        [Fact]
+        public void Ctor_VariableReplacerIsNull_ThrowsException()
+        {
+            // arrange
+            var nameValidator = new NameValidator();
+            var descriptorGenerator = new CommandAttributeInspector();
+            var registry = new CommandRegistry(nameValidator, descriptorGenerator);
+            Action sutAction = () => new CommandParameterBinder(registry, null, new VariableCollection());
+
+            // act, assert
+            var ex = Assert.Throws<ArgumentNullException>(sutAction);
+            Assert.Equal("variableReplacer", ex.ParamName);
+        }
+
+        [Fact]
+        public void Ctor_VariablesIsNull_ThrowsException()
+        {
+            // arrange
+            var nameValidator = new NameValidator();
+            var descriptorGenerator = new CommandAttributeInspector();
+            var registry = new CommandRegistry(nameValidator, descriptorGenerator);
+            Action sutAction = () => new CommandParameterBinder(registry, new VariableReplacer(), null);
+
+            // act, assert
+            var ex = Assert.Throws<ArgumentNullException>(sutAction);
+            Assert.Equal("variables", ex.ParamName);
         }
 
         [Fact]
@@ -878,7 +907,92 @@ namespace Chel.UnitTests
             Assert.Equal(command.GuidArray, new[]{ guid1, guid2 });
         }
 
+        [Fact]
+        public void Bind_NamedParameterContainsVariable_VariableIsReplaced()
+        {
+            // arrange
+            var registry = CreateCommandRegistry(typeof(NamedParameterCommand));
+            var variables = new VariableCollection();
+            variables.Set(new ValueVariable("foo", "bar"));
+
+            var replacer = new VariableReplacer();
+
+            var sut = new CommandParameterBinder(registry, replacer, variables);
+            var command = new NamedParameterCommand();
+            var input = CreateCommandInput("nam", "-param1", "$foo$");
+            
+            // act
+            var result = sut.Bind(command, input);
+
+            // assert
+            Assert.True(result.Success);
+            Assert.Equal("bar", command.NamedParameter1);
+        }
+
+        [Fact]
+        public void Bind_NamedParameterContainsUnsetVariable_ErrorIncludedInResult()
+        {
+            // arrange
+            var sut = CreateCommandParameterBinder(typeof(NamedParameterCommand));
+            var command = new NamedParameterCommand();
+            var input = CreateCommandInput("nam", "-param1", "$foo$");
+            
+            // act
+            var result = sut.Bind(command, input);
+
+            // assert
+            Assert.False(result.Success);
+            Assert.Equal(new[]{ "Variable $foo$ is not set" }, result.Errors);
+        }
+
+        [Fact]
+        public void Bind_NumberedParameterContainsVariable_VariableIsReplaced()
+        {
+            // arrange
+            var registry = CreateCommandRegistry(typeof(NumericNumberedParameterCommand));
+            var variables = new VariableCollection();
+            variables.Set(new ValueVariable("foo", "10"));
+
+            var replacer = new VariableReplacer();
+
+            var sut = new CommandParameterBinder(registry, replacer, variables);
+            var command = new NumericNumberedParameterCommand();
+            var input = CreateCommandInput("command", "$foo$");
+            
+            // act
+            var result = sut.Bind(command, input);
+
+            // assert
+            Assert.True(result.Success);
+            Assert.Equal(10, command.NumberedParameter);
+        }
+
+        [Fact]
+        public void Bind_NumberedParameterContainsUnsetVariable_ErrorIncludedInResult()
+        {
+            // arrange
+            var sut = CreateCommandParameterBinder(typeof(NumericNumberedParameterCommand));
+            var command = new NumericNumberedParameterCommand();
+            var input = CreateCommandInput("command", "$foo$");
+            
+            // act
+            var result = sut.Bind(command, input);
+
+            // assert
+            Assert.False(result.Success);
+            Assert.Equal(new[]{ "Variable $foo$ is not set" }, result.Errors);
+        }
+
         private CommandParameterBinder CreateCommandParameterBinder(params Type[] commandTypes)
+        {
+            var registry = CreateCommandRegistry(commandTypes);
+            var variables = new VariableCollection();
+            var replacer = new VariableReplacer();
+
+            return new CommandParameterBinder(registry, replacer, variables);
+        }
+
+        private CommandRegistry CreateCommandRegistry(params Type[] commandTypes)
         {
             var nameValidator = new NameValidator();
             var descriptorGenerator = new CommandAttributeInspector();
@@ -887,7 +1001,7 @@ namespace Chel.UnitTests
             foreach(var commandType in commandTypes)
                 registry.Register(commandType);
 
-            return new CommandParameterBinder(registry);
+            return registry;
         }
 
         private CommandInput CreateCommandInput(string commandName, params string[] parameters)
