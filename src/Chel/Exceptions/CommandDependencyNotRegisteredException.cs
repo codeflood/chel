@@ -3,9 +3,9 @@ using System;
 namespace Chel
 {
     /// <summary>
-    /// An <see cref="Exception" /> indicating a command service has not been registered.
+    /// An <see cref="Exception" /> indicating a command dependency has not been registered.
     /// </summary>
-    public class CommandServiceNotRegisteredException : Exception
+    public class CommandDependencyNotRegisteredException : Exception
     {
         /// <summary>
         /// Gets the <see cref="Type" /> of the service that was not registered.
@@ -16,8 +16,8 @@ namespace Chel
         /// Create a new instance.
         /// </summary>
         /// <param name="type">The <see cref="Type" /> of the service that was not registered.</param>
-        public CommandServiceNotRegisteredException(Type type)
-            : base(string.Format(Texts.CommandServiceNotRegistered, type?.FullName))
+        public CommandDependencyNotRegisteredException(Type type)
+            : base(string.Format(Texts.CommandDependencyNotRegistered, type?.FullName))
         {
             if(type == null)
                 throw new ArgumentNullException(nameof(type));

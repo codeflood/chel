@@ -11,5 +11,7 @@ namespace Chel
         public const char Escape = '\\';
 
         public const string ParameterName = "-";
+
+        public const char Variable = '$';
     }
 }

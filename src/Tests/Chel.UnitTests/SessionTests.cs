@@ -1,6 +1,7 @@
 using System;
 using Chel.Abstractions;
 using Chel.Abstractions.Results;
+using Chel.Abstractions.Variables;
 using Chel.Exceptions;
 using Chel.UnitTests.SampleCommands;
 using NSubstitute;
@@ -14,7 +15,11 @@ namespace Chel.UnitTests
         private void Ctor_ParserIsNull_ThrowsException()
         {
             // arrange
-            Action sutAction = () => new Session(null, Substitute.For<ICommandFactory>(), Substitute.For<ICommandParameterBinder>());
+            Action sutAction = () => new Session(
+                    null,
+                    Substitute.For<ICommandFactory>(),
+                    Substitute.For<ICommandParameterBinder>()
+                );
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -25,7 +30,11 @@ namespace Chel.UnitTests
         private void Ctor_FactoryIsNull_ThrowsException()
         {
             // arrange
-            Action sutAction = () => new Session(Substitute.For<IParser>(), null, Substitute.For<ICommandParameterBinder>());
+            Action sutAction = () => new Session(
+                    Substitute.For<IParser>(),
+                    null,
+                    Substitute.For<ICommandParameterBinder>()
+                );
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -36,7 +45,11 @@ namespace Chel.UnitTests
         public void Ctor_BinderIsNull_ThrowsException()
         {
             // arrange
-            Action sutAction = () => new Session(Substitute.For<IParser>(), Substitute.For<ICommandFactory>(), null);
+            Action sutAction = () => new Session(
+                    Substitute.For<IParser>(),
+                    Substitute.For<ICommandFactory>(),
+                    null
+                );
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -198,7 +211,49 @@ namespace Chel.UnitTests
             Assert.Equal(1, executionResult.SourceLine);
         }
 
+        [Fact]
+        public void Execute_ParameterIsUnsetVariable_ReturnsFailure()
+        {
+            // arrange
+            var sut = CreateSession(typeof(NamedParameterCommand));
+            FailureResult executionResult = null;
+
+            // act
+            sut.Execute("nam -param1 $foo$", result => executionResult = result as FailureResult);
+
+            // assert
+            Assert.Contains("Variable $foo$ is not set", executionResult.Messages);
+        }
+
+        [Fact]
+        public void Execute_ParameterIsSetVariable_PerformsSubstitution()
+        {
+            // arrange
+            var sut = CreateSession(
+                sessionObjectsConfigurator: x => {
+                    x.Register<VariableCollection>();
+                    ((VariableCollection)x.Resolve(typeof(VariableCollection))).Set(new ValueVariable("foo", "lorem"));
+                },
+                typeof(NamedParameterCommand));
+
+            CommandResult executionResult = null;
+
+            // act
+            sut.Execute("nam -param1 $foo$ -param2 $foo$", result => executionResult = result);
+
+            // assert
+            Assert.IsType<ValueResult>(executionResult);
+            Assert.Equal("lorem lorem", (executionResult as ValueResult).Value);
+        }
+
         private Session CreateSession(params Type[] commandTypes)
+        {
+            return CreateSession(null, commandTypes);
+        }
+
+        private Session CreateSession(
+            Action<ScopedObjectRegistry> sessionObjectsConfigurator = null,
+            params Type[] commandTypes)
         {
             var parser = new Parser();
             var nameValidator = new NameValidator();
@@ -209,8 +264,15 @@ namespace Chel.UnitTests
                 registry.Register(commandType);
 
             var services = new CommandServices();
-            var factory = new CommandFactory(registry, services);
-            var binder = new CommandParameterBinder(registry);
+            var scopedObjects = new ScopedObjectRegistry();
+            scopedObjects.Register<VariableCollection>();
+            sessionObjectsConfigurator?.Invoke(scopedObjects);
+
+            var factory = new CommandFactory(registry, services, scopedObjects);
+
+            var variables = scopedObjects.Resolve(typeof(VariableCollection)) as VariableCollection;
+            var replacer = new VariableReplacer();
+            var binder = new CommandParameterBinder(registry, replacer, variables);
 
             return new Session(parser, factory, binder);
         }

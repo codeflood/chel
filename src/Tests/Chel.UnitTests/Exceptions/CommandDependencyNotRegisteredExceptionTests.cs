@@ -4,13 +4,13 @@ using Xunit;
 
 namespace Chel.UnitTests.Exceptions
 {
-    public class CommandServiceNotRegisteredExceptionTests
+    public class CommandDependencyNotRegisteredExceptionTests
     {
         [Fact]
         public void Ctor_TypeIsNull_ThrowsException()
         {
             // arrange
-            Action sutAction = () => new CommandServiceNotRegisteredException(null);
+            Action sutAction = () => new CommandDependencyNotRegisteredException(null);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -21,17 +21,17 @@ namespace Chel.UnitTests.Exceptions
         public void Ctor_WhenCalled_SetsMessageProperty()
         {
             // arrange, act
-            var sut = new CommandServiceNotRegisteredException(typeof(ISampleService));
+            var sut = new CommandDependencyNotRegisteredException(typeof(ISampleService));
 
             // assert
-            Assert.Equal("Command service implementing Chel.UnitTests.Services.ISampleService has not been registered", sut.Message);
+            Assert.Equal("Command dependency implementing Chel.UnitTests.Services.ISampleService has not been registered", sut.Message);
         }
 
         [Fact]
         public void Ctor_WhenCalled_SetsCommandServiceTypeProperty()
         {
             // arrange, act
-            var sut = new CommandServiceNotRegisteredException(typeof(ISampleService));
+            var sut = new CommandDependencyNotRegisteredException(typeof(ISampleService));
 
             // assert
             Assert.Equal(typeof(ISampleService), sut.CommandServiceType);

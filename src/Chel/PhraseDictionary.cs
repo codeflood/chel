@@ -14,6 +14,10 @@ namespace Chel
             availableCommandsPhrases.AddText("Available commands", null);
             _phrases.Add(Texts.PhraseKeys.AvailableCommands, availableCommandsPhrases);
 
+            var noVariablesSetPhrases = new LocalisedTexts();
+            noVariablesSetPhrases.AddText("No variables set.", null);
+            _phrases.Add(Texts.PhraseKeys.NoVariablesSet, noVariablesSetPhrases);
+
             var requiredPhrases = new LocalisedTexts();
             requiredPhrases.AddText("Required", null);
             _phrases.Add(Texts.PhraseKeys.Required, requiredPhrases);
@@ -21,6 +25,10 @@ namespace Chel
             var usagePhrases = new LocalisedTexts();
             usagePhrases.AddText("usage", null);
             _phrases.Add(Texts.PhraseKeys.Usage, usagePhrases);
+
+            var variableNotSetPhrases = new LocalisedTexts();
+            variableNotSetPhrases.AddText("Variable '{0}' is not set.", null);
+            _phrases.Add(Texts.PhraseKeys.VariableNotSet, variableNotSetPhrases);
         }
 
         public string GetPhrase(string phraseKey, string cultureName)

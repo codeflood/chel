@@ -21,6 +21,8 @@ namespace Chel.UnitTests
         [InlineData(Texts.PhraseKeys.AvailableCommands, "Available commands")]
         [InlineData(Texts.PhraseKeys.Required, "Required")]
         [InlineData(Texts.PhraseKeys.Usage, "usage")]
+        [InlineData(Texts.PhraseKeys.NoVariablesSet, "No variables set.")]
+        [InlineData(Texts.PhraseKeys.VariableNotSet, "Variable '{0}' is not set.")]
         public void GetPhrase_PhraseKeyIsValid_ReturnsPhrase(string key, string expected)
         {
             // arrange

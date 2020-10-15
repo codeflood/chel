@@ -12,13 +12,15 @@ namespace Chel
     {
         private ICommandRegistry _commandRegistry = null;
         private ICommandServices _commandServices = null;
+        private IScopedObjectRegistry _sessionObjects = null;
 
         /// <summary>
         /// Create a new instance.
         /// </summary>
         /// <param name="commandRegistry">The commands that have been registered.</param>
         /// <param name="commandServices">The command services that have been registered.</param>
-        public CommandFactory(ICommandRegistry commandRegistry, ICommandServices commandServices)
+        /// <param name="sessionObjects">Objects available to the session.</summary>
+        public CommandFactory(ICommandRegistry commandRegistry, ICommandServices commandServices, IScopedObjectRegistry sessionObjects)
         {
             if(commandRegistry == null)
                 throw new ArgumentNullException(nameof(commandRegistry));
@@ -26,8 +28,12 @@ namespace Chel
             if(commandServices == null)
                 throw new ArgumentNullException(nameof(commandServices));
 
+            if(sessionObjects == null)
+                throw new ArgumentNullException(nameof(sessionObjects));
+
             _commandRegistry = commandRegistry;
             _commandServices = commandServices;
+            _sessionObjects = sessionObjects;
         }
 
         /// <summary>
@@ -68,7 +74,10 @@ namespace Chel
             {
                 var value = _commandServices.Resolve(parameters[i].ParameterType);
                 if(value == null)
-                    throw new CommandServiceNotRegisteredException(parameters[i].ParameterType);
+                    value = _sessionObjects.Resolve(parameters[i].ParameterType);
+
+                if(value == null)
+                    throw new CommandDependencyNotRegisteredException(parameters[i].ParameterType);
 
                 parameterValues[i] = value;
             }
