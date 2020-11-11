@@ -1,9 +1,8 @@
-using System;
 using Xunit;
-using Chel.Parsing;
+using Chel.Abstractions.Parsing;
 using System.Collections.Generic;
 
-namespace Chel.UnitTests.Parsing
+namespace Chel.Abstractions.UnitTests.Parsing
 {
     public class CompositeTokenTests
     {

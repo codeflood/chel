@@ -1,8 +1,8 @@
 using System;
 
-namespace Chel.Parsing
+namespace Chel.Abstractions.Parsing
 {
-    internal class LiteralToken : Token
+    public class LiteralToken : Token
     {
         public string Value { get; }
 

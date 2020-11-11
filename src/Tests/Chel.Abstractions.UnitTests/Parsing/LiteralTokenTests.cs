@@ -1,8 +1,8 @@
 using System;
-using Chel.Parsing;
+using Chel.Abstractions.Parsing;
 using Xunit;
 
-namespace Chel.UnitTests.Parsing
+namespace Chel.Abstractions.UnitTests.Parsing
 {
     public class LiteralTokenTests
     {

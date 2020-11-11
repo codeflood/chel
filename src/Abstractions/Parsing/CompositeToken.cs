@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 
-namespace Chel.Parsing
+namespace Chel.Abstractions.Parsing
 {
-    internal class CompositeToken : Token
+    public class CompositeToken : Token
     {
         public IReadOnlyList<Token> Tokens { get; }
 

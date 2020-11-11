@@ -1,8 +1,8 @@
 using System;
 
-namespace Chel.Parsing
+namespace Chel.Abstractions.Parsing
 {
-    internal class VariableToken : Token
+    public class VariableToken : Token
     {
         public string VariableName { get; }
 
