@@ -5,13 +5,13 @@ using Xunit;
 
 namespace Chel.Abstractions.UnitTests.Parsing
 {
-    public class SetStateResponseTests
+    public class PushStateResponseTests
     {
         [Fact]
         public void Ctor_StateIsNull_ThrowsException()
         {
             // arrange
-            Action sutAction = () => new SetStateResponse(null, false);
+            Action sutAction = () => new PushStateResponse(null);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -25,11 +25,10 @@ namespace Chel.Abstractions.UnitTests.Parsing
             var state = Substitute.For<ITokenizerState>();
 
             // act
-            var sut = new SetStateResponse(state, true);
+            var sut = new PushStateResponse(state);
 
             // assert
             Assert.Equal(state, sut.State);
-            Assert.True(sut.Reprocess);
         }
     }
 }

@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Chel.Abstractions.Parsing
 {
     /// <summary>
@@ -5,6 +7,6 @@ namespace Chel.Abstractions.Parsing
     /// </summary>
     public interface ITokenizerState
     {
-        TokenizerStateResponse Process(char input);
+        IEnumerable<TokenizerStateResponse> Process(char input);
     }
 }

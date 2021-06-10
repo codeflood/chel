@@ -82,7 +82,7 @@ To return a value from a script or subscript, use the `return` command.
 
     sub get-name (
         set num << math:random
-        return (name-$num$)
+        return (name-^num^)
     )
 
 ### Parameters ###

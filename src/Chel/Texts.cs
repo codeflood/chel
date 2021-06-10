@@ -40,6 +40,10 @@ namespace Chel
 
         public const string ParameterCannotBeEmpty = "Parameter '{0}' cannot be empty";
 
+        public const string ParseErrorExpectedLitealToken = "Parse error. Expected a literal token.";
+
+        public const string ParseErorUnexpectedResponseFromInnerState = "Parse error. Unexpected response from inner state.";
+
         public const string PropertyMissingSetter = "Property {0} on command type {1} requires a setter";
         
         public const string ServiceTypeAlreadyRegistered = "The service type {0} has already been registered";
@@ -58,9 +62,9 @@ namespace Chel
 
         public const string UnknownCommand = "Unknown command";
 
-        public const string UnpairedVariableToken = "Unpaired variable token $";
+        public const string UnpairedVariableToken = "Unpaired variable token ^";
 
-        public const string VariableIsUnset = "Variable ${0}$ is not set";
+        public const string VariableIsUnset = "Variable ^{0}^ is not set";
 
         public class PhraseKeys {
 

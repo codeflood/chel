@@ -919,7 +919,7 @@ namespace Chel.UnitTests
 
             var sut = new CommandParameterBinder(registry, replacer, variables);
             var command = new NamedParameterCommand();
-            var input = CreateCommandInput("nam", "-param1", "$foo$");
+            var input = CreateCommandInput("nam", "-param1", "^foo^");
             
             // act
             var result = sut.Bind(command, input);
@@ -935,14 +935,14 @@ namespace Chel.UnitTests
             // arrange
             var sut = CreateCommandParameterBinder(typeof(NamedParameterCommand));
             var command = new NamedParameterCommand();
-            var input = CreateCommandInput("nam", "-param1", "$foo$");
+            var input = CreateCommandInput("nam", "-param1", "^foo^");
             
             // act
             var result = sut.Bind(command, input);
 
             // assert
             Assert.False(result.Success);
-            Assert.Equal(new[]{ "Variable $foo$ is not set" }, result.Errors);
+            Assert.Equal(new[]{ "Variable ^foo^ is not set" }, result.Errors);
         }
 
         [Fact]
@@ -957,7 +957,7 @@ namespace Chel.UnitTests
 
             var sut = new CommandParameterBinder(registry, replacer, variables);
             var command = new NumericNumberedParameterCommand();
-            var input = CreateCommandInput("command", "$foo$");
+            var input = CreateCommandInput("command", "^foo^");
             
             // act
             var result = sut.Bind(command, input);
@@ -973,14 +973,14 @@ namespace Chel.UnitTests
             // arrange
             var sut = CreateCommandParameterBinder(typeof(NumericNumberedParameterCommand));
             var command = new NumericNumberedParameterCommand();
-            var input = CreateCommandInput("command", "$foo$");
+            var input = CreateCommandInput("command", "^foo^");
             
             // act
             var result = sut.Bind(command, input);
 
             // assert
             Assert.False(result.Success);
-            Assert.Equal(new[]{ "Variable $foo$ is not set" }, result.Errors);
+            Assert.Equal(new[]{ "Variable ^foo^ is not set" }, result.Errors);
         }
 
         private CommandParameterBinder CreateCommandParameterBinder(params Type[] commandTypes)

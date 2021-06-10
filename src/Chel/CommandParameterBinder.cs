@@ -116,7 +116,7 @@ namespace Chel
                     }
 
                     var value = parameters[markerIndex + 1];
-                    if(value.StartsWith(Symbols.ParameterName))
+                    if(value.StartsWith(Symbols.ParameterName.ToString()))
                     {
                         // This is a name marker, which cannot be a value.
                         result.AddError(string.Format(Texts.MissingValueForNamedParameter, describedParameter.Name));
@@ -202,7 +202,7 @@ namespace Chel
         {
             for(var i = parameters.Count - 1; i >= 0; i--)
             {
-                if(parameters[i].StartsWith(Symbols.ParameterName))
+                if(parameters[i].StartsWith(Symbols.ParameterName.ToString()))
                 {
                     // If the following parameter starts with a dash, we'll treat this one as a flag parameter.
                     

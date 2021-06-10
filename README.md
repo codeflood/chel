@@ -10,9 +10,9 @@ Chel in a nutshell:
 
 	# comment
 	var varname value
-	command numparam -parameter $varname$ -flag
+	command numparam -parameter ^varname^ -flag
 	command << subcommand
-	command >> chained-command $~$
+	command >> chained-command ^~^
 
 	sub rigel (
 		command -flag
@@ -24,8 +24,8 @@ Chel in a nutshell:
 		key : value
 	}
 	var moreParams {
-		foo : $list$
-		bar : $params$
+		foo : ^list^
+		bar : ^params^
 	}
 	command @moreparams -flag
 	rigel

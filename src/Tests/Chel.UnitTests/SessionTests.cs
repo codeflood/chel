@@ -219,10 +219,10 @@ namespace Chel.UnitTests
             FailureResult executionResult = null;
 
             // act
-            sut.Execute("nam -param1 $foo$", result => executionResult = result as FailureResult);
+            sut.Execute("nam -param1 ^foo^", result => executionResult = result as FailureResult);
 
             // assert
-            Assert.Contains("Variable $foo$ is not set", executionResult.Messages);
+            Assert.Contains("Variable ^foo^ is not set", executionResult.Messages);
         }
 
         [Fact]
@@ -239,7 +239,7 @@ namespace Chel.UnitTests
             CommandResult executionResult = null;
 
             // act
-            sut.Execute("nam -param1 $foo$ -param2 $foo$", result => executionResult = result);
+            sut.Execute("nam -param1 ^foo^ -param2 ^foo^", result => executionResult = result);
 
             // assert
             Assert.IsType<ValueResult>(executionResult);

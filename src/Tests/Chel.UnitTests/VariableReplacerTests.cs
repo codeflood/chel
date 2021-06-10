@@ -62,11 +62,11 @@ namespace Chel.UnitTests
         }
 
         [Theory]
-        [InlineData("$foo$ ipsum", "bar ipsum")]
-        [InlineData("$Foo$ ipsum", "bar ipsum")]
-        [InlineData("lorem $FOO$ ipsum", "lorem bar ipsum")]
-        [InlineData("lorem $foo$", "lorem bar")]
-        [InlineData("lorem$foo$ipsum", "lorembaripsum")]
+        [InlineData("^foo^ ipsum", "bar ipsum")]
+        [InlineData("^Foo^ ipsum", "bar ipsum")]
+        [InlineData("lorem ^FOO^ ipsum", "lorem bar ipsum")]
+        [InlineData("lorem ^foo^", "lorem bar")]
+        [InlineData("lorem^foo^ipsum", "lorembaripsum")]
         public void ReplaceVariables_InputContainsSetVariable_ReplacesVariable(string input, string expected)
         {
             // arrange
@@ -82,9 +82,9 @@ namespace Chel.UnitTests
         }
 
         [Theory]
-        [InlineData("lorem foo$ ipsum")]
-        [InlineData("lorem $foo ipsum")]
-        [InlineData("$")]
+        [InlineData("lorem foo^ ipsum")]
+        [InlineData("lorem ^foo ipsum")]
+        [InlineData("^")]
         public void ReplaceVariables_MissingPairedVariableToken_ThrowsException(string input)
         {
             // arrange
@@ -97,7 +97,7 @@ namespace Chel.UnitTests
             // act, assert
             var ex = Assert.Throws<ArgumentException>(sutAction);
             Assert.Equal("input", ex.ParamName);
-            Assert.Contains("Unpaired variable token $", ex.Message);
+            Assert.Contains("Unpaired variable token ^", ex.Message);
         }
 
         [Fact]
@@ -109,10 +109,10 @@ namespace Chel.UnitTests
             variables.Set(new ValueVariable("foo", "bar"));
 
             // act
-            var result = sut.ReplaceVariables(variables, @"lorem \$foo\$ ipsum");
+            var result = sut.ReplaceVariables(variables, @"lorem \^foo\^ ipsum");
 
             // assert
-            Assert.Equal(@"lorem $foo$ ipsum", result);
+            Assert.Equal(@"lorem ^foo^ ipsum", result);
         }
 
         [Fact]
@@ -121,7 +121,7 @@ namespace Chel.UnitTests
             // arrange
             var sut = new VariableReplacer();
             var variables = new VariableCollection();
-            Action sutAction = () => sut.ReplaceVariables(variables, "$foo$");
+            Action sutAction = () => sut.ReplaceVariables(variables, "^foo^");
 
             // act, assert
             var ex = Assert.Throws<UnsetVariableException>(sutAction);

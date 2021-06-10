@@ -31,21 +31,24 @@ namespace Chel.Parsing
                 var response = _state.Process((char)c);
                 var reprocessChar = false;
 
-                switch(response)
+                foreach(var singleResponse in response)
                 {
-                    case EmitResponse emitResponse:
-                        return emitResponse.Token;
+                    switch(singleResponse)
+                    {
+                        case EmitResponse emitResponse:
+                            return emitResponse.Token;
 
-                    case SetStateResponse setStateResponse:
-                        _state = setStateResponse.State;
-                        reprocessChar = setStateResponse.Reprocess;
-                        break;
+                        case SetStateResponse setStateResponse:
+                            _state = setStateResponse.State;
+                            reprocessChar = setStateResponse.Reprocess;
+                            break;
 
-                    case ContinueResponse _:
-                        break;
+                        case ContinueResponse _:
+                            break;
 
-                    default:
-                        throw new Exception("unknown response from parser state: " + response.GetType().FullName);
+                        default:
+                            throw new Exception("unknown response from parser state: " + response.GetType().FullName);
+                    }
                 }
 
                 if(!reprocessChar)

@@ -2,7 +2,7 @@ using Xunit;
 using System;
 using Chel.Abstractions.Parsing;
 
-namespace Chel.Abstractions.UnitTests
+namespace Chel.Abstractions.UnitTests.Parsing
 {
     public class EmitResponseTests
     {

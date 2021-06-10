@@ -1,8 +1,9 @@
 using Xunit;
 using Chel.Parsing;
 using Chel.Abstractions.Parsing;
+using System.Linq;
 
-namespace Chel.UnitTests
+namespace Chel.UnitTests.Parsing
 {
     public class SkipWhiteSpaceStateTests
     {
@@ -19,7 +20,7 @@ namespace Chel.UnitTests
             var result = sut.Process(input);
 
             // assert
-            Assert.IsType<ContinueResponse>(result);
+            Assert.IsType<ContinueResponse>(result.Single());
         }
 
         [Theory]
@@ -38,9 +39,9 @@ namespace Chel.UnitTests
             var result = sut.Process(input);
 
             // assert
-            Assert.IsType<SetStateResponse>(result);
+            Assert.IsType<SetStateResponse>(result.Single());
             
-            var setStateResponse = (SetStateResponse)result;
+            var setStateResponse = (SetStateResponse)result.Single();
             Assert.IsType<ParseWordState>(setStateResponse.State);
             Assert.True(setStateResponse.Reprocess);
         }
@@ -55,9 +56,9 @@ namespace Chel.UnitTests
             var result = sut.Process('\n');
 
             // assert
-            Assert.IsType<EmitResponse>(result);
+            Assert.IsType<EmitResponse>(result.Single());
 
-            var emitResponse = (EmitResponse)result;
+            var emitResponse = (EmitResponse)result.Single();
             Assert.IsType<EndOfBlockToken>(emitResponse.Token);
         }
     }

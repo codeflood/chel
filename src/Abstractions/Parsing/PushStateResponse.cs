@@ -3,9 +3,9 @@ using System;
 namespace Chel.Abstractions.Parsing
 {
     /// <summary>
-    /// Set the next tokenizer state.
+    /// Push the current tokenizer state to the state stack and set the new state.
     /// </summary>
-    public class SetStateResponse : TokenizerStateResponse
+    public class PushStateResponse : TokenizerStateResponse
     {
         /// <summary>
         /// Gets the next state to set.
@@ -13,22 +13,15 @@ namespace Chel.Abstractions.Parsing
         public ITokenizerState State { get; }
 
         /// <summary>
-        /// Indicates whether the current input should be reprocessed with the next state.
-        /// </summary>
-        public bool Reprocess { get; }
-
-        /// <summary>
         /// Create a new instance.
         /// </summary>
         /// <param name="state">The next state to set.</param>
-        /// <param name="reprocess">Indicates whether the current input should be reprocessed with the next state.</param>
-        public SetStateResponse(ITokenizerState state, bool reprocess)
+        public PushStateResponse(ITokenizerState state)
         {
             if(state == null)
                 throw new ArgumentNullException(nameof(state));
 
             State = state;
-            Reprocess = reprocess;
         }
     }
 }

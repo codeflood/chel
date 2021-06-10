@@ -3,7 +3,7 @@ using Chel.Abstractions.Parsing;
 using Chel.Parsing;
 using Xunit;
 
-namespace Chel.UnitTests
+namespace Chel.UnitTests.Parsing
 {
     public class TokenizerTests
     {
