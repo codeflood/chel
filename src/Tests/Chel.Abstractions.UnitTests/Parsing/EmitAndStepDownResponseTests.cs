@@ -4,13 +4,13 @@ using Chel.Abstractions.Parsing;
 
 namespace Chel.Abstractions.UnitTests.Parsing
 {
-    public class EmitResponseTests
+    public class EmitAndStepDownResponseTests
     {
         [Fact]
         public void Ctor_TokenIsNull_ThrowsException()
         {
             // arrange
-            Action sutAction = () => new EmitResponse(null);
+            Action sutAction = () => new EmitAndStepDownResponse(null);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -24,7 +24,7 @@ namespace Chel.Abstractions.UnitTests.Parsing
             var token = new EndOfBlockToken();
             
             // act
-            var sut = new EmitResponse(token);
+            var sut = new EmitAndStepDownResponse(token);
 
             // assert
             Assert.Equal(token, sut.Token);

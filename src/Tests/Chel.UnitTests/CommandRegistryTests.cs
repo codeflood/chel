@@ -1,5 +1,6 @@
 using System;
 using Chel.Abstractions;
+using Chel.Abstractions.Exceptions;
 using Chel.Exceptions;
 using Chel.UnitTests.Comparers;
 using Chel.UnitTests.SampleCommands;

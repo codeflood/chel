@@ -1,3 +1,4 @@
+using Chel.Abstractions.Exceptions;
 using Xunit;
 
 namespace Chel.Abstractions.UnitTests

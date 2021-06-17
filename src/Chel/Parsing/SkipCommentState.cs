@@ -1,18 +1,20 @@
-using System.Collections.Generic;
 using Chel.Abstractions.Parsing;
 
 namespace Chel.Parsing
 {
-    public class SkipCommentState : ITokenizerState
+	public class SkipCommentState : ITokenizerState
     {
-        public static SkipCommentState Instance { get; } = new SkipCommentState();
+        public bool CanProcess(char input)
+		{
+			return input == Symbols.Comment;
+		}
 
-        public IEnumerable<TokenizerStateResponse> Process(char input)
+        public TokenizerStateResponse Process(char input)
         {
             if(input == '\n')
-                return new[] { new EmitResponse(new EndOfBlockToken()) };
+                return StepDownResponse.Instance;
 
-            return new[] { ContinueResponse.Instance };
+            return ContinueResponse.Instance;
         }
     }
 }

@@ -7,6 +7,14 @@ namespace Chel.Abstractions.Parsing
     /// </summary>
     public interface ITokenizerState
     {
-        IEnumerable<TokenizerStateResponse> Process(char input);
+        /// <summary>
+        /// Indicates whether the state can process the input.
+        /// </summary>
+        bool CanProcess(char input);
+
+        /// <summary>
+        /// Process the input.
+        /// </summary>
+        TokenizerStateResponse Process(char input);
     }
 }

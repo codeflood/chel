@@ -5,17 +5,20 @@ namespace Chel.Parsing
 {
     public class SkipWhiteSpaceState : ITokenizerState
     {
-        public static SkipWhiteSpaceState Instance { get; } = new SkipWhiteSpaceState();
+		public bool CanProcess(char input)
+		{
+			return char.IsWhiteSpace(input);
+		}
 
-        public IEnumerable<TokenizerStateResponse> Process(char input)
+        public TokenizerStateResponse Process(char input)
         {
             if(input == '\n')
-                return new[] { new EmitResponse(new EndOfBlockToken()) };
+                return new EmitAndStepDownResponse(EndOfBlockToken.Instance);
 
             if(char.IsWhiteSpace(input))
-                return new[] { ContinueResponse.Instance };
+                return ContinueResponse.Instance;
 
-            return new[] { new SetStateResponse(new ParseWordState(), true) };
+            return StepDownResponse.Instance;
         }
-    }
+	}
 }

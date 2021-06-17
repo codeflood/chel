@@ -1,6 +1,6 @@
 using System;
 
-namespace Chel.Abstractions
+namespace Chel.Abstractions.Exceptions
 {
     public class InvalidCommandNameException : Exception
     {

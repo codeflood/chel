@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using Chel.Abstractions.Exceptions;
 using Chel.Abstractions.Parsing;
 
 namespace Chel.Parsing
@@ -10,7 +12,8 @@ namespace Chel.Parsing
     public class Tokenizer : ITokenizer
     {
         private StringReader _reader = null;
-        private ITokenizerState _state = null;
+        private List<ITokenizerState> _states = null;
+        private ITokenizerState _activeState = null;
 
         /// <summary>
         /// Create a new instance.
@@ -18,44 +21,88 @@ namespace Chel.Parsing
         /// <param name="input">The input to tokenize.</param>
         public Tokenizer(string input)
         {
-            _reader = new StringReader(input ?? string.Empty);
-            _state = new SkipWhiteSpaceState();
+            // Add a newline to the input to ensure the last state flushes properly.
+            _reader = new StringReader((input ?? string.Empty) + "\n");
+            _states = new List<ITokenizerState>
+            {
+                new SkipWhiteSpaceState(),
+                new SkipCommentState(),
+                new ParseWordState()
+            };
         }
 
         public Token GetNextToken()
         {
             var c = _reader.Read();
 
+            bool reprocess = false;
+
             while(c > 0)
             {
-                var response = _state.Process((char)c);
-                var reprocessChar = false;
+                var input = (char)c;
+                reprocess = false;
 
-                foreach(var singleResponse in response)
+                if(_activeState == null)
+                    SetActiveState(input);
+
+                /*if(_activeState == null)
+                    // todo: The exception should include the exact location of the error, line and column.
+                    throw new ParsingException("Unable to parse input. Unexpected input " + c);*/
+
+                var response = _activeState.Process(input);
+                
+                switch(response)
                 {
-                    switch(singleResponse)
-                    {
-                        case EmitResponse emitResponse:
-                            return emitResponse.Token;
+                    case StepDownResponse _:
+                        _activeState = null;
+                        /*SetActiveState(input);
 
-                        case SetStateResponse setStateResponse:
-                            _state = setStateResponse.State;
-                            reprocessChar = setStateResponse.Reprocess;
-                            break;
+                        if(_activeState == null)
+                            // todo: The exception should include the exact location of the error, line and column.
+                            throw new ParsingException("Unable to parse input. Unexpected input " + c);*/
 
-                        case ContinueResponse _:
-                            break;
+                        reprocess = true;
 
-                        default:
-                            throw new Exception("unknown response from parser state: " + response.GetType().FullName);
-                    }
+                        break;
+
+                    case EmitAndStepDownResponse emitResponse:
+                        _activeState = null;
+                        reprocess = true;
+                        return emitResponse.Token;
+
+                    /*case SetStateResponse setStateResponse:
+                        _state = setStateResponse.State;
+                        reprocessChar = setStateResponse.Reprocess;
+                        break;*/
+
+                    case ContinueResponse _:
+                        break;
+
+                    default:
+                        throw new Exception("unknown response from parser state: " + response.GetType().FullName);
                 }
 
-                if(!reprocessChar)
+                if(!reprocess)
                     c = _reader.Read();
             }
 
             return null;
+        }
+
+        private void SetActiveState(char input)
+        {
+            foreach(var state in _states)
+            {
+                if(state.CanProcess(input))
+                {
+                    _activeState = state;
+                    return;
+                }
+            }
+
+            //_activeState = null;
+            // todo: The exception should include the exact location of the error, line and column.
+            throw new ParsingException("Unable to parse input. Unexpected input " + input);
         }
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using Chel.Abstractions.Exceptions;
 
 namespace Chel.Abstractions
 {

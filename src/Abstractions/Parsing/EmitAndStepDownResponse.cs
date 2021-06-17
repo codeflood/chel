@@ -2,7 +2,7 @@ using System;
 
 namespace Chel.Abstractions.Parsing
 {
-    public class EmitResponse : TokenizerStateResponse
+    public class EmitAndStepDownResponse : TokenizerStateResponse
     {
         /// <summary>
         /// Gets the token to emit.
@@ -13,7 +13,7 @@ namespace Chel.Abstractions.Parsing
         /// Create a new instance.
         /// </summary>
         /// <param name="token">The token to emit.</param>
-        public EmitResponse(Token token)
+        public EmitAndStepDownResponse(Token token)
         {
             if(token == null)
                 throw new ArgumentNullException(nameof(token));

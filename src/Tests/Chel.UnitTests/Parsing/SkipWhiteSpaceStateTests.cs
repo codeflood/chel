@@ -1,12 +1,46 @@
 using Xunit;
 using Chel.Parsing;
 using Chel.Abstractions.Parsing;
-using System.Linq;
 
 namespace Chel.UnitTests.Parsing
 {
-    public class SkipWhiteSpaceStateTests
+	public class SkipWhiteSpaceStateTests
     {
+        [Theory]
+        [InlineData('a')]
+        [InlineData('A')]
+        [InlineData(Symbols.Variable)]
+        [InlineData(Symbols.BlockStart)]
+        [InlineData(Symbols.BlockEnd)]
+        [InlineData(Symbols.Comment)]
+        public void CanProcess_InputIsNotWhiteSpace_ReturnsFalse(char input)
+        {
+            // arrange
+            var sut = new SkipWhiteSpaceState();
+
+            // act
+            var result = sut.CanProcess(input);
+
+            // assert
+            Assert.False(result);
+        }
+
+        [Theory]
+        [InlineData(' ')]
+        [InlineData('\t')]
+        [InlineData('\r')]
+        public void CanProcess_InputIsWhiteSpace_ReturnsTrue(char input)
+        {
+            // arrange
+            var sut = new SkipWhiteSpaceState();
+
+            // act
+            var result = sut.CanProcess(input);
+
+            // assert
+            Assert.True(result);
+        }
+
         [Theory]
         [InlineData(' ')]
         [InlineData('\t')]
@@ -20,7 +54,7 @@ namespace Chel.UnitTests.Parsing
             var result = sut.Process(input);
 
             // assert
-            Assert.IsType<ContinueResponse>(result.Single());
+            Assert.IsType<ContinueResponse>(result);
         }
 
         [Theory]
@@ -30,7 +64,7 @@ namespace Chel.UnitTests.Parsing
         [InlineData(Symbols.BlockStart)]
         [InlineData(Symbols.BlockEnd)]
         [InlineData(Symbols.Comment)]
-        public void Process_InputIsNotWhiteSpace_ReturnsSetStateResponse(char input)
+        public void Process_InputIsNotWhiteSpace_ReturnsStepDown(char input)
         {
             // arrange
             var sut = new SkipWhiteSpaceState();
@@ -39,11 +73,7 @@ namespace Chel.UnitTests.Parsing
             var result = sut.Process(input);
 
             // assert
-            Assert.IsType<SetStateResponse>(result.Single());
-            
-            var setStateResponse = (SetStateResponse)result.Single();
-            Assert.IsType<ParseWordState>(setStateResponse.State);
-            Assert.True(setStateResponse.Reprocess);
+            Assert.IsType<StepDownResponse>(result);
         }
 
         [Fact]
@@ -56,9 +86,9 @@ namespace Chel.UnitTests.Parsing
             var result = sut.Process('\n');
 
             // assert
-            Assert.IsType<EmitResponse>(result.Single());
+            Assert.IsType<EmitAndStepDownResponse>(result);
 
-            var emitResponse = (EmitResponse)result.Single();
+            var emitResponse = (EmitAndStepDownResponse)result;
             Assert.IsType<EndOfBlockToken>(emitResponse.Token);
         }
     }

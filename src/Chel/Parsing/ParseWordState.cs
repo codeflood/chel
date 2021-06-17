@@ -1,7 +1,4 @@
 using Chel.Abstractions.Parsing;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace Chel.Parsing
@@ -10,79 +7,70 @@ namespace Chel.Parsing
     {
         private StringBuilder _buffer = new StringBuilder();
 
-        private ITokenizerState _innerState = null;
+        private int _parenthesisCount = 0;
 
-        public IEnumerable<TokenizerStateResponse> Process(char input)
+        // todo: Ignore comments inside brackets.
+        // todo: Escaping characters, like brakcets. \(
+
+        public bool CanProcess(char input)
+		{
+			return !char.IsWhiteSpace(input);
+		}
+
+        public TokenizerStateResponse Process(char input)
         {
-            if(_innerState != null)
-                return ProcessWithInnerState(input);
-
-            if(input == Symbols.Escape)
+            if(input == Symbols.BlockEnd)
             {
-                _innerState = new ParseLiteralInnerState();
-                return _innerState.Process(input);
+                _parenthesisCount--;
+
+                if(_parenthesisCount == 0)
+                {
+                    if(_buffer.Length > 0)
+                    {
+                        var token = new LiteralToken(_buffer.ToString());
+                    _buffer.Clear();
+                    return new EmitAndStepDownResponse(token);
+                    }
+
+                    return StepDownResponse.Instance;
+                }
             }
 
-            if(char.IsWhiteSpace(input))
+            if(_parenthesisCount == 0 && char.IsWhiteSpace(input))
             {
-                if(_buffer.Length == 0)
+                if(_buffer.Length > 0)
                 {
-                    return new TokenizerStateResponse[]
-                    {
-                        new SetStateResponse(SkipWhiteSpaceState.Instance, true)
-                    };
+                    var token = new LiteralToken(_buffer.ToString());
+                    _buffer.Clear();
+                    return new EmitAndStepDownResponse(token);
                 }
 
-                return new TokenizerStateResponse[]
-                {
-                    new EmitResponse(new LiteralToken(_buffer.ToString())),
-                    new SetStateResponse(SkipWhiteSpaceState.Instance, true)
-                };
+                return StepDownResponse.Instance;
             }
 
-            if(input == Symbols.Comment)
+            if(_parenthesisCount == 0 && input == Symbols.Comment)
             {
-                if(_buffer.Length == 0)
+                if(_buffer.Length > 0)
                 {
-                    return new TokenizerStateResponse[]
-                    {
-                        new SetStateResponse(SkipCommentState.Instance, false)
-                    };
+                    var token = new LiteralToken(_buffer.ToString());
+                    _buffer.Clear();
+                    return new EmitAndStepDownResponse(token);
                 }
 
-                return new TokenizerStateResponse[]
-                {
-                    new EmitResponse(new LiteralToken(_buffer.ToString())),
-                    new SetStateResponse(SkipCommentState.Instance, false)
-                };
+                return StepDownResponse.Instance;
             }
 
-            _buffer.Append(input);
-
-            return new[] { ContinueResponse.Instance };
-        }
-
-        private IEnumerable<TokenizerStateResponse> ProcessWithInnerState(char input)
-        {
-            var result = _innerState.Process(input);
-            var single = result.Single();
-            
-            switch(single)
+            if(input == Symbols.BlockStart)
             {
-                case ContinueResponse _:
-                    return new[]{ single };
-                
-                case EmitResponse emitResponse:
-                    var literalToken = emitResponse.Token as LiteralToken
-                        ?? throw new InvalidOperationException(Texts.ParseErrorExpectedLitealToken);
+                _parenthesisCount++;
 
-                    _buffer.Append(literalToken.Value);
-                    _innerState = null;
-                    return new[] { ContinueResponse.Instance };
-
-                default:
-                    throw new InvalidOperationException(Texts.ParseErorUnexpectedResponseFromInnerState);
+                if(_parenthesisCount > 1)
+                    _buffer.Append(input);
             }
+            else
+                _buffer.Append(input);
+
+            return ContinueResponse.Instance;
         }
     }
 }
