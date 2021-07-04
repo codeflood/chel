@@ -57,7 +57,7 @@ namespace Chel
             }
             catch(ParserException ex)
             {
-                var commandResult = new FailureResult(ex.SourceLine, new[] { ex.Message });
+                var commandResult = new FailureResult(ex.SourceLocation.LineNumber, new[] { ex.Message });
                 resultHandler(commandResult);
                 return;
             }

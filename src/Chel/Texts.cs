@@ -50,13 +50,15 @@ namespace Chel
 
         public const string TypeRequiresParameterlessConstructor = "Type {0} requires a parameterless constructor";
 
-        public const string UnknownFlagParameter = "Unknown flag parameter '{0}'";
-
-        public const string UnknownNamedParameter = "Unknown named parameter '{0}'";
-        
         public const string UnexpectedNumberedParameter = "Unexpected numbered parameter '{0}'";
 
         public const string UnknownCommand = "Unknown command";
+
+        public const string UnknownEscapedCharacter = "Unknown escaped character '{0}'";
+
+        public const string UnknownFlagParameter = "Unknown flag parameter '{0}'";
+
+        public const string UnknownNamedParameter = "Unknown named parameter '{0}'";
 
         public const string UnpairedVariableToken = "Unpaired variable token $";
 

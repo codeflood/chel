@@ -1,3 +1,4 @@
+using Chel.Abstractions.Parsing;
 using Chel.Exceptions;
 using Xunit;
 
@@ -8,11 +9,15 @@ namespace Chel.UnitTests.Exceptions
         [Fact]
         public void Ctor_WhenCalled_SetsSourceLine()
         {
-            // arrange, act
-            var sut = new ParserException(3, "message");
+            // arrange
+            var location = new SourceLocation(42, 34);
+            
+            // act
+            var sut = new ParserException(location, "message");
 
             // assert
-            Assert.Equal(3, sut.SourceLine);
+            Assert.Equal(location, sut.SourceLocation);
+            Assert.Equal("message", sut.Message);
         }
     }
 }

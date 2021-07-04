@@ -357,7 +357,7 @@ namespace Chel.UnitTests
 
             // act, assert
             var exception = Assert.Throws<ParserException>(sutAction);
-            Assert.Equal(2, exception.SourceLine);
+            Assert.Equal(2, exception.SourceLocation.LineNumber);
         }
 
         [Fact]
@@ -369,7 +369,7 @@ namespace Chel.UnitTests
 
             // act, assert
             var exception = Assert.Throws<ParserException>(sutAction);
-            Assert.Equal(3, exception.SourceLine);
+            Assert.Equal(3, exception.SourceLocation.LineNumber);
         }
 
         [Fact]
@@ -405,7 +405,7 @@ namespace Chel.UnitTests
 
             // act, assert
             var exception = Assert.Throws<ParserException>(sutAction);
-            Assert.Equal(2, exception.SourceLine);
+            Assert.Equal(2, exception.SourceLocation.LineNumber);
         }
 
         private CommandInput CreateCommandInput(int sourceLine, string commandName)

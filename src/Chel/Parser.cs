@@ -2,6 +2,7 @@
 using System.IO;
 using System.Text;
 using Chel.Abstractions;
+using Chel.Abstractions.Parsing;
 using Chel.Exceptions;
 
 namespace Chel
@@ -77,9 +78,9 @@ namespace Chel
                 if(character == -1 || (character == '\n' && openingParenthesisCount == 0))
                 {
                     if(openingParenthesisCount > 0)
-                        throw new ParserException(_currentSourceLine, Texts.MissingClosingParenthesis);
+                        throw new ParserException(new SourceLocation(_currentSourceLine, 1), Texts.MissingClosingParenthesis);
                     else if(openingParenthesisCount < 0)
-                        throw new ParserException(_currentSourceLine, Texts.MissingOpeningParenthesis);
+                        throw new ParserException(new SourceLocation(_currentSourceLine, 1), Texts.MissingOpeningParenthesis);
 
                     isEndOfLine = true;
                     break;
