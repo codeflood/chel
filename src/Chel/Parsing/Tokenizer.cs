@@ -20,11 +20,11 @@ namespace Chel.Parsing
 		private const char Escape = '\\';
 		private const char BlockStart = '(';
 		private const char BlockEnd = ')';
+		private const char Comment = '#';
 
 		private StringReader _reader = null;
 		private int _currentLineNumber = 1;
 		private int _currentCharacterNumber = 0;
-		private bool _escaping = false;
 
 		private SourceLocation CurrentLocation => new SourceLocation(_currentLineNumber, _currentCharacterNumber);
 
@@ -41,53 +41,56 @@ namespace Chel.Parsing
 
 		public Token GetNextToken()
 		{
-			var keepReading = true;
-
 			if(_reader == null)
-				keepReading = false;
+				return null;
 
-			while(keepReading)
+			var nextChar = ReadNext();
+
+			switch(nextChar)
 			{
-				keepReading = false;
+				case NewLine:
+					return HandleNewLine();
+				
+				case Escape:
+					return HandleEscaped();
 
-				var nextChar = _reader.Read();
-				_currentCharacterNumber++;
+				case Comment:
+					return SkipToEndOfLine();
 
-				if(_escaping)
-				{
-					_escaping = false;
-					return HandleEscaped((char)nextChar);
-				}
+				case BlockStart:
+					return HandleSpecial(SpecialTokenType.BlockStart);
 
-				switch(nextChar)
-				{
-					case NewLine:
-						var result = HandleLiteral((char)nextChar);
-						_currentLineNumber++;
-						_currentCharacterNumber = 0;
-						return result;
-					
-					case Escape:
-						_escaping = true;
-						keepReading = true;
-						break;
+				case BlockEnd:
+					return HandleSpecial(SpecialTokenType.BlockEnd);
 
-					case BlockStart:
-						return HandleSpecial(SpecialTokenType.BlockStart);
+				case -1:
+					HandleEndOfStream();
+					return null;
 
-					case BlockEnd:
-						return HandleSpecial(SpecialTokenType.BlockEnd);
+				default:
+					return HandleLiteral((char)nextChar);
+			}
+		}
 
-					case -1:
-						HandleEndOfStream();
-						return null;
+		private int ReadNext()
+		{
+			_currentCharacterNumber++;
+			return _reader.Read();
+		}
 
-					default:
-						return HandleLiteral((char)nextChar);
-				}
+		private Token SkipToEndOfLine()
+		{
+			var nextChar = ReadNext();
+
+			while(nextChar != -1 && nextChar != NewLine)
+			{
+				nextChar = ReadNext();
 			}
 
-			return null;
+			if(nextChar == -1)
+				return null;
+
+			return HandleNewLine();
 		}
 
 		private void HandleEndOfStream()
@@ -96,12 +99,25 @@ namespace Chel.Parsing
 			_reader = null;
 		}
 
-		private Token HandleEscaped(char nextChar)
+		private Token HandleNewLine()
 		{
+			var result = HandleLiteral(NewLine);		
+			_currentLineNumber++;
+			_currentCharacterNumber = 0;
+			return result;
+		}
+
+		private Token HandleEscaped()
+		{
+			var nextChar = ReadNext();
+			if(nextChar == -1)
+				return null;
+
 			if(nextChar == BlockStart ||
 				nextChar == BlockEnd ||
-				nextChar == Escape)
-				return HandleLiteral(nextChar);
+				nextChar == Escape ||
+				nextChar == Comment)
+				return HandleLiteral((char)nextChar);
 
 			throw new ParserException(CurrentLocation, string.Format(Texts.UnknownEscapedCharacter, Escape + nextChar));
 		}
