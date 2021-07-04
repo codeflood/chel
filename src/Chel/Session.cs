@@ -55,7 +55,7 @@ namespace Chel
             {
                 commandInputs = _parser.Parse(input);
             }
-            catch(ParserException ex)
+            catch(ParseException ex)
             {
                 var commandResult = new FailureResult(ex.SourceLocation.LineNumber, new[] { ex.Message });
                 resultHandler(commandResult);

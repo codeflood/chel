@@ -4,7 +4,7 @@ using Xunit;
 
 namespace Chel.UnitTests.Exceptions
 {
-    public class ParserExceptionTests
+    public class ParseExceptionTests
     {
         [Fact]
         public void Ctor_WhenCalled_SetsSourceLine()
@@ -13,7 +13,7 @@ namespace Chel.UnitTests.Exceptions
             var location = new SourceLocation(42, 34);
             
             // act
-            var sut = new ParserException(location, "message");
+            var sut = new ParseException(location, "message");
 
             // assert
             Assert.Equal(location, sut.SourceLocation);

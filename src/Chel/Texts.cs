@@ -26,6 +26,10 @@ namespace Chel
 
         public const string MissingClosingParenthesis = "Missing closing parenthesis )";
 
+        public const string MissingCommentBlockEnd = "Missing comment block end.";
+
+        public const string MissingCommentBlockStart = "Missing comment block start.";
+
         public const string MissingOpeningParenthesis = "Missing opening parenthesis (";
 
         public const string MissingParameterName = "Missing parameter name after -";
@@ -54,7 +58,7 @@ namespace Chel
 
         public const string UnknownCommand = "Unknown command";
 
-        public const string UnknownEscapedCharacter = "Unknown escaped character '{0}'";
+        public const string UnknownEscapedCharacter = "Unknown escaped character '\\{0}'";
 
         public const string UnknownFlagParameter = "Unknown flag parameter '{0}'";
 

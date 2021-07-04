@@ -159,7 +159,7 @@ namespace Chel.UnitTests
             // arrange
             var parser = Substitute.For<IParser>();
             var location = new SourceLocation(1, 1);
-            parser.Parse(Arg.Any<string>()).Returns(x => { throw new ParserException(location, "message"); });
+            parser.Parse(Arg.Any<string>()).Returns(x => { throw new ParseException(location, "message"); });
 
             var factory = Substitute.For<ICommandFactory>();
             var binder = Substitute.For<ICommandParameterBinder>();

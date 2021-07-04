@@ -356,7 +356,7 @@ namespace Chel.UnitTests
             Action sutAction = () => sut.Parse("command (\npa ram");
 
             // act, assert
-            var exception = Assert.Throws<ParserException>(sutAction);
+            var exception = Assert.Throws<ParseException>(sutAction);
             Assert.Equal(2, exception.SourceLocation.LineNumber);
         }
 
@@ -368,7 +368,7 @@ namespace Chel.UnitTests
             Action sutAction = () => sut.Parse("command (\npa ram\nram");
 
             // act, assert
-            var exception = Assert.Throws<ParserException>(sutAction);
+            var exception = Assert.Throws<ParseException>(sutAction);
             Assert.Equal(3, exception.SourceLocation.LineNumber);
         }
 
@@ -380,7 +380,7 @@ namespace Chel.UnitTests
             Action sutAction = () => sut.Parse("command (param");
 
             // act, assert
-            var exception = Assert.Throws<ParserException>(sutAction);
+            var exception = Assert.Throws<ParseException>(sutAction);
             Assert.Equal(Texts.MissingClosingParenthesis, exception.Message);
         }
 
@@ -392,7 +392,7 @@ namespace Chel.UnitTests
             Action sutAction = () => sut.Parse("command param )");
 
             // act, assert
-            var exception = Assert.Throws<ParserException>(sutAction);
+            var exception = Assert.Throws<ParseException>(sutAction);
             Assert.Equal(Texts.MissingOpeningParenthesis, exception.Message);
         }
 
@@ -404,7 +404,7 @@ namespace Chel.UnitTests
             Action sutAction = () => sut.Parse("command\ncommand (param");
 
             // act, assert
-            var exception = Assert.Throws<ParserException>(sutAction);
+            var exception = Assert.Throws<ParseException>(sutAction);
             Assert.Equal(2, exception.SourceLocation.LineNumber);
         }
 

@@ -123,7 +123,11 @@ namespace Chel.UnitTests.Parsing
             var sut = new Tokenizer("\\a");
             
             // act
-            var ex = Assert.Throws<ParserException>(() => sut.GetNextToken());
+            var ex = Assert.Throws<ParseException>(() => sut.GetNextToken());
+            Assert.Equal("Unknown escaped character '\\a'", ex.Message);
+            
+            var sourceLocation = new SourceLocation(1, 1);
+            Assert.Equal(sourceLocation, ex.SourceLocation);
         }
 
         [Fact]
@@ -227,6 +231,82 @@ namespace Chel.UnitTests.Parsing
             Assert.Equal(' ', result6.Value);
             Assert.Equal(new SourceLocation(1, 6), result6.Location);
             Assert.Null(result7);
+        }
+
+        [Fact]
+        public void GetNextToken_InputContainsCommentBlock_ExcludesCommentBlock()
+        {
+            // arrange
+            var sut = new Tokenizer("ab(#comment#)c");
+
+            // act
+            var result1 = (LiteralToken)sut.GetNextToken();
+            var result2 = (LiteralToken)sut.GetNextToken();
+            var result3 = (LiteralToken)sut.GetNextToken();
+            var result4 = sut.GetNextToken();
+            
+            // assert
+            Assert.Equal('a', result1.Value);
+            Assert.Equal(new SourceLocation(1, 1), result1.Location);
+            Assert.Equal('b', result2.Value);
+            Assert.Equal(new SourceLocation(1, 2), result2.Location);
+            Assert.Equal('c', result3.Value);
+            Assert.Equal(new SourceLocation(1, 14), result3.Location);
+            Assert.Null(result4);
+        }
+
+        [Fact]
+        public void GetNextToken_CommentBlockMissingEnd_ThrowsException()
+        {
+            // arrange
+            var sut = new Tokenizer("ab (#comment");
+
+            // act
+            var result1 = (LiteralToken)sut.GetNextToken();
+            var result2 = (LiteralToken)sut.GetNextToken();
+            var result3 = (LiteralToken)sut.GetNextToken();
+            
+            // assert
+            var ex = Assert.Throws<ParseException>(() => sut.GetNextToken());
+            
+            // assert
+            Assert.Equal('a', result1.Value);
+            Assert.Equal(new SourceLocation(1, 1), result1.Location);
+            Assert.Equal('b', result2.Value);
+            Assert.Equal(new SourceLocation(1, 2), result2.Location);
+            Assert.Equal(' ', result3.Value);
+            Assert.Equal(new SourceLocation(1, 3), result3.Location);
+            Assert.Equal("Missing comment block end.", ex.Message);
+
+            var commentBlockStartLocation = new SourceLocation(1, 4);
+            Assert.Equal(commentBlockStartLocation, ex.SourceLocation);
+        }
+
+        [Fact]
+        public void GetNextToken_CommentBlockStartMissing_ThrowsException()
+        {
+            // arrange
+            var sut = new Tokenizer("ab #)");
+
+            // act
+            var result1 = (LiteralToken)sut.GetNextToken();
+            var result2 = (LiteralToken)sut.GetNextToken();
+            var result3 = (LiteralToken)sut.GetNextToken();
+            
+            // assert
+            var ex = Assert.Throws<ParseException>(() => sut.GetNextToken());
+            
+            // assert
+            Assert.Equal('a', result1.Value);
+            Assert.Equal(new SourceLocation(1, 1), result1.Location);
+            Assert.Equal('b', result2.Value);
+            Assert.Equal(new SourceLocation(1, 2), result2.Location);
+            Assert.Equal(' ', result3.Value);
+            Assert.Equal(new SourceLocation(1, 3), result3.Location);
+            Assert.Equal("Missing comment block start.", ex.Message);
+
+            var commentBlockStartLocation = new SourceLocation(1, 4);
+            Assert.Equal(commentBlockStartLocation, ex.SourceLocation);
         }
     }
 }

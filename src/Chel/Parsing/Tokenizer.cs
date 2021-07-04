@@ -55,9 +55,19 @@ namespace Chel.Parsing
 					return HandleEscaped();
 
 				case Comment:
+					if(PeekNext() == BlockEnd)
+						throw new ParseException(CurrentLocation, Texts.MissingCommentBlockStart);
+
 					return SkipToEndOfLine();
 
 				case BlockStart:
+					if(PeekNext() == Comment)
+					{
+						ReadNext();
+						SkipToEndOfCommentBlock();
+						return GetNextToken();
+					}
+
 					return HandleSpecial(SpecialTokenType.BlockStart);
 
 				case BlockEnd:
@@ -78,6 +88,11 @@ namespace Chel.Parsing
 			return _reader.Read();
 		}
 
+		private int PeekNext()
+		{
+			return _reader.Peek();
+		}
+
 		private Token SkipToEndOfLine()
 		{
 			var nextChar = ReadNext();
@@ -91,6 +106,24 @@ namespace Chel.Parsing
 				return null;
 
 			return HandleNewLine();
+		}
+
+		private void SkipToEndOfCommentBlock()
+		{
+			var currentLocation = CurrentLocation;
+			var startLocation = new SourceLocation(currentLocation.LineNumber, currentLocation.CharacterNumber - 1);
+
+			var nextChar = ReadNext();
+			var prevChar = nextChar;
+
+			while(nextChar != -1 && prevChar != Comment && nextChar != BlockEnd)
+			{
+				prevChar = nextChar;
+				nextChar = ReadNext();
+			}
+
+			if(nextChar == -1)
+				throw new ParseException(startLocation, Texts.MissingCommentBlockEnd);
 		}
 
 		private void HandleEndOfStream()
@@ -119,7 +152,10 @@ namespace Chel.Parsing
 				nextChar == Comment)
 				return HandleLiteral((char)nextChar);
 
-			throw new ParserException(CurrentLocation, string.Format(Texts.UnknownEscapedCharacter, Escape + nextChar));
+			// Report the error location as the escape character
+			var currentLocation = CurrentLocation;
+			var location = new SourceLocation(currentLocation.LineNumber, currentLocation.CharacterNumber - 1);
+			throw new ParseException(location, string.Format(Texts.UnknownEscapedCharacter, (char)nextChar));
 		}
 
 		private Token HandleLiteral(char nextChar)

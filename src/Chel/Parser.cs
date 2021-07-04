@@ -78,9 +78,9 @@ namespace Chel
                 if(character == -1 || (character == '\n' && openingParenthesisCount == 0))
                 {
                     if(openingParenthesisCount > 0)
-                        throw new ParserException(new SourceLocation(_currentSourceLine, 1), Texts.MissingClosingParenthesis);
+                        throw new ParseException(new SourceLocation(_currentSourceLine, 1), Texts.MissingClosingParenthesis);
                     else if(openingParenthesisCount < 0)
-                        throw new ParserException(new SourceLocation(_currentSourceLine, 1), Texts.MissingOpeningParenthesis);
+                        throw new ParseException(new SourceLocation(_currentSourceLine, 1), Texts.MissingOpeningParenthesis);
 
                     isEndOfLine = true;
                     break;
