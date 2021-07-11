@@ -6,6 +6,11 @@ namespace Chel.Abstractions.Parsing
     public interface ITokenizer
     {
         /// <summary>
+        /// Indicates whether the tokenizer contains any more tokens.
+        /// </summary>
+        bool HasMore { get; }
+
+        /// <summary>
         /// Gets the next token available.
         /// </summary>
         /// <returns>The next token available, or null if there are no more tokens.</returns>

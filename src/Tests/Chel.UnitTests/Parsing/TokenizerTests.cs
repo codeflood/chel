@@ -10,6 +10,51 @@ namespace Chel.UnitTests.Parsing
         [Theory]
         [InlineData(null)]
         [InlineData("")]
+        public void HasMore_InputIsNullOrEmpty_ReturnsFalse(string input)
+        {
+            // arrange
+            var sut = new Tokenizer(input);
+
+            // act
+            var result = sut.HasMore;
+
+            // assert
+            Assert.False(result);
+        }
+
+        [Fact]
+        public void HasMore_InputNotRead_ReturnsTrue()
+        {
+            // arrange
+            var sut = new Tokenizer("abc");
+
+            // act
+            var result = sut.HasMore;
+
+            // assert
+            Assert.True(result);
+        }
+
+        [Fact]
+        public void HasMore_InputHasBeenRead_ReturnsFalse()
+        {
+            // arrange
+            var sut = new Tokenizer("abc");
+
+            // act
+            sut.GetNextToken();
+            sut.GetNextToken();
+            sut.GetNextToken();
+            sut.GetNextToken();
+            var result = sut.HasMore;
+
+            // assert
+            Assert.False(result);
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
         public void GetNextToken_InputIsNullOrEmpty_ReturnsNull(string input)
         {
             // arrange
