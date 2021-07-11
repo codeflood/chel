@@ -185,7 +185,7 @@ namespace Chel.UnitTests.Parsing
         }
 
         [Fact]
-        public void Parse_ParenthesisedParameterIncludesSpaces_SpacesIncludedInParameter()
+        public void Parse_BracketedParameterIncludesSpaces_SpacesIncludedInParameter()
         {
             // arrange
             var sut = new Parser();
@@ -217,7 +217,7 @@ namespace Chel.UnitTests.Parsing
         }
 
         [Fact]
-        public void Parse_EscapedParentheses_ParenthesesIncludedInParameter()
+        public void Parse_EscapedBrackets_BracketsIncludedInParameter()
         {
             // arrange
             var sut = new Parser();
@@ -266,7 +266,7 @@ namespace Chel.UnitTests.Parsing
         }
 
         [Fact]
-        public void Parse_SomeParametersParenthesised_ParametersParsedProperly()
+        public void Parse_SomeParametersBracketed_ParametersParsedProperly()
         {
             // arrange
             var sut = new Parser();
@@ -283,7 +283,7 @@ namespace Chel.UnitTests.Parsing
         }
 
         [Fact]
-        public void Parse_NewlineInsideParenthesisedParameter_ParameterIncludesNewline()
+        public void Parse_NewlineInsideBracketedParameter_ParameterIncludesNewline()
         {
             // arrange
             var sut = new Parser();
@@ -372,7 +372,7 @@ namespace Chel.UnitTests.Parsing
         }
 
         [Fact]
-        public void Parse_MissingClosingParenthesis_ThrowsException()
+        public void Parse_MissingClosingBracket_ThrowsException()
         {
             // arrange
             var sut = new Parser();
@@ -384,7 +384,7 @@ namespace Chel.UnitTests.Parsing
         }
 
         [Fact]
-        public void Parse_MissingOpeningParenthesis_ThrowsException()
+        public void Parse_MissingOpeningBracket_ThrowsException()
         {
             // arrange
             var sut = new Parser();
@@ -396,7 +396,7 @@ namespace Chel.UnitTests.Parsing
         }
 
         [Fact]
-        public void Parse_UnbalancedParenthesisOnSecondLine_SourceLineOfExceptionIsCorrect()
+        public void Parse_UnbalancedBracketOnSecondLine_SourceLineOfExceptionIsCorrect()
         {
             // arrange
             var sut = new Parser();

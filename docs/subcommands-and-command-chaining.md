@@ -4,7 +4,7 @@ A subcommand is a command that is executed and the output of the command is used
 
     command << subcommand
 
-If the subcommand uses parameters, then the subcommand must be wrapped in parentheses.
+If the subcommand uses parameters, then the subcommand must be 1enclosed in round brackets.
 
     command << (subcommand param1 -named paramvalue)
 

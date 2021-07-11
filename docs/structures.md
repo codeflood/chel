@@ -35,11 +35,11 @@ Chel is a space delimited language.
 
     command parameter1 parameter2
 
-To include a space in a parameter, enclose the parameter in parentheses.
+To include a space in a parameter, enclose the parameter with round brackets.
 
     command (parameter with space)
 
-Parentheses can also span multiple lines, to allow multi-line parameters.
+Round brackets can also span multiple lines, to allow multi-line parameters.
 
     command (
         parameter
