@@ -3,17 +3,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26124.0
 MinimumVisualStudioVersion = 15.0.26124.0
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Abstractions", "Abstractions\Abstractions.csproj", "{5A0F8D5A-D972-43E8-96BA-34EFE70581B5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Abstractions", "src\Abstractions\Abstractions.csproj", "{5A0F8D5A-D972-43E8-96BA-34EFE70581B5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chel", "Chel\Chel.csproj", "{EBCE0BEB-E89B-495D-9493-38A0C5828FEC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chel", "src\Chel\Chel.csproj", "{EBCE0BEB-E89B-495D-9493-38A0C5828FEC}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{6F583604-7125-44A5-ACF6-71DB0CBB40B0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chel.UnitTests", "Tests\Chel.UnitTests\Chel.UnitTests.csproj", "{D1C47F05-A063-4C39-8607-6014B205846F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chel.UnitTests", "tests\Chel.UnitTests\Chel.UnitTests.csproj", "{D1C47F05-A063-4C39-8607-6014B205846F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chel.Abstractions.UnitTests", "Tests\Chel.Abstractions.UnitTests\Chel.Abstractions.UnitTests.csproj", "{5B2E861D-3C41-49B2-A76E-35B94A72CF08}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chel.Abstractions.UnitTests", "tests\Chel.Abstractions.UnitTests\Chel.Abstractions.UnitTests.csproj", "{5B2E861D-3C41-49B2-A76E-35B94A72CF08}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sandbox", "Sandbox\Sandbox.csproj", "{23088893-152F-4EF6-A5B8-7023C8FEF594}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sandbox", "src\Sandbox\Sandbox.csproj", "{23088893-152F-4EF6-A5B8-7023C8FEF594}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
