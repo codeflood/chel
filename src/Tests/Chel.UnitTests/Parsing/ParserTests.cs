@@ -1,14 +1,13 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using Chel.Abstractions;
 using Chel.Exceptions;
+using Chel.Parsing;
 using Chel.UnitTests.Comparers;
 using Xunit;
 
-namespace Chel.UnitTests
+namespace Chel.UnitTests.Parsing
 {
-    public class ParserTests
+	public class ParserTests
     {
         [Theory]
         [InlineData(null)]
@@ -186,7 +185,7 @@ namespace Chel.UnitTests
         }
 
         [Fact]
-        public void Parse_ParenthesisedParameterIncludesSpaces_SpacesIncludedInParameter()
+        public void Parse_BracketedParameterIncludesSpaces_SpacesIncludedInParameter()
         {
             // arrange
             var sut = new Parser();
@@ -218,7 +217,7 @@ namespace Chel.UnitTests
         }
 
         [Fact]
-        public void Parse_EscapedParentheses_ParenthesesIncludedInParameter()
+        public void Parse_EscapedBrackets_BracketsIncludedInParameter()
         {
             // arrange
             var sut = new Parser();
@@ -267,7 +266,7 @@ namespace Chel.UnitTests
         }
 
         [Fact]
-        public void Parse_SomeParametersParenthesised_ParametersParsedProperly()
+        public void Parse_SomeParametersBracketed_ParametersParsedProperly()
         {
             // arrange
             var sut = new Parser();
@@ -284,7 +283,7 @@ namespace Chel.UnitTests
         }
 
         [Fact]
-        public void Parse_NewlineInsideParenthesisedParameter_ParameterIncludesNewline()
+        public void Parse_NewlineInsideBracketedParameter_ParameterIncludesNewline()
         {
             // arrange
             var sut = new Parser();
@@ -300,7 +299,7 @@ namespace Chel.UnitTests
         }
 
         [Fact]
-        public void Parse_DoubleParenthesesInParameters_ParameterIncludesParentheses()
+        public void Parse_EscapedBracketsInParameters_ParameterIncludesBrackets()
         {
             // arrange
             var sut = new Parser();
@@ -309,14 +308,14 @@ namespace Chel.UnitTests
             var expectedCommand = builder.Build();
 
             // act
-            var result = sut.Parse("command ((param))");
+            var result = sut.Parse("command (\\(param\\))");
 
             // assert
             Assert.Equal(expectedCommand, result[0], new CommandInputEqualityComparer());
         }
 
         [Fact]
-        public void Parse_NestedParenthesesInParameters_ParameterIncludesParentheses()
+        public void Parse_NestedBracketsInParameters_ParameterIncludesBrackets()
         {
             // arrange
             var sut = new Parser();
@@ -325,7 +324,7 @@ namespace Chel.UnitTests
             var expectedCommand = builder.Build();
 
             // act
-            var result = sut.Parse("command (\nic  (pa ram)\nic (pa ram))");
+            var result = sut.Parse("command (\nic  \\(pa ram\\)\nic \\(pa ram\\))");
 
             // assert
             Assert.Equal(expectedCommand, result[0], new CommandInputEqualityComparer());
@@ -356,8 +355,8 @@ namespace Chel.UnitTests
             Action sutAction = () => sut.Parse("command (\npa ram");
 
             // act, assert
-            var exception = Assert.Throws<ParserException>(sutAction);
-            Assert.Equal(2, exception.SourceLine);
+            var exception = Assert.Throws<ParseException>(sutAction);
+            Assert.Equal(2, exception.SourceLocation.LineNumber);
         }
 
         [Fact]
@@ -368,44 +367,44 @@ namespace Chel.UnitTests
             Action sutAction = () => sut.Parse("command (\npa ram\nram");
 
             // act, assert
-            var exception = Assert.Throws<ParserException>(sutAction);
-            Assert.Equal(3, exception.SourceLine);
+            var exception = Assert.Throws<ParseException>(sutAction);
+            Assert.Equal(3, exception.SourceLocation.LineNumber);
         }
 
         [Fact]
-        public void Parse_MissingClosingParenthesis_ThrowsException()
+        public void Parse_MissingClosingBracket_ThrowsException()
         {
             // arrange
             var sut = new Parser();
             Action sutAction = () => sut.Parse("command (param");
 
             // act, assert
-            var exception = Assert.Throws<ParserException>(sutAction);
-            Assert.Equal(Texts.MissingClosingParenthesis, exception.Message);
+            var exception = Assert.Throws<ParseException>(sutAction);
+            Assert.Equal(Texts.MissingBlockEnd, exception.Message);
         }
 
         [Fact]
-        public void Parse_MissingOpeningParenthesis_ThrowsException()
+        public void Parse_MissingOpeningBracket_ThrowsException()
         {
             // arrange
             var sut = new Parser();
             Action sutAction = () => sut.Parse("command param )");
 
             // act, assert
-            var exception = Assert.Throws<ParserException>(sutAction);
-            Assert.Equal(Texts.MissingOpeningParenthesis, exception.Message);
+            var exception = Assert.Throws<ParseException>(sutAction);
+            Assert.Equal(Texts.MissingBlockStart, exception.Message);
         }
 
         [Fact]
-        public void Parse_UnbalancedParenthesisOnSecondLine_SourceLineOfExceptionIsCorrect()
+        public void Parse_UnbalancedBracketOnSecondLine_SourceLineOfExceptionIsCorrect()
         {
             // arrange
             var sut = new Parser();
             Action sutAction = () => sut.Parse("command\ncommand (param");
 
             // act, assert
-            var exception = Assert.Throws<ParserException>(sutAction);
-            Assert.Equal(2, exception.SourceLine);
+            var exception = Assert.Throws<ParseException>(sutAction);
+            Assert.Equal(2, exception.SourceLocation.LineNumber);
         }
 
         private CommandInput CreateCommandInput(int sourceLine, string commandName)

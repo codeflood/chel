@@ -24,9 +24,13 @@ namespace Chel
 
         public const string InvalidParameterValueForNumberedParameter = "Invalid parameter value '{0}' for numbered parameter '{1}'.";
 
-        public const string MissingClosingParenthesis = "Missing closing parenthesis )";
+        public const string MissingBlockEnd = "Missing block end )";
 
-        public const string MissingOpeningParenthesis = "Missing opening parenthesis (";
+        public const string MissingBlockStart = "Missing block start (";
+
+        public const string MissingCommentBlockEnd = "Missing comment block end.";
+
+        public const string MissingCommentBlockStart = "Missing comment block start.";
 
         public const string MissingParameterName = "Missing parameter name after -";
 
@@ -50,13 +54,17 @@ namespace Chel
 
         public const string TypeRequiresParameterlessConstructor = "Type {0} requires a parameterless constructor";
 
+        public const string UnexpectedNumberedParameter = "Unexpected numbered parameter '{0}'";
+
+        public const string UnexpectedToken = "Unexpected token '{0}'";
+
+        public const string UnknownCommand = "Unknown command";
+
+        public const string UnknownEscapedCharacter = "Unknown escaped character '\\{0}'";
+
         public const string UnknownFlagParameter = "Unknown flag parameter '{0}'";
 
         public const string UnknownNamedParameter = "Unknown named parameter '{0}'";
-        
-        public const string UnexpectedNumberedParameter = "Unexpected numbered parameter '{0}'";
-
-        public const string UnknownCommand = "Unknown command";
 
         public const string UnpairedVariableToken = "Unpaired variable token $";
 

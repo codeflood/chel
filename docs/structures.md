@@ -17,11 +17,15 @@ Comments are preceeded by a hash (`#`) character. Anything after the character i
     # this is a comment
     command # all this text is ignored.
 
-A comment block is started with the `#>` token and continues until the `<#` token is encountered.
+A comment block is started with the `(#` token and continues until the `#)` token is encountered.
 
-    #> ignore all this
+    (# ignore all this
     and all this, up to
-    this <#
+    this #)
+
+If you want to pass a hash (`#`) character as a parameter, escape the hash with the escape character (`\`);
+
+    command (param with \# hash)
 
 ## Command ##
 
@@ -31,11 +35,11 @@ Chel is a space delimited language.
 
     command parameter1 parameter2
 
-To include a space in a parameter, enclose the parameter in parentheses.
+To include a space in a parameter, enclose the parameter with round brackets.
 
     command (parameter with space)
 
-Parentheses can also span multiple lines, to allow multi-line parameters.
+Round brackets can also span multiple lines, to allow multi-line parameters.
 
     command (
         parameter

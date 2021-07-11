@@ -1,8 +1,10 @@
 using System;
 using Chel.Abstractions;
+using Chel.Abstractions.Parsing;
 using Chel.Abstractions.Results;
 using Chel.Abstractions.Variables;
 using Chel.Exceptions;
+using Chel.Parsing;
 using Chel.UnitTests.SampleCommands;
 using NSubstitute;
 using Xunit;
@@ -157,7 +159,8 @@ namespace Chel.UnitTests
         {
             // arrange
             var parser = Substitute.For<IParser>();
-            parser.Parse(Arg.Any<string>()).Returns(x => { throw new ParserException(1, "message"); });
+            var location = new SourceLocation(1, 1);
+            parser.Parse(Arg.Any<string>()).Returns(x => { throw new ParseException(location, "message"); });
 
             var factory = Substitute.For<ICommandFactory>();
             var binder = Substitute.For<ICommandParameterBinder>();

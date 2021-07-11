@@ -14,7 +14,7 @@ Chel includes a very simple type system.
 
 ### Single Value ###
 
-This is the simplest kind of variable. It stores a single value. If the value includes any spaces, surround the value with parentheses.
+This is the simplest kind of variable. It stores a single value. If the value includes any spaces, enclose the value with round brackets.
 
     var name value
     var itemName (a value with spaces)
