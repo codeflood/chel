@@ -95,7 +95,7 @@ namespace Chel.Abstractions.UnitTests.Parsing
 
             // act
             var hashCode1 = sut1.GetHashCode();
-            var hashCode2 = sut1.GetHashCode();
+            var hashCode2 = sut2.GetHashCode();
 
             // assert
             Assert.Equal(hashCode1, hashCode2);

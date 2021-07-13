@@ -20,5 +20,26 @@ namespace Chel.Abstractions.Parsing
         {
             Value = value;
         }
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null || obj.GetType() != typeof(LiteralToken))
+            {
+                return false;
+            }
+            
+            var other = (LiteralToken)obj;
+
+            return
+                other.Location.Equals(Location) &&
+                other.Value.Equals(Value);
+        }
+        
+        public override int GetHashCode()
+        {
+            return
+                Location.GetHashCode() +
+                Value.GetHashCode();
+        }
     }
 }

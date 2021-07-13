@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Chel.Abstractions.Parsing;
 using Chel.Exceptions;
 using Chel.Parsing;
@@ -72,21 +73,14 @@ namespace Chel.UnitTests.Parsing
         {
             // arrange
             var sut = new Tokenizer("abc");
+            var expected = new[] {
+                new LiteralToken(new SourceLocation(1, 1), 'a'),
+                new LiteralToken(new SourceLocation(1, 2), 'b'),
+                new LiteralToken(new SourceLocation(1, 3), 'c')
+            };
             
-            // act
-            var result1 = (LiteralToken)sut.GetNextToken();
-            var result2 = (LiteralToken)sut.GetNextToken();
-            var result3 = (LiteralToken)sut.GetNextToken();
-            var result4 = sut.GetNextToken();
-
-            // assert
-            Assert.Equal('a', result1.Value);
-            Assert.Equal(new SourceLocation(1, 1), result1.Location);
-            Assert.Equal('b', result2.Value);
-            Assert.Equal(new SourceLocation(1, 2), result2.Location);
-            Assert.Equal('c', result3.Value);
-            Assert.Equal(new SourceLocation(1, 3), result3.Location);
-            Assert.Null(result4);
+            // act, assert
+            AssertTokenStream(expected, sut);
         }
 
         [Fact]
@@ -94,27 +88,17 @@ namespace Chel.UnitTests.Parsing
         {
             // arrange
             var sut = new Tokenizer("\na\nb\n");
-            
-            // act
-            var result1 = (LiteralToken)sut.GetNextToken();
-            var result2 = (LiteralToken)sut.GetNextToken();
-            var result3 = (LiteralToken)sut.GetNextToken();
-            var result4 = (LiteralToken)sut.GetNextToken();
-            var result5 = (LiteralToken)sut.GetNextToken();
-            var result6 = sut.GetNextToken();
 
-            // assert
-            Assert.Equal('\n', result1.Value);
-            Assert.Equal(new SourceLocation(1, 1), result1.Location);
-            Assert.Equal('a', result2.Value);
-            Assert.Equal(new SourceLocation(2, 1), result2.Location);
-            Assert.Equal('\n', result3.Value);
-            Assert.Equal(new SourceLocation(2, 2), result3.Location);
-            Assert.Equal('b', result4.Value);
-            Assert.Equal(new SourceLocation(3, 1), result4.Location);
-            Assert.Equal('\n', result5.Value);
-            Assert.Equal(new SourceLocation(3, 2), result5.Location);
-            Assert.Null(result6);
+            var expected = new[] {
+                new LiteralToken(new SourceLocation(1, 1), '\n'),
+                new LiteralToken(new SourceLocation(2, 1), 'a'),
+                new LiteralToken(new SourceLocation(2, 2), '\n'),
+                new LiteralToken(new SourceLocation(3, 1), 'b'),
+                new LiteralToken(new SourceLocation(3, 2), '\n')
+            };
+            
+            // act, assert
+            AssertTokenStream(expected, sut);
         }
 
         [Fact]
@@ -122,21 +106,15 @@ namespace Chel.UnitTests.Parsing
         {
             // arrange
             var sut = new Tokenizer("(a)");
-            
-            // act
-            var result1 = (SpecialToken)sut.GetNextToken();
-            var result2 = (LiteralToken)sut.GetNextToken();
-            var result3 = (SpecialToken)sut.GetNextToken();
-            var result4 = sut.GetNextToken();
 
-            // assert
-            Assert.Equal(SpecialTokenType.BlockStart, result1.Type);
-            Assert.Equal(new SourceLocation(1, 1), result1.Location);
-            Assert.Equal('a', result2.Value);
-            Assert.Equal(new SourceLocation(1, 2), result2.Location);
-            Assert.Equal(SpecialTokenType.BlockEnd, result3.Type);
-            Assert.Equal(new SourceLocation(1, 3), result3.Location);
-            Assert.Null(result4);
+            var expected = new Token[] {
+                new SpecialToken(new SourceLocation(1, 1), SpecialTokenType.BlockStart),
+                new LiteralToken(new SourceLocation(1, 2), 'a'),
+                new SpecialToken(new SourceLocation(1, 3), SpecialTokenType.BlockEnd)
+            };
+            
+            // act, assert
+            AssertTokenStream(expected, sut);
         }
 
         [Fact]
@@ -144,21 +122,15 @@ namespace Chel.UnitTests.Parsing
         {
             // arrange
             var sut = new Tokenizer("\\(a\\)");
-            
-            // act
-            var result1 = (LiteralToken)sut.GetNextToken();
-            var result2 = (LiteralToken)sut.GetNextToken();
-            var result3 = (LiteralToken)sut.GetNextToken();
-            var result4 = sut.GetNextToken();
 
-            // assert
-            Assert.Equal('(', result1.Value);
-            Assert.Equal(new SourceLocation(1, 2), result1.Location);
-            Assert.Equal('a', result2.Value);
-            Assert.Equal(new SourceLocation(1, 3), result2.Location);
-            Assert.Equal(')', result3.Value);
-            Assert.Equal(new SourceLocation(1, 5), result3.Location);
-            Assert.Null(result4);
+            var expected = new[] {
+                new LiteralToken(new SourceLocation(1, 2), '('),
+                new LiteralToken(new SourceLocation(1, 3), 'a'),
+                new LiteralToken(new SourceLocation(1, 5), ')')
+            };
+            
+            // act, assert
+            AssertTokenStream(expected, sut);
         }
 
         [Fact]
@@ -180,18 +152,14 @@ namespace Chel.UnitTests.Parsing
         {
             // arrange
             var sut = new Tokenizer("a\\\\");
-            
-            // act
-            var result1 = (LiteralToken)sut.GetNextToken();
-            var result2 = (LiteralToken)sut.GetNextToken();
-            var result3 = sut.GetNextToken();
 
-            // assert
-            Assert.Equal('a', result1.Value);
-            Assert.Equal(new SourceLocation(1, 1), result1.Location);
-            Assert.Equal('\\', result2.Value);
-            Assert.Equal(new SourceLocation(1, 3), result2.Location);
-            Assert.Null(result3);
+            var expected = new[] {
+                new LiteralToken(new SourceLocation(1, 1), 'a'),
+                new LiteralToken(new SourceLocation(1, 3), '\\')
+            };
+            
+            // act, assert
+            AssertTokenStream(expected, sut);
         }
 
         [Fact]
@@ -200,26 +168,16 @@ namespace Chel.UnitTests.Parsing
             // arrange
             var sut = new Tokenizer("a \\# b");
 
-            // act
-            var result1 = (LiteralToken)sut.GetNextToken();
-            var result2 = (LiteralToken)sut.GetNextToken();
-            var result3 = (LiteralToken)sut.GetNextToken();
-            var result4 = (LiteralToken)sut.GetNextToken();
-            var result5 = (LiteralToken)sut.GetNextToken();
-            var result6 = sut.GetNextToken();
-
-            // assert
-            Assert.Equal('a', result1.Value);
-            Assert.Equal(new SourceLocation(1, 1), result1.Location);
-            Assert.Equal(' ', result2.Value);
-            Assert.Equal(new SourceLocation(1, 2), result2.Location);
-            Assert.Equal('#', result3.Value);
-            Assert.Equal(new SourceLocation(1, 4), result3.Location);
-            Assert.Equal(' ', result4.Value);
-            Assert.Equal(new SourceLocation(1, 5), result4.Location);
-            Assert.Equal('b', result5.Value);
-            Assert.Equal(new SourceLocation(1, 6), result5.Location);
-            Assert.Null(result6);
+            var expected = new[] {
+                new LiteralToken(new SourceLocation(1, 1), 'a'),
+                new LiteralToken(new SourceLocation(1, 2), ' '),
+                new LiteralToken(new SourceLocation(1, 4), '#'),
+                new LiteralToken(new SourceLocation(1, 5), ' '),
+                new LiteralToken(new SourceLocation(1, 6), 'b')
+            };
+            
+            // act, assert
+            AssertTokenStream(expected, sut);
         }
 
         [Fact]
@@ -228,23 +186,15 @@ namespace Chel.UnitTests.Parsing
             // arrange
             var sut = new Tokenizer("abc #comment");
 
-            // act
-            var result1 = (LiteralToken)sut.GetNextToken();
-            var result2 = (LiteralToken)sut.GetNextToken();
-            var result3 = (LiteralToken)sut.GetNextToken();
-            var result4 = (LiteralToken)sut.GetNextToken();
-            var result5 = sut.GetNextToken();
-
-            // assert
-            Assert.Equal('a', result1.Value);
-            Assert.Equal(new SourceLocation(1, 1), result1.Location);
-            Assert.Equal('b', result2.Value);
-            Assert.Equal(new SourceLocation(1, 2), result2.Location);
-            Assert.Equal('c', result3.Value);
-            Assert.Equal(new SourceLocation(1, 3), result3.Location);
-            Assert.Equal(' ', result4.Value);
-            Assert.Equal(new SourceLocation(1, 4), result4.Location);
-            Assert.Null(result5);
+            var expected = new[] {
+                new LiteralToken(new SourceLocation(1, 1), 'a'),
+                new LiteralToken(new SourceLocation(1, 2), 'b'),
+                new LiteralToken(new SourceLocation(1, 3), 'c'),
+                new LiteralToken(new SourceLocation(1, 4), ' ')
+            };
+            
+            // act, assert
+            AssertTokenStream(expected, sut);
         }
 
         [Fact]
@@ -253,29 +203,17 @@ namespace Chel.UnitTests.Parsing
             // arrange
             var sut = new Tokenizer("ab (c #comment)");
 
-            // act
-            var result1 = (LiteralToken)sut.GetNextToken();
-            var result2 = (LiteralToken)sut.GetNextToken();
-            var result3 = (LiteralToken)sut.GetNextToken();
-            var result4 = (SpecialToken)sut.GetNextToken();
-            var result5 = (LiteralToken)sut.GetNextToken();
-            var result6 = (LiteralToken)sut.GetNextToken();
-            var result7 = sut.GetNextToken();
-
-            // assert
-            Assert.Equal('a', result1.Value);
-            Assert.Equal(new SourceLocation(1, 1), result1.Location);
-            Assert.Equal('b', result2.Value);
-            Assert.Equal(new SourceLocation(1, 2), result2.Location);
-            Assert.Equal(' ', result3.Value);
-            Assert.Equal(new SourceLocation(1, 3), result3.Location);
-            Assert.Equal(SpecialTokenType.BlockStart, result4.Type);
-            Assert.Equal(new SourceLocation(1, 4), result4.Location);
-            Assert.Equal('c', result5.Value);
-            Assert.Equal(new SourceLocation(1, 5), result5.Location);
-            Assert.Equal(' ', result6.Value);
-            Assert.Equal(new SourceLocation(1, 6), result6.Location);
-            Assert.Null(result7);
+            var expected = new Token[] {
+                new LiteralToken(new SourceLocation(1, 1), 'a'),
+                new LiteralToken(new SourceLocation(1, 2), 'b'),
+                new LiteralToken(new SourceLocation(1, 3), ' '),
+                new SpecialToken(new SourceLocation(1, 4), SpecialTokenType.BlockStart),
+                new LiteralToken(new SourceLocation(1, 5), 'c'),
+                new LiteralToken(new SourceLocation(1, 6), ' '),
+            };
+            
+            // act, assert
+            AssertTokenStream(expected, sut);
         }
 
         [Fact]
@@ -284,20 +222,14 @@ namespace Chel.UnitTests.Parsing
             // arrange
             var sut = new Tokenizer("ab(#comment#)c");
 
-            // act
-            var result1 = (LiteralToken)sut.GetNextToken();
-            var result2 = (LiteralToken)sut.GetNextToken();
-            var result3 = (LiteralToken)sut.GetNextToken();
-            var result4 = sut.GetNextToken();
+            var expected = new[] {
+                new LiteralToken(new SourceLocation(1, 1), 'a'),
+                new LiteralToken(new SourceLocation(1, 2), 'b'),
+                new LiteralToken(new SourceLocation(1, 14), 'c')
+            };
             
-            // assert
-            Assert.Equal('a', result1.Value);
-            Assert.Equal(new SourceLocation(1, 1), result1.Location);
-            Assert.Equal('b', result2.Value);
-            Assert.Equal(new SourceLocation(1, 2), result2.Location);
-            Assert.Equal('c', result3.Value);
-            Assert.Equal(new SourceLocation(1, 14), result3.Location);
-            Assert.Null(result4);
+            // act, assert
+            AssertTokenStream(expected, sut);
         }
 
         [Fact]
@@ -306,20 +238,16 @@ namespace Chel.UnitTests.Parsing
             // arrange
             var sut = new Tokenizer("ab (#comment");
 
-            // act
-            var result1 = (LiteralToken)sut.GetNextToken();
-            var result2 = (LiteralToken)sut.GetNextToken();
-            var result3 = (LiteralToken)sut.GetNextToken();
+            var expected = new[] {
+                new LiteralToken(new SourceLocation(1, 1), 'a'),
+                new LiteralToken(new SourceLocation(1, 2), 'b'),
+                new LiteralToken(new SourceLocation(1, 3), ' ')
+            };
             
-            // assert
+            // act, assert
+            AssertTokenStream(expected, sut, expectError: true);
+
             var ex = Assert.Throws<ParseException>(() => sut.GetNextToken());
-            
-            Assert.Equal('a', result1.Value);
-            Assert.Equal(new SourceLocation(1, 1), result1.Location);
-            Assert.Equal('b', result2.Value);
-            Assert.Equal(new SourceLocation(1, 2), result2.Location);
-            Assert.Equal(' ', result3.Value);
-            Assert.Equal(new SourceLocation(1, 3), result3.Location);
             Assert.Equal("Missing comment block end.", ex.Message);
 
             var commentBlockStartLocation = new SourceLocation(1, 4);
@@ -332,24 +260,36 @@ namespace Chel.UnitTests.Parsing
             // arrange
             var sut = new Tokenizer("ab #)");
 
-            // act
-            var result1 = (LiteralToken)sut.GetNextToken();
-            var result2 = (LiteralToken)sut.GetNextToken();
-            var result3 = (LiteralToken)sut.GetNextToken();
+            var expected = new[] {
+                new LiteralToken(new SourceLocation(1, 1), 'a'),
+                new LiteralToken(new SourceLocation(1, 2), 'b'),
+                new LiteralToken(new SourceLocation(1, 3), ' ')
+            };
             
-            // assert
+            // act, assert
+            AssertTokenStream(expected, sut, expectError: true);
+            
             var ex = Assert.Throws<ParseException>(() => sut.GetNextToken());
-            
-            Assert.Equal('a', result1.Value);
-            Assert.Equal(new SourceLocation(1, 1), result1.Location);
-            Assert.Equal('b', result2.Value);
-            Assert.Equal(new SourceLocation(1, 2), result2.Location);
-            Assert.Equal(' ', result3.Value);
-            Assert.Equal(new SourceLocation(1, 3), result3.Location);
             Assert.Equal("Missing comment block start.", ex.Message);
 
             var commentBlockStartLocation = new SourceLocation(1, 4);
             Assert.Equal(commentBlockStartLocation, ex.SourceLocation);
+        }
+
+        private void AssertTokenStream(IEnumerable<Token> expected, Tokenizer sut, bool expectError = false)
+        {
+            // act, assert
+            foreach(var token in expected)
+            {
+                var result = sut.GetNextToken();
+                Assert.Equal(token, result);
+            }
+
+            if(!expectError)
+            {
+                var finalResult = sut.GetNextToken();
+                Assert.Null(finalResult);
+            }
         }
     }
 }

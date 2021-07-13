@@ -44,8 +44,8 @@ namespace Chel.Abstractions.Parsing
             var other = (SourceLocation)obj;
             
             return
-                other.LineNumber == LineNumber &&
-                other.CharacterNumber == CharacterNumber;
+                other.LineNumber.Equals(LineNumber) &&
+                other.CharacterNumber.Equals(CharacterNumber);
         }
         
         public override int GetHashCode()
