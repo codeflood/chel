@@ -314,7 +314,6 @@ namespace Chel.UnitTests.Parsing
             // assert
             var ex = Assert.Throws<ParseException>(() => sut.GetNextToken());
             
-            // assert
             Assert.Equal('a', result1.Value);
             Assert.Equal(new SourceLocation(1, 1), result1.Location);
             Assert.Equal('b', result2.Value);
@@ -341,7 +340,6 @@ namespace Chel.UnitTests.Parsing
             // assert
             var ex = Assert.Throws<ParseException>(() => sut.GetNextToken());
             
-            // assert
             Assert.Equal('a', result1.Value);
             Assert.Equal(new SourceLocation(1, 1), result1.Location);
             Assert.Equal('b', result2.Value);
