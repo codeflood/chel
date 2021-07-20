@@ -17,9 +17,11 @@ namespace Chel.Parsing
 	public class Tokenizer : ITokenizer, IDisposable
 	{
 		private const char NewLine = '\n';
+		private const char Escape = '\\';
 		private const char BlockStart = '(';
 		private const char BlockEnd = ')';
 		private const char Comment = '#';
+		private const char Variable = '$';
 
 		private StringReader _reader = null;
 		private int _currentLineNumber = 1;
@@ -52,7 +54,7 @@ namespace Chel.Parsing
 				case NewLine:
 					return HandleNewLine();
 				
-				case Symbols.Escape:
+				case Escape:
 					return HandleEscaped();
 
 				case Comment:
@@ -73,6 +75,12 @@ namespace Chel.Parsing
 
 				case BlockEnd:
 					return HandleSpecial(SpecialTokenType.BlockEnd);
+
+				case Variable:
+					return HandleSpecial(SpecialTokenType.VariableMarker);
+
+				case Symbols.ParameterName:
+					return HandleSpecial(SpecialTokenType.ParameterName);
 
 				case -1:
 					HandleEndOfStream();
@@ -149,7 +157,9 @@ namespace Chel.Parsing
 
 			if(nextChar == BlockStart ||
 				nextChar == BlockEnd ||
-				nextChar == Symbols.Escape ||
+				nextChar == Escape ||
+				nextChar == Variable ||
+				nextChar == Symbols.ParameterName ||
 				nextChar == Comment)
 				return HandleLiteral((char)nextChar);
 

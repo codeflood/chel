@@ -1,9 +1,9 @@
 using System.Collections.Generic;
-using Chel.Abstractions;
+using Chel.Abstractions.Parsing;
 
 namespace Chel.UnitTests.Comparers
 {
-    public class CommandInputEqualityComparer : IEqualityComparer<CommandInput>
+	public class CommandInputEqualityComparer : IEqualityComparer<CommandInput>
     {
         public bool Equals(CommandInput x, CommandInput y)
         {

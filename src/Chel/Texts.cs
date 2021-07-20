@@ -39,6 +39,8 @@ namespace Chel
         public const string MissingRequiredNumberedParameter = "Missing required numbered parameter '{0}'";
 
         public const string MissingValueForNamedParameter = "Missing value for named parameter '{0}'";
+
+        public const string MissingVariableName = "Missing variable name";
         
         public const string ParameterDoesNotImplementICommand = "{0} does not implement ICommand";
 

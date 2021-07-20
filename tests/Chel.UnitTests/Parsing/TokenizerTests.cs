@@ -276,6 +276,169 @@ namespace Chel.UnitTests.Parsing
             Assert.Equal(commentBlockStartLocation, ex.SourceLocation);
         }
 
+        [Fact]
+        public void GetNextToken_InputIsVariable_IncludesVariableToken()
+        {
+            // arrange
+            var sut = new Tokenizer("$a$");
+
+            var expected = new Token[] {
+                new SpecialToken(new SourceLocation(1, 1), SpecialTokenType.VariableMarker),
+                new LiteralToken(new SourceLocation(1, 2), 'a'),
+                new SpecialToken(new SourceLocation(1, 3), SpecialTokenType.VariableMarker)
+            };
+
+            // act, assert
+            AssertTokenStream(expected, sut);
+        }
+
+        [Fact]
+        public void GetNextToken_InputHasEscapedVariable_TreatVariableAsLiteral()
+        {
+            // arrange
+            var sut = new Tokenizer("\\$a\\$");
+
+            var expected = new[] {
+                new LiteralToken(new SourceLocation(1, 2), '$'),
+                new LiteralToken(new SourceLocation(1, 3), 'a'),
+                new LiteralToken(new SourceLocation(1, 5), '$')
+            };
+
+            // act, assert
+            AssertTokenStream(expected, sut);
+        }
+
+        [Fact]
+        public void GetNextToken_InputIncludesVariable_IncludesVariableToken()
+        {
+            // arrange
+            var sut = new Tokenizer("a$a$");
+
+            var expected = new Token[] {
+                new LiteralToken(new SourceLocation(1, 1), 'a'),
+                new SpecialToken(new SourceLocation(1, 2), SpecialTokenType.VariableMarker),
+                new LiteralToken(new SourceLocation(1, 3), 'a'),
+                new SpecialToken(new SourceLocation(1, 4), SpecialTokenType.VariableMarker)
+            };
+
+            // act, assert
+            AssertTokenStream(expected, sut);
+        }
+
+        [Fact]
+        public void GetNextToken_InputIncludesSeperatedVariable_IncludesVariableToken()
+        {
+            // arrange
+            var sut = new Tokenizer("cmd $var$ cont");
+            
+            var expected = new Token[] {
+                new LiteralToken(new SourceLocation(1, 1), 'c'),
+                new LiteralToken(new SourceLocation(1, 2), 'm'),
+                new LiteralToken(new SourceLocation(1, 3), 'd'),
+                new LiteralToken(new SourceLocation(1, 4), ' '),
+                new SpecialToken(new SourceLocation(1, 5), SpecialTokenType.VariableMarker),
+                new LiteralToken(new SourceLocation(1, 6), 'v'),
+                new LiteralToken(new SourceLocation(1, 7), 'a'),
+                new LiteralToken(new SourceLocation(1, 8), 'r'),
+                new SpecialToken(new SourceLocation(1, 9), SpecialTokenType.VariableMarker),
+                new LiteralToken(new SourceLocation(1, 10), ' '),
+                new LiteralToken(new SourceLocation(1, 11), 'c'),
+                new LiteralToken(new SourceLocation(1, 12), 'o'),
+                new LiteralToken(new SourceLocation(1, 13), 'n'),
+                new LiteralToken(new SourceLocation(1, 14), 't'),
+            };
+
+            // act, assert
+            AssertTokenStream(expected, sut);
+        }
+
+        [Fact]
+        public void GetNextToken_BlockStartsWithDash_IncludesParameterNameSymbol()
+        {
+            // arrange
+            var sut = new Tokenizer("cmd -par");
+            
+            var expected = new Token[] {
+                new LiteralToken(new SourceLocation(1, 1), 'c'),
+                new LiteralToken(new SourceLocation(1, 2), 'm'),
+                new LiteralToken(new SourceLocation(1, 3), 'd'),
+                new LiteralToken(new SourceLocation(1, 4), ' '),
+                new SpecialToken(new SourceLocation(1, 5), SpecialTokenType.ParameterName),
+                new LiteralToken(new SourceLocation(1, 6), 'p'),
+                new LiteralToken(new SourceLocation(1, 7), 'a'),
+                new LiteralToken(new SourceLocation(1, 8), 'r'),
+            };
+
+            // act, assert
+            AssertTokenStream(expected, sut);
+        }
+
+        [Fact]
+        public void GetNextToken_BlockStartsWithEscapedDash_DashTreatedAsLiteral()
+        {
+            // arrange
+            var sut = new Tokenizer(@"cmd \-par");
+            
+            var expected = new Token[] {
+                new LiteralToken(new SourceLocation(1, 1), 'c'),
+                new LiteralToken(new SourceLocation(1, 2), 'm'),
+                new LiteralToken(new SourceLocation(1, 3), 'd'),
+                new LiteralToken(new SourceLocation(1, 4), ' '),
+                new LiteralToken(new SourceLocation(1, 6), '-'),
+                new LiteralToken(new SourceLocation(1, 7), 'p'),
+                new LiteralToken(new SourceLocation(1, 8), 'a'),
+                new LiteralToken(new SourceLocation(1, 9), 'r'),
+            };
+
+            // act, assert
+            AssertTokenStream(expected, sut);
+        }
+
+        [Fact]
+        public void GetNextToken_DashInParameter_IncludesParameterNameSymbol()
+        {
+            // arrange
+            var sut = new Tokenizer(@"cmd p-ar");
+            
+            var expected = new Token[] {
+                new LiteralToken(new SourceLocation(1, 1), 'c'),
+                new LiteralToken(new SourceLocation(1, 2), 'm'),
+                new LiteralToken(new SourceLocation(1, 3), 'd'),
+                new LiteralToken(new SourceLocation(1, 4), ' '),
+                new LiteralToken(new SourceLocation(1, 5), 'p'),
+                new SpecialToken(new SourceLocation(1, 6), SpecialTokenType.ParameterName),
+                new LiteralToken(new SourceLocation(1, 7), 'a'),
+                new LiteralToken(new SourceLocation(1, 8), 'r'),
+            };
+
+            // act, assert
+            AssertTokenStream(expected, sut);
+        }
+
+        [Fact]
+        public void GetNextToken_DashAfterSpaceInBracketedParameter_IncludesParameterNameSymbol()
+        {
+            // arrange
+            var sut = new Tokenizer(@"cmd (p -ar)");
+            
+            var expected = new Token[] {
+                new LiteralToken(new SourceLocation(1, 1), 'c'),
+                new LiteralToken(new SourceLocation(1, 2), 'm'),
+                new LiteralToken(new SourceLocation(1, 3), 'd'),
+                new LiteralToken(new SourceLocation(1, 4), ' '),
+                new SpecialToken(new SourceLocation(1, 5), SpecialTokenType.BlockStart),
+                new LiteralToken(new SourceLocation(1, 6), 'p'),
+                new LiteralToken(new SourceLocation(1, 7), ' '),
+                new SpecialToken(new SourceLocation(1, 8), SpecialTokenType.ParameterName),
+                new LiteralToken(new SourceLocation(1, 9), 'a'),
+                new LiteralToken(new SourceLocation(1, 10), 'r'),
+                new SpecialToken(new SourceLocation(1, 11), SpecialTokenType.BlockEnd)
+            };
+
+            // act, assert
+            AssertTokenStream(expected, sut);
+        }
+
         private void AssertTokenStream(IEnumerable<Token> expected, Tokenizer sut, bool expectError = false)
         {
             // act, assert

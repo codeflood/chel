@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Chel.Abstractions
+namespace Chel.Abstractions.Parsing
 {
     /// <summary>
     /// A single command input to be executed.
@@ -21,7 +21,7 @@ namespace Chel.Abstractions
         /// <summary>
         /// Gets the parameters for the command.
         /// </summary>
-        public IReadOnlyList<string> Parameters { get; private set; }
+        public IReadOnlyList<CommandParameter> Parameters { get; private set; }
 
         private CommandInput()
         {
@@ -34,7 +34,7 @@ namespace Chel.Abstractions
         {
             private int _sourceLine = -1;
             private string _commandName = null;
-            private List<string> _parameters = null;
+            private List<CommandParameter> _parameters = null;
 
             /// <summary>
             /// Create a new instance.
@@ -55,14 +55,14 @@ namespace Chel.Abstractions
                 _sourceLine = sourceLine;
                 _commandName = commandName;
 
-                _parameters = new List<string>();
+                _parameters = new List<CommandParameter>();
             }
 
             /// <summary>
             /// Add a parameter to the command input.
             /// </summary>
             /// <param name="value">The parameter value to add.</param>
-            public void AddParameter(string value)
+            public void AddParameter(CommandParameter value)
             {
                 if(value == null)
                     throw new ArgumentNullException(nameof(value));
@@ -79,7 +79,7 @@ namespace Chel.Abstractions
                 {
                     SourceLine = _sourceLine,
                     CommandName = _commandName,
-                    Parameters = new List<string>(_parameters),
+                    Parameters = new List<CommandParameter>(_parameters),
                 };
 
                 return commandInput;

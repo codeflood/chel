@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
-using Chel.Abstractions;
+using Chel.Abstractions.Parsing;
 using Chel.Abstractions.Variables;
 using Chel.UnitTests.SampleCommands;
 using Xunit;
 
 namespace Chel.UnitTests
 {
-    public class CommandParameterBinderTests
+	public class CommandParameterBinderTests
     {
         [Fact]
         public void Ctor_CommandRegistryIsNull_ThrowsException()
@@ -94,7 +94,7 @@ namespace Chel.UnitTests
             // arrange
             var sut = CreateCommandParameterBinder(typeof(NumberedParameterCommand));
             var command = new NumberedParameterCommand();
-            var input = CreateCommandInput("num", "value");
+            var input = CreateCommandInput("num", new LiteralCommandParameter("value"));
 
             // act
             var result = sut.Bind(command, input);
@@ -110,7 +110,7 @@ namespace Chel.UnitTests
             // arrange
             var sut = CreateCommandParameterBinder(typeof(NumberedParameterCommand));
             var command = new NumberedParameterCommand();
-            var input = CreateCommandInput("num", "value1", "value2");
+            var input = CreateCommandInput("num", new LiteralCommandParameter("value1"), new LiteralCommandParameter("value2"));
 
             // act
             var result = sut.Bind(command, input);
@@ -127,7 +127,12 @@ namespace Chel.UnitTests
             // arrange
             var sut = CreateCommandParameterBinder(typeof(NumberedParameterCommand));
             var command = new NumberedParameterCommand();
-            var input = CreateCommandInput("num", "value1", "value2", "value3");
+            var input = CreateCommandInput(
+                "num",
+                new LiteralCommandParameter("value1"),
+                new LiteralCommandParameter("value2"),
+                new LiteralCommandParameter("value3")
+            );
 
             // act
             var result = sut.Bind(command, input);
@@ -143,7 +148,13 @@ namespace Chel.UnitTests
             // arrange
             var sut = CreateCommandParameterBinder(typeof(NumberedParameterCommand));
             var command = new NumberedParameterCommand();
-            var input = CreateCommandInput("num", "value1", "value2", "value3", "value4");
+            var input = CreateCommandInput(
+                "num",
+                new LiteralCommandParameter("value1"), 
+                new LiteralCommandParameter("value2"),
+                new LiteralCommandParameter("value3"),
+                new LiteralCommandParameter("value4")
+            );
 
             // act
             var result = sut.Bind(command, input);
@@ -159,7 +170,7 @@ namespace Chel.UnitTests
             // arrange
             var sut = CreateCommandParameterBinder(typeof(NumberedParameterCommand));
             var command = new NumberedParameterCommand();
-            var input = CreateCommandInput("num", @"\-value");
+            var input = CreateCommandInput("num", new LiteralCommandParameter("-value"));
 
             // act
             var result = sut.Bind(command, input);
@@ -170,28 +181,12 @@ namespace Chel.UnitTests
         }
 
         [Fact]
-        public void Bind_NumberedParameterStartsWithDash_TreatParameterAsUnknownFlag()
-        {
-            // arrange
-            var sut = CreateCommandParameterBinder(typeof(NumberedParameterCommand));
-            var command = new NumberedParameterCommand();
-            var input = CreateCommandInput("num", "-value");
-
-            // act
-            var result = sut.Bind(command, input);
-
-            // assert
-            Assert.False(result.Success);
-            Assert.Equal(new[]{ "Unknown flag parameter 'value'" }, result.Errors);
-        }
-
-        [Fact]
         public void Bind_NumberedParameterContainsDash_BindsProperty()
         {
             // arrange
             var sut = CreateCommandParameterBinder(typeof(NumberedParameterCommand));
             var command = new NumberedParameterCommand();
-            var input = CreateCommandInput("num", "val-ue");
+            var input = CreateCommandInput("num", new LiteralCommandParameter("val-ue"));
 
             // act
             var result = sut.Bind(command, input);
@@ -207,7 +202,7 @@ namespace Chel.UnitTests
             // arrange
             var sut = CreateCommandParameterBinder(typeof(NumericNumberedParameterCommand));
             var command = new NumericNumberedParameterCommand();
-            var input = CreateCommandInput("command", "3000000000");
+            var input = CreateCommandInput("command", new LiteralCommandParameter("3000000000"));
 
             // act
             var result = sut.Bind(command, input);
@@ -223,7 +218,11 @@ namespace Chel.UnitTests
             // arrange
             var sut = CreateCommandParameterBinder(typeof(NamedParameterCommand));
             var command = new NamedParameterCommand();
-            var input = CreateCommandInput("nam", "-param1", "value1");
+            var input = CreateCommandInput(
+                "nam",
+                new ParameterNameCommandParameter("param1"),
+                new LiteralCommandParameter("value1")
+            );
             
             // act
             var result = sut.Bind(command, input);
@@ -239,7 +238,11 @@ namespace Chel.UnitTests
             // arrange
             var sut = CreateCommandParameterBinder(typeof(NamedParameterCommand));
             var command = new NamedParameterCommand();
-            var input = CreateCommandInput("nam", "-PARAM1", "value1");
+            var input = CreateCommandInput(
+                "nam",
+                new ParameterNameCommandParameter("PARAM1"),
+                new LiteralCommandParameter("value1")
+            );
             
             // act
             var result = sut.Bind(command, input);
@@ -255,7 +258,7 @@ namespace Chel.UnitTests
             // arrange
             var sut = CreateCommandParameterBinder(typeof(NamedParameterCommand));
             var command = new NamedParameterCommand();
-            var input = CreateCommandInput("nam", "-param1");
+            var input = CreateCommandInput("nam", new ParameterNameCommandParameter("param1"));
             
             // act
             var result = sut.Bind(command, input);
@@ -266,12 +269,12 @@ namespace Chel.UnitTests
         }
 
         [Fact]
-        public void Bind_NamedParameterValueStartsWithEscapedDash_BindsProperty()
+        public void Bind_NamedParameterValueStartsWithDash_BindsProperty()
         {
             // arrange
             var sut = CreateCommandParameterBinder(typeof(NamedParameterCommand));
             var command = new NamedParameterCommand();
-            var input = CreateCommandInput("nam", "-param1", @"\-value1");
+            var input = CreateCommandInput("nam", new ParameterNameCommandParameter("param1"), new LiteralCommandParameter("-value1"));
             
             // act
             var result = sut.Bind(command, input);
@@ -282,28 +285,18 @@ namespace Chel.UnitTests
         }
 
         [Fact]
-        public void Bind_NamedParameterValueStartsWithDash_ErrorIncludedInResult()
-        {
-            // arrange
-            var sut = CreateCommandParameterBinder(typeof(NamedParameterCommand));
-            var command = new NamedParameterCommand();
-            var input = CreateCommandInput("nam", "-param1", "-value1");
-            
-            // act
-            var result = sut.Bind(command, input);
-
-            // assert
-            Assert.False(result.Success);
-            Assert.Equal(new[]{ "Missing value for named parameter 'param1'", "Unknown flag parameter 'value1'" }, result.Errors);
-        }
-
-        [Fact]
         public void Bind_MultipleNamedParametersOnCommand_BindsProperty()
         {
             // arrange
             var sut = CreateCommandParameterBinder(typeof(NamedParameterCommand));
             var command = new NamedParameterCommand();
-            var input = CreateCommandInput("nam", "-param1", "value1", "-param2", "value2");
+            var input = CreateCommandInput(
+                "nam",
+                new ParameterNameCommandParameter("param1"),
+                new LiteralCommandParameter("value1"),
+                new ParameterNameCommandParameter("param2"),
+                new LiteralCommandParameter("value2")
+            );
             
             // act
             var result = sut.Bind(command, input);
@@ -320,7 +313,13 @@ namespace Chel.UnitTests
             // arrange
             var sut = CreateCommandParameterBinder(typeof(NamedParameterCommand));
             var command = new NamedParameterCommand();
-            var input = CreateCommandInput("nam", "-ParaM1", "value1", "-ParaM2", "value2");
+            var input = CreateCommandInput(
+                "nam",
+                new ParameterNameCommandParameter("ParaM1"),
+                (LiteralCommandParameter)"value1",
+                new ParameterNameCommandParameter("ParaM2"),
+                (LiteralCommandParameter)"value2"
+            );
             
             // act
             var result = sut.Bind(command, input);
@@ -337,7 +336,13 @@ namespace Chel.UnitTests
             // arrange
             var sut = CreateCommandParameterBinder(typeof(NamedParameterCommand));
             var command = new NamedParameterCommand();
-            var input = CreateCommandInput("nam", "-param1", "value1", "-param1", "value2");
+            var input = CreateCommandInput(
+                "nam",
+                new ParameterNameCommandParameter("param1"),
+                (LiteralCommandParameter)"value1",
+                new ParameterNameCommandParameter("param1"),
+                (LiteralCommandParameter)"value2"
+            );
             
             // act
             var result = sut.Bind(command, input);
@@ -353,7 +358,15 @@ namespace Chel.UnitTests
             // arrange
             var sut = CreateCommandParameterBinder(typeof(NamedParameterCommand));
             var command = new NamedParameterCommand();
-            var input = CreateCommandInput("nam", "-param1", "value1", "-param1", "value2", "-param1", "value3");
+            var input = CreateCommandInput(
+                "nam",
+                new ParameterNameCommandParameter("param1"),
+                (LiteralCommandParameter)"value1",
+                new ParameterNameCommandParameter("param1"),
+                (LiteralCommandParameter)"value2",
+                new ParameterNameCommandParameter("param1"),
+                (LiteralCommandParameter)"value3"
+            );
             
             // act
             var result = sut.Bind(command, input);
@@ -369,7 +382,17 @@ namespace Chel.UnitTests
             // arrange
             var sut = CreateCommandParameterBinder(typeof(NamedParameterCommand));
             var command = new NamedParameterCommand();
-            var input = CreateCommandInput("nam", "-param1", "value1", "-param1", "value2", "-param1", "value3", "-param1", "value4");
+            var input = CreateCommandInput(
+                "nam",
+                new ParameterNameCommandParameter("param1"),
+                (LiteralCommandParameter)"value1",
+                new ParameterNameCommandParameter("param1"),
+                (LiteralCommandParameter)"value2",
+                new ParameterNameCommandParameter("param1"),
+                (LiteralCommandParameter)"value3",
+                new ParameterNameCommandParameter("param1"),
+                (LiteralCommandParameter)"value4"
+            );
             
             // act
             var result = sut.Bind(command, input);
@@ -385,7 +408,11 @@ namespace Chel.UnitTests
             // arrange
             var sut = CreateCommandParameterBinder(typeof(NamedParameterCommand));
             var command = new NamedParameterCommand();
-            var input = CreateCommandInput("nam", "-invalid", "value");
+            var input = CreateCommandInput(
+                "nam",
+                new ParameterNameCommandParameter("invalid"),
+                (LiteralCommandParameter)"value"
+            );
 
             // act
             var result = sut.Bind(command, input);
@@ -401,7 +428,11 @@ namespace Chel.UnitTests
             // arrange
             var sut = CreateCommandParameterBinder(typeof(FlagParameterCommand));
             var command = new FlagParameterCommand();
-            var input = CreateCommandInput("command", "-p1", "-p2");
+            var input = CreateCommandInput(
+                "command",
+                new ParameterNameCommandParameter("p1"),
+                new ParameterNameCommandParameter("p2")
+            );
 
             // act
             var result = sut.Bind(command, input);
@@ -418,7 +449,11 @@ namespace Chel.UnitTests
             // arrange
             var sut = CreateCommandParameterBinder(typeof(FlagParameterCommand));
             var command = new FlagParameterCommand();
-            var input = CreateCommandInput("command", "-unknown1", "-unknown2");
+            var input = CreateCommandInput(
+                "command",
+                new ParameterNameCommandParameter("unknown1"),
+                new ParameterNameCommandParameter("unknown2")
+            );
 
             // act
             var result = sut.Bind(command, input);
@@ -434,7 +469,11 @@ namespace Chel.UnitTests
             // arrange
             var sut = CreateCommandParameterBinder(typeof(FlagParameterCommand));
             var command = new FlagParameterCommand();
-            var input = CreateCommandInput("command", "-p1", "-p1");
+            var input = CreateCommandInput(
+                "command",
+                new ParameterNameCommandParameter("p1"),
+                new ParameterNameCommandParameter("p1")
+            );
 
             // act
             var result = sut.Bind(command, input);
@@ -450,7 +489,12 @@ namespace Chel.UnitTests
             // arrange
             var sut = CreateCommandParameterBinder(typeof(FlagParameterCommand));
             var command = new FlagParameterCommand();
-            var input = CreateCommandInput("command", "-p1", "-p1", "-p1");
+            var input = CreateCommandInput(
+                "command",
+                new ParameterNameCommandParameter("p1"),
+                new ParameterNameCommandParameter("p1"),
+                new ParameterNameCommandParameter("p1")
+            );
 
             // act
             var result = sut.Bind(command, input);
@@ -466,7 +510,13 @@ namespace Chel.UnitTests
             // arrange
             var sut = CreateCommandParameterBinder(typeof(FlagParameterCommand));
             var command = new FlagParameterCommand();
-            var input = CreateCommandInput("command", "-p1", "-p1", "-p1", "-p1");
+            var input = CreateCommandInput(
+                "command",
+                new ParameterNameCommandParameter("p1"),
+                new ParameterNameCommandParameter("p1"),
+                new ParameterNameCommandParameter("p1"),
+                new ParameterNameCommandParameter("p1")
+            );
 
             // act
             var result = sut.Bind(command, input);
@@ -482,7 +532,7 @@ namespace Chel.UnitTests
             // arrange
             var sut = CreateCommandParameterBinder(typeof(ParameterNoSetterCommand));
             var command = new ParameterNoSetterCommand();
-            var input = CreateCommandInput("command", "parameter");
+            var input = CreateCommandInput("command", (LiteralCommandParameter)"parameter");
 
             Action sutAction = () => sut.Bind(command, input);
 
@@ -529,7 +579,7 @@ namespace Chel.UnitTests
             // arrange
             var sut = CreateCommandParameterBinder(typeof(RequiredParameterCommand));
             var command = new RequiredParameterCommand();
-            var input = CreateCommandInput("command", "val");
+            var input = CreateCommandInput("command", (LiteralCommandParameter)"val");
 
             // act
             var result = sut.Bind(command, input);
@@ -539,15 +589,15 @@ namespace Chel.UnitTests
             Assert.Equal("val", command.NumberedParameter);
         }
 
-        [InlineData("num1", "-named", "value1")]
-        [InlineData("-named", "value1", "num1")]
         [Theory]
-        public void Bind_NumberedAndNamedParameters_BindsProperty(string parameter1, string parameter2, string parameter3)
+        [MemberData(nameof(Bind_NumberedAndNamedParameters_BindsProperty_Datasource))]
+        public void Bind_NumberedAndNamedParameters_BindsProperty(CommandParameter parameter1, CommandParameter parameter2, CommandParameter parameter3)
         {
             // arrange
             var sut = CreateCommandParameterBinder(typeof(AllParametersCommand));
             var command = new AllParametersCommand();
-            var input = CreateCommandInput("☕", parameter1, parameter2, parameter3);
+            var input = CreateCommandInput("☕", parameter1, parameter2, parameter3
+            );
             
             // act
             var result = sut.Bind(command, input);
@@ -558,10 +608,24 @@ namespace Chel.UnitTests
             Assert.Equal("value1", command.NamedParameter);
         }
 
-        [InlineData("num1", "-flag")]
-        [InlineData("-flag", "num1")]
+        public static IEnumerable<object[]> Bind_NumberedAndNamedParameters_BindsProperty_Datasource()
+        {
+            yield return new object[] {
+                new LiteralCommandParameter("num1"), 
+                new ParameterNameCommandParameter("named"),
+                new LiteralCommandParameter("value1")
+            };
+
+            yield return new object[] {
+                new ParameterNameCommandParameter("named"),
+                new LiteralCommandParameter("value1"),
+                new LiteralCommandParameter("num1"),
+            };
+        }
+
         [Theory]
-        public void Bind_NumberedAndFlagParameters_BindsProperty(string parameter1, string parameter2)
+        [MemberData(nameof(Bind_NumberedAndFlagParameters_BindsProperty_Datasource))]
+        public void Bind_NumberedAndFlagParameters_BindsProperty(CommandParameter parameter1, CommandParameter parameter2)
         {
             // arrange
             var sut = CreateCommandParameterBinder(typeof(AllParametersCommand));
@@ -577,15 +641,28 @@ namespace Chel.UnitTests
             Assert.True(command.FlagParameter);
         }
 
-        [InlineData("-named", "value1", "-flag")]
-        [InlineData("-flag", "-named", "value1")]
+        public static IEnumerable<object[]> Bind_NumberedAndFlagParameters_BindsProperty_Datasource()
+        {
+            yield return new object[] {
+                new LiteralCommandParameter("num1"), 
+                new ParameterNameCommandParameter("flag")
+            };
+
+            yield return new object[] {
+                new ParameterNameCommandParameter("flag"),
+                new LiteralCommandParameter("num1"),
+            };
+        }
+
         [Theory]
-        public void Bind_NamedAndFlagParameters_BindsProperty(string parameter1, string parameter2, string parameter3)
+        [MemberData(nameof(Bind_NamedAndFlagParameters_BindsProperty_Datasource))]
+        public void Bind_NamedAndFlagParameters_BindsProperty(CommandParameter parameter1, CommandParameter parameter2, CommandParameter parameter3)
         {
             // arrange
             var sut = CreateCommandParameterBinder(typeof(AllParametersCommand));
             var command = new AllParametersCommand();
-            var input = CreateCommandInput("☕", parameter1, parameter2, parameter3);
+            var input = CreateCommandInput("☕", parameter1, parameter2, parameter3
+            );
             
             // act
             var result = sut.Bind(command, input);
@@ -596,19 +673,34 @@ namespace Chel.UnitTests
             Assert.True(command.FlagParameter);
         }
 
-        [InlineData("-flag", "-named", "value1", "num1")]
-        [InlineData("-flag", "num1", "-named", "value1")]
-        [InlineData("-named", "value1", "num1", "-flag")]
-        [InlineData("-named", "value1", "-flag", "num1")]
-        [InlineData("num1", "-flag", "-named", "value1")]
-        [InlineData("num1", "-named", "value1", "-flag")]
+        public static IEnumerable<object[]> Bind_NamedAndFlagParameters_BindsProperty_Datasource()
+        {
+            yield return new object[] {
+                new ParameterNameCommandParameter("named"),
+                new LiteralCommandParameter("value1"), 
+                new ParameterNameCommandParameter("flag")
+            };
+
+            yield return new object[] {
+                new ParameterNameCommandParameter("flag"),
+                new ParameterNameCommandParameter("named"),
+                new LiteralCommandParameter("value1")
+            };
+        }
+
         [Theory]
-        public void Bind_AllParameters_BindsProperty(string parameter1, string parameter2, string parameter3, string parameter4)
+        [MemberData(nameof(Bind_AllParameters_BindsProperty_Datasource))]
+        public void Bind_AllParameters_BindsProperty(
+            CommandParameter parameter1,
+            CommandParameter parameter2,
+            CommandParameter parameter3,
+            CommandParameter parameter4)
         {
             // arrange
             var sut = CreateCommandParameterBinder(typeof(AllParametersCommand));
             var command = new AllParametersCommand();
-            var input = CreateCommandInput("☕", parameter1, parameter2, parameter3, parameter4);
+            var input = CreateCommandInput("☕", parameter1, parameter2, parameter3, parameter4
+            );
             
             // act
             var result = sut.Bind(command, input);
@@ -618,6 +710,51 @@ namespace Chel.UnitTests
             Assert.True(command.FlagParameter);
             Assert.Equal("num1", command.NumberedParameter);
             Assert.Equal("value1", command.NamedParameter);
+        }
+
+        public static IEnumerable<object[]> Bind_AllParameters_BindsProperty_Datasource()
+        {
+            yield return new object[] {
+                new ParameterNameCommandParameter("flag"),
+                new ParameterNameCommandParameter("named"),
+                new LiteralCommandParameter("value1"), 
+                new LiteralCommandParameter("num1")
+            };
+
+            yield return new object[] {
+                new ParameterNameCommandParameter("flag"),
+                new LiteralCommandParameter("num1"),
+                new ParameterNameCommandParameter("named"),
+                new LiteralCommandParameter("value1")
+            };
+
+            yield return new object[] {
+                new ParameterNameCommandParameter("named"),
+                new LiteralCommandParameter("value1"),
+                new ParameterNameCommandParameter("flag"),
+                new LiteralCommandParameter("num1")
+            };
+
+            yield return new object[] {
+                new ParameterNameCommandParameter("named"),
+                new LiteralCommandParameter("value1"),
+                new LiteralCommandParameter("num1"),
+                new ParameterNameCommandParameter("flag")
+            };
+
+            yield return new object[] {
+                new LiteralCommandParameter("num1"),
+                new ParameterNameCommandParameter("named"),
+                new LiteralCommandParameter("value1"),
+                new ParameterNameCommandParameter("flag")
+            };
+
+            yield return new object[] {
+                new LiteralCommandParameter("num1"),
+                new ParameterNameCommandParameter("flag"),
+                new ParameterNameCommandParameter("named"),
+                new LiteralCommandParameter("value1")
+            };
         }
 
         [InlineData("True", true)]
@@ -632,7 +769,7 @@ namespace Chel.UnitTests
             // arrange
             var sut = CreateCommandParameterBinder(typeof(ParameterTypesCommand));
             var command = new ParameterTypesCommand();
-            var input = CreateCommandInput("command", "-bool", value);
+            var input = CreateCommandInput("command", new ParameterNameCommandParameter("bool"), (LiteralCommandParameter)value);
 
             // act
             var result = sut.Bind(command, input);
@@ -655,7 +792,7 @@ namespace Chel.UnitTests
             // arrange
             var sut = CreateCommandParameterBinder(typeof(ParameterTypesCommand));
             var command = new ParameterTypesCommand();
-            var input = CreateCommandInput("command", "-byte", value);
+            var input = CreateCommandInput("command", new ParameterNameCommandParameter("byte"), (LiteralCommandParameter)value);
 
             // act
             var result = sut.Bind(command, input);
@@ -675,7 +812,7 @@ namespace Chel.UnitTests
             // arrange
             var sut = CreateCommandParameterBinder(typeof(ParameterTypesCommand));
             var command = new ParameterTypesCommand();
-            var input = CreateCommandInput("command", "-enum", value);
+            var input = CreateCommandInput("command", new ParameterNameCommandParameter("enum"), (LiteralCommandParameter)value);
 
             // act
             var result = sut.Bind(command, input);
@@ -688,7 +825,7 @@ namespace Chel.UnitTests
         [InlineData("0", 0)]
         [InlineData("1", 1)]
         [InlineData("1000020", 1000020)]
-        [InlineData(@"\-2147483648", int.MinValue)]
+        [InlineData("-2147483648", int.MinValue)]
         [InlineData("2147483647", int.MaxValue)]
         [Theory]
         public void Bind_IntTypeParameter_BindsParameter(string value, int expected)
@@ -696,7 +833,7 @@ namespace Chel.UnitTests
             // arrange
             var sut = CreateCommandParameterBinder(typeof(ParameterTypesCommand));
             var command = new ParameterTypesCommand();
-            var input = CreateCommandInput("command", "-int", value);
+            var input = CreateCommandInput("command", new ParameterNameCommandParameter("int"), (LiteralCommandParameter)value);
 
             // act
             var result = sut.Bind(command, input);
@@ -715,7 +852,7 @@ namespace Chel.UnitTests
             // arrange
             var sut = CreateCommandParameterBinder(typeof(ParameterTypesCommand));
             var command = new ParameterTypesCommand();
-            var input = CreateCommandInput("command", "-char", value);
+            var input = CreateCommandInput("command", new ParameterNameCommandParameter("char"), (LiteralCommandParameter)value);
 
             // act
             var result = sut.Bind(command, input);
@@ -734,7 +871,7 @@ namespace Chel.UnitTests
             // arrange
             var sut = CreateCommandParameterBinder(typeof(ParameterTypesCommand));
             var command = new ParameterTypesCommand();
-            var input = CreateCommandInput("command", "-float", value);
+            var input = CreateCommandInput("command", new ParameterNameCommandParameter("float"), (LiteralCommandParameter)value);
 
             // act
             var result = sut.Bind(command, input);
@@ -752,7 +889,7 @@ namespace Chel.UnitTests
             // arrange
             var sut = CreateCommandParameterBinder(typeof(ParameterTypesCommand));
             var command = new ParameterTypesCommand();
-            var input = CreateCommandInput("command", "-double", value);
+            var input = CreateCommandInput("command", new ParameterNameCommandParameter("double"), (LiteralCommandParameter)value);
 
             // act
             var result = sut.Bind(command, input);
@@ -769,7 +906,7 @@ namespace Chel.UnitTests
             // arrange
             var sut = CreateCommandParameterBinder(typeof(ParameterTypesCommand));
             var command = new ParameterTypesCommand();
-            var input = CreateCommandInput("command", "-date", value);
+            var input = CreateCommandInput("command", new ParameterNameCommandParameter("date"), (LiteralCommandParameter)value);
 
             // act
             var result = sut.Bind(command, input);
@@ -794,7 +931,7 @@ namespace Chel.UnitTests
             // arrange
             var sut = CreateCommandParameterBinder(typeof(ParameterTypesCommand));
             var command = new ParameterTypesCommand();
-            var input = CreateCommandInput("command", "-time", value);
+            var input = CreateCommandInput("command", new ParameterNameCommandParameter("time"), (LiteralCommandParameter)value);
 
             // act
             var result = sut.Bind(command, input);
@@ -820,7 +957,7 @@ namespace Chel.UnitTests
             // arrange
             var sut = CreateCommandParameterBinder(typeof(ParameterTypesCommand));
             var command = new ParameterTypesCommand();
-            var input = CreateCommandInput("command", "-guid", value);
+            var input = CreateCommandInput("command", new ParameterNameCommandParameter("guid"), (LiteralCommandParameter)value);
 
             // act
             var result = sut.Bind(command, input);
@@ -847,7 +984,7 @@ namespace Chel.UnitTests
             // arrange
             var sut = CreateCommandParameterBinder(typeof(ParameterTypesCommand));
             var command = new ParameterTypesCommand();
-            var input = CreateCommandInput("command", "-guid", value);
+            var input = CreateCommandInput("command", new ParameterNameCommandParameter("guid"), (LiteralCommandParameter)value);
 
             // act
             var result = sut.Bind(command, input);
@@ -879,7 +1016,7 @@ namespace Chel.UnitTests
             // arrange
             var sut = CreateCommandParameterBinder(typeof(ParameterTypesCommand));
             var command = new ParameterTypesCommand();
-            var input = CreateCommandInput("command", "-" + parameter, value);
+            var input = CreateCommandInput("command", new ParameterNameCommandParameter(parameter), (LiteralCommandParameter)value);
 
             // act
             var result = sut.Bind(command, input);
@@ -897,7 +1034,7 @@ namespace Chel.UnitTests
             var guid2 = Guid.NewGuid();
             var sut = CreateCommandParameterBinder(typeof(ParameterTypesCommand));
             var command = new ParameterTypesCommand();
-            var input = CreateCommandInput("command", "-guidarray", $"{guid1}|{guid2}");
+            var input = CreateCommandInput("command", new ParameterNameCommandParameter("guidarray"), (LiteralCommandParameter)$"{guid1}|{guid2}");
 
             // act
             var result = sut.Bind(command, input);
@@ -919,7 +1056,7 @@ namespace Chel.UnitTests
 
             var sut = new CommandParameterBinder(registry, replacer, variables);
             var command = new NamedParameterCommand();
-            var input = CreateCommandInput("nam", "-param1", "$foo$");
+            var input = CreateCommandInput("nam", new ParameterNameCommandParameter("param1"), new VariableCommandParameter("foo"));
             
             // act
             var result = sut.Bind(command, input);
@@ -935,7 +1072,7 @@ namespace Chel.UnitTests
             // arrange
             var sut = CreateCommandParameterBinder(typeof(NamedParameterCommand));
             var command = new NamedParameterCommand();
-            var input = CreateCommandInput("nam", "-param1", "$foo$");
+            var input = CreateCommandInput("nam", new ParameterNameCommandParameter("param1"), new VariableCommandParameter("foo"));
             
             // act
             var result = sut.Bind(command, input);
@@ -957,7 +1094,7 @@ namespace Chel.UnitTests
 
             var sut = new CommandParameterBinder(registry, replacer, variables);
             var command = new NumericNumberedParameterCommand();
-            var input = CreateCommandInput("command", "$foo$");
+            var input = CreateCommandInput("command", new VariableCommandParameter("foo"));
             
             // act
             var result = sut.Bind(command, input);
@@ -973,7 +1110,7 @@ namespace Chel.UnitTests
             // arrange
             var sut = CreateCommandParameterBinder(typeof(NumericNumberedParameterCommand));
             var command = new NumericNumberedParameterCommand();
-            var input = CreateCommandInput("command", "$foo$");
+            var input = CreateCommandInput("command", new VariableCommandParameter("foo"));
             
             // act
             var result = sut.Bind(command, input);
@@ -1004,7 +1141,7 @@ namespace Chel.UnitTests
             return registry;
         }
 
-        private CommandInput CreateCommandInput(string commandName, params string[] parameters)
+        private CommandInput CreateCommandInput(string commandName, params CommandParameter[] parameters)
         {
             var builder = new CommandInput.Builder(1, commandName);
 
@@ -1013,7 +1150,5 @@ namespace Chel.UnitTests
             
             return builder.Build();
         }
-
-        // todo: different types
     }
 }

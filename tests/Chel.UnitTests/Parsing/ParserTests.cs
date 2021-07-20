@@ -1,5 +1,5 @@
 using System;
-using Chel.Abstractions;
+using Chel.Abstractions.Parsing;
 using Chel.Exceptions;
 using Chel.Parsing;
 using Chel.UnitTests.Comparers;
@@ -88,7 +88,7 @@ namespace Chel.UnitTests.Parsing
             // arrange
             var sut = new Parser();
             var builder = new CommandInput.Builder(1, "command");
-            builder.AddParameter("param");
+            builder.AddParameter(new LiteralCommandParameter("param"));
             var expectedCommand = builder.Build();
 
             // act
@@ -107,8 +107,8 @@ namespace Chel.UnitTests.Parsing
             // arrange
             var sut = new Parser();
             var builder = new CommandInput.Builder(1, "command");
-            builder.AddParameter("param1");
-            builder.AddParameter("param2");
+            builder.AddParameter(new LiteralCommandParameter("param1"));
+            builder.AddParameter(new LiteralCommandParameter("param2"));
             var expectedCommand = builder.Build();
 
             // act
@@ -128,13 +128,13 @@ namespace Chel.UnitTests.Parsing
             var sut = new Parser();
             
             var builder1 = new CommandInput.Builder(1, "command");
-            builder1.AddParameter("param1");
-            builder1.AddParameter("param2");
+            builder1.AddParameter(new LiteralCommandParameter("param1"));
+            builder1.AddParameter(new LiteralCommandParameter("param2"));
             var expectedCommand1 = builder1.Build();
 
             var builder2 = new CommandInput.Builder(2, "command");
-            builder2.AddParameter("param1");
-            builder2.AddParameter("param2");
+            builder2.AddParameter(new LiteralCommandParameter("param1"));
+            builder2.AddParameter(new LiteralCommandParameter("param2"));
             var expectedCommand2 = builder2.Build();
 
             // act
@@ -152,8 +152,8 @@ namespace Chel.UnitTests.Parsing
             // arrange
             var sut = new Parser();
             var builder = new CommandInput.Builder(1, "command");
-            builder.AddParameter("-name");
-            builder.AddParameter("value");
+            builder.AddParameter(new ParameterNameCommandParameter("name"));
+            builder.AddParameter(new LiteralCommandParameter("value"));
             var expectedCommand = builder.Build();
 
             // act
@@ -171,10 +171,10 @@ namespace Chel.UnitTests.Parsing
             // arrange
             var sut = new Parser();
             var builder = new CommandInput.Builder(1, "command");
-            builder.AddParameter("-name");
-            builder.AddParameter("value");
-            builder.AddParameter("-name2");
-            builder.AddParameter("value2");
+            builder.AddParameter(new ParameterNameCommandParameter("name"));
+            builder.AddParameter(new LiteralCommandParameter("value"));
+            builder.AddParameter(new ParameterNameCommandParameter("name2"));
+            builder.AddParameter(new LiteralCommandParameter("value2"));
             var expectedCommand = builder.Build();
 
             // act
@@ -190,7 +190,7 @@ namespace Chel.UnitTests.Parsing
             // arrange
             var sut = new Parser();
             var builder = new CommandInput.Builder(1, "command");
-            builder.AddParameter("pa ram");
+            builder.AddParameter(new LiteralCommandParameter("pa ram"));
             var expectedCommand = builder.Build();
 
             // act
@@ -206,7 +206,7 @@ namespace Chel.UnitTests.Parsing
             // arrange
             var sut = new Parser();
             var builder = new CommandInput.Builder(1, "command");
-            builder.AddParameter("\n\n");
+            builder.AddParameter(new LiteralCommandParameter("\n\n"));
             var expectedCommand = builder.Build();
 
             // act
@@ -222,7 +222,7 @@ namespace Chel.UnitTests.Parsing
             // arrange
             var sut = new Parser();
             var builder = new CommandInput.Builder(1, "command");
-            builder.AddParameter("(param)");
+            builder.AddParameter(new LiteralCommandParameter("(param)"));
             var expectedCommand = builder.Build();
 
             // act
@@ -238,7 +238,7 @@ namespace Chel.UnitTests.Parsing
             // arrange
             var sut = new Parser();
             var builder = new CommandInput.Builder(1, "command");
-            builder.AddParameter(@"\");
+            builder.AddParameter(new LiteralCommandParameter(@"\"));
             var expectedCommand = builder.Build();
 
             // act
@@ -254,8 +254,8 @@ namespace Chel.UnitTests.Parsing
             // arrange
             var sut = new Parser();
             var builder = new CommandInput.Builder(1, "command");
-            builder.AddParameter("#");
-            builder.AddParameter("param");
+            builder.AddParameter(new LiteralCommandParameter("#"));
+            builder.AddParameter(new LiteralCommandParameter("param"));
             var expectedCommand = builder.Build();
 
             // act
@@ -271,8 +271,8 @@ namespace Chel.UnitTests.Parsing
             // arrange
             var sut = new Parser();
             var builder = new CommandInput.Builder(1, "command");
-            builder.AddParameter(" param  param ");
-            builder.AddParameter("param");
+            builder.AddParameter(new LiteralCommandParameter(" param  param "));
+            builder.AddParameter(new LiteralCommandParameter("param"));
             var expectedCommand = builder.Build();
 
             // act
@@ -288,7 +288,7 @@ namespace Chel.UnitTests.Parsing
             // arrange
             var sut = new Parser();
             var builder = new CommandInput.Builder(1, "command");
-            builder.AddParameter("param\nparam");
+            builder.AddParameter(new LiteralCommandParameter("param\nparam"));
             var expectedCommand = builder.Build();
 
             // act
@@ -304,7 +304,7 @@ namespace Chel.UnitTests.Parsing
             // arrange
             var sut = new Parser();
             var builder = new CommandInput.Builder(1, "command");
-            builder.AddParameter("(param)");
+            builder.AddParameter(new LiteralCommandParameter("(param)"));
             var expectedCommand = builder.Build();
 
             // act
@@ -320,7 +320,7 @@ namespace Chel.UnitTests.Parsing
             // arrange
             var sut = new Parser();
             var builder = new CommandInput.Builder(1, "command");
-            builder.AddParameter("\nic  (pa ram)\nic (pa ram)");
+            builder.AddParameter(new LiteralCommandParameter("\nic  (pa ram)\nic (pa ram)"));
             var expectedCommand = builder.Build();
 
             // act
@@ -336,8 +336,8 @@ namespace Chel.UnitTests.Parsing
             // arrange
             var sut = new Parser();
             var builder = new CommandInput.Builder(1, "command");
-            builder.AddParameter("pa ram");
-            builder.AddParameter("pa ram");
+            builder.AddParameter(new LiteralCommandParameter("pa ram"));
+            builder.AddParameter(new LiteralCommandParameter("pa ram"));
             var expectedCommand = builder.Build();
 
             // act
@@ -405,6 +405,132 @@ namespace Chel.UnitTests.Parsing
             // act, assert
             var exception = Assert.Throws<ParseException>(sutAction);
             Assert.Equal(2, exception.SourceLocation.LineNumber);
+        }
+
+        [Fact]
+        public void Parse_InputContainsVariable_VariableParsed()
+        {
+            // arrange
+            var builder = new CommandInput.Builder(1, "cmd");
+            builder.AddParameter(new VariableCommandParameter("var"));
+            var expectedCommand = builder.Build();
+
+            var sut = new Parser();
+
+            // act
+            var result = sut.Parse("cmd $var$");
+
+            // assert
+            Assert.Equal(expectedCommand, result[0], new CommandInputEqualityComparer());
+        }
+
+        [Fact]
+        public void Parse_InputContainsUnpairedVariableSymbol_ThrowsException()
+        {
+            // arrange
+            var sut = new Parser();
+            Action sutAction = () => sut.Parse("cmd $var");
+
+            // act, assert
+            var ex = Assert.Throws<ParseException>(sutAction);
+            Assert.Contains("Unpaired variable token $", ex.Message);
+        }
+
+        [Fact]
+        public void Parse_InputContainsEscapedVariableSymbol_ParseSymbolAsLiteral()
+        {
+            // arrange
+            var builder = new CommandInput.Builder(1, "cmd");
+            builder.AddParameter(new LiteralCommandParameter("$var$"));
+            var expectedCommand = builder.Build();
+
+            var sut = new Parser();
+
+            // act
+            var result = sut.Parse(@"cmd \$var\$");
+
+            // assert
+            Assert.Equal(expectedCommand, result[0], new CommandInputEqualityComparer());
+        }
+
+        [Fact]
+        public void Parse_InputContainsVariableWithNoName_ThrowsException()
+        {
+            // arrange
+            var sut = new Parser();
+            Action sutAction = () => sut.Parse("cmd $$");
+
+            // act, assert
+            var ex = Assert.Throws<ParseException>(sutAction);
+            Assert.Contains("Missing variable name", ex.Message);
+        }
+
+        [Fact]
+        public void Parse_InputContainsParameterName_ParsesParameterName()
+        {
+            // arrange
+            var builder = new CommandInput.Builder(1, "cmd");
+            builder.AddParameter(new ParameterNameCommandParameter("par"));
+            var expectedCommand = builder.Build();
+
+            var sut = new Parser();
+
+            // act
+            var result = sut.Parse("cmd -par");
+
+            // assert
+            Assert.Equal(expectedCommand, result[0], new CommandInputEqualityComparer());
+        }
+
+        [Fact]
+        public void Parse_InputContainsEscapedParameterNameSymbol_ParsesAsLiteral()
+        {
+            // arrange
+            var builder = new CommandInput.Builder(1, "cmd");
+            builder.AddParameter(new LiteralCommandParameter("-par"));
+            var expectedCommand = builder.Build();
+
+            var sut = new Parser();
+
+            // act
+            var result = sut.Parse(@"cmd \-par");
+
+            // assert
+            Assert.Equal(expectedCommand, result[0], new CommandInputEqualityComparer());
+        }
+
+        [Fact]
+        public void Parse_InputContainsParameterNameSymbol_ParsesAsLiteral()
+        {
+            // arrange
+            var builder = new CommandInput.Builder(1, "cmd");
+            builder.AddParameter(new LiteralCommandParameter("p-ar"));
+            var expectedCommand = builder.Build();
+
+            var sut = new Parser();
+
+            // act
+            var result = sut.Parse("cmd p-ar");
+
+            // assert
+            Assert.Equal(expectedCommand, result[0], new CommandInputEqualityComparer());
+        }
+
+        [Fact]
+        public void Parse_InputContainsParameterNameSymbolInsideBlock_ParsesAsLiteral()
+        {
+            // arrange
+            var builder = new CommandInput.Builder(1, "cmd");
+            builder.AddParameter(new LiteralCommandParameter("p -ar"));
+            var expectedCommand = builder.Build();
+
+            var sut = new Parser();
+
+            // act
+            var result = sut.Parse("cmd (p -ar)");
+
+            // assert
+            Assert.Equal(expectedCommand, result[0], new CommandInputEqualityComparer());
         }
 
         private CommandInput CreateCommandInput(int sourceLine, string commandName)

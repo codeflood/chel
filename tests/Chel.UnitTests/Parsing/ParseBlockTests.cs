@@ -17,7 +17,7 @@ namespace Chel.UnitTests.Parsing
         public void Ctor_LocationIsNull_Throws()
         {
             // arrange
-            Action sutAction = () => new ParseBlock(null, "abc");
+            Action sutAction = () => new ParseBlock(null, new LiteralCommandParameter("abc"));
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -27,7 +27,7 @@ namespace Chel.UnitTests.Parsing
         [Fact]
         public void Ctor_BlockIsEmpty_DoesNotThrow()
         {
-            var sut = new ParseBlock(new SourceLocation(1, 1), "");
+            var sut = new ParseBlock(new SourceLocation(1, 1), new AggregateCommandParameter(new LiteralCommandParameter[0]));
         }
 
         [Fact]
@@ -35,18 +35,19 @@ namespace Chel.UnitTests.Parsing
         {
             // arrange, act
             var location = new SourceLocation(1, 1);
-            var sut = new ParseBlock(location, "param");
+            var parameter = new LiteralCommandParameter("param");
+            var sut = new ParseBlock(location, parameter);
 
             // assert
             Assert.Equal(location, sut.LocationStart);
-            Assert.Equal("param", sut.Block);
+            Assert.Equal(parameter, sut.Block);
         }
 
         [Fact]
         public void Ctor_EndOfLineIsTrue_SetsProperty()
         {
             // arrange, act
-            var sut = new ParseBlock(new SourceLocation(1, 1), "param", isEndOfLine: true);
+            var sut = new ParseBlock(new SourceLocation(1, 1), new LiteralCommandParameter("param"), isEndOfLine: true);
 
             // assert
             Assert.True(sut.IsEndOfLine);

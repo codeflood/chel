@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using Chel.Abstractions.Parsing;
 using Chel.Abstractions.Variables;
 using Chel.Exceptions;
 using Xunit;
@@ -12,7 +14,7 @@ namespace Chel.UnitTests
         {
             // arange
             var sut = new VariableReplacer();
-            Action sutAction = () => sut.ReplaceVariables(null, "input");
+            Action sutAction = () => sut.ReplaceVariables(null, new LiteralCommandParameter("input"));
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -40,7 +42,7 @@ namespace Chel.UnitTests
             var variables = new VariableCollection();
 
             // act
-            var result = sut.ReplaceVariables(variables, "");
+            var result = sut.ReplaceVariables(variables, new AggregateCommandParameter(new LiteralCommandParameter[0]));
 
             // assert
             Assert.Empty(result);
@@ -55,19 +57,15 @@ namespace Chel.UnitTests
             var input = "Input without variables";
 
             // act
-            var result = sut.ReplaceVariables(variables, input);
+            var result = sut.ReplaceVariables(variables, new LiteralCommandParameter(input));
 
             // assert
             Assert.Equal(input, result);
         }
 
         [Theory]
-        [InlineData("$foo$ ipsum", "bar ipsum")]
-        [InlineData("$Foo$ ipsum", "bar ipsum")]
-        [InlineData("lorem $FOO$ ipsum", "lorem bar ipsum")]
-        [InlineData("lorem $foo$", "lorem bar")]
-        [InlineData("lorem$foo$ipsum", "lorembaripsum")]
-        public void ReplaceVariables_InputContainsSetVariable_ReplacesVariable(string input, string expected)
+        [MemberData(nameof(ReplaceVariables_InputContainsSetVariable_ReplacesVariable_DataSource))]
+        public void ReplaceVariables_InputContainsSetVariable_ReplacesVariable(CommandParameter input, string expected)
         {
             // arrange
             var sut = new VariableReplacer();
@@ -81,38 +79,49 @@ namespace Chel.UnitTests
             Assert.Equal(expected, result);
         }
 
-        [Theory]
-        [InlineData("lorem foo$ ipsum")]
-        [InlineData("lorem $foo ipsum")]
-        [InlineData("$")]
-        public void ReplaceVariables_MissingPairedVariableToken_ThrowsException(string input)
+        public static IEnumerable<object[]> ReplaceVariables_InputContainsSetVariable_ReplacesVariable_DataSource()
         {
-            // arrange
-            var sut = new VariableReplacer();
-            var variables = new VariableCollection();
-            variables.Set(new ValueVariable("foo", "bar"));
+            yield return new object[] {
+                new AggregateCommandParameter(new CommandParameter[]{
+                    new VariableCommandParameter("foo"),
+                    new LiteralCommandParameter(" ipsum")
+                }),
+                "bar ipsum"
+            };
 
-            Action sutAction = () => sut.ReplaceVariables(variables, input);
+            yield return new object[] {
+                new AggregateCommandParameter(new CommandParameter[]{
+                    new VariableCommandParameter("Foo"),
+                    new LiteralCommandParameter(" ipsum")
+                }),
+                "bar ipsum"
+            };
 
-            // act, assert
-            var ex = Assert.Throws<ArgumentException>(sutAction);
-            Assert.Equal("input", ex.ParamName);
-            Assert.Contains("Unpaired variable token $", ex.Message);
-        }
+            yield return new object[] {
+                new AggregateCommandParameter(new CommandParameter[]{
+                    new LiteralCommandParameter("lorem "),
+                    new VariableCommandParameter("FOO"),
+                    new LiteralCommandParameter(" ipsum")
+                }),
+                "lorem bar ipsum"
+            };
 
-        [Fact]
-        public void ReplaceVariables_VariableSymbolEscaped_ReturnsWithUnescapedVariable()
-        {
-            // arrange
-            var sut = new VariableReplacer();
-            var variables = new VariableCollection();
-            variables.Set(new ValueVariable("foo", "bar"));
+            yield return new object[] {
+                new AggregateCommandParameter(new CommandParameter[]{
+                    new LiteralCommandParameter("lorem "),
+                    new VariableCommandParameter("foo")
+                }),
+                "lorem bar"
+            };
 
-            // act
-            var result = sut.ReplaceVariables(variables, @"lorem \$foo\$ ipsum");
-
-            // assert
-            Assert.Equal(@"lorem $foo$ ipsum", result);
+            yield return new object[] {
+                new AggregateCommandParameter(new CommandParameter[]{
+                    new LiteralCommandParameter("lorem"),
+                    new VariableCommandParameter("foo"),
+                    new LiteralCommandParameter("ipsum")
+                }),
+                "lorembaripsum"
+            };
         }
 
         [Fact]
@@ -121,7 +130,7 @@ namespace Chel.UnitTests
             // arrange
             var sut = new VariableReplacer();
             var variables = new VariableCollection();
-            Action sutAction = () => sut.ReplaceVariables(variables, "$foo$");
+            Action sutAction = () => sut.ReplaceVariables(variables, new VariableCommandParameter("foo"));
 
             // act, assert
             var ex = Assert.Throws<UnsetVariableException>(sutAction);

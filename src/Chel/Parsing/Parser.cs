@@ -44,7 +44,10 @@ namespace Chel.Parsing
             if(parsedBlock.Block == null)
                 return null;
 
-            var commandInputBuilder = new CommandInput.Builder(parsedBlock.LocationStart.LineNumber, parsedBlock.Block);
+            if(parsedBlock.Block.GetType() != typeof(LiteralCommandParameter))
+                throw new ParseException(parsedBlock.LocationStart, "Command name must be a literal.");
+
+            var commandInputBuilder = new CommandInput.Builder(parsedBlock.LocationStart.LineNumber, (parsedBlock.Block as LiteralCommandParameter).Value);
 
             while(!parsedBlock.IsEndOfLine)
             {
@@ -59,8 +62,11 @@ namespace Chel.Parsing
 
         private ParseBlock ParseBlock()
         {
+            var parameters = new List<CommandParameter>();
             var block = new StringBuilder();
             var isEndOfLine = false;
+            var isVariable = false;
+            var isParameterName = false;
             var blockStartCount = 0;
             SourceLocation locationStart = null;
 
@@ -98,6 +104,38 @@ namespace Chel.Parsing
                                 break;
                             break;
 
+                        case SpecialTokenType.VariableMarker:
+                            var blockValue = block.ToString();
+
+                            if(isVariable)
+                            {
+                                isVariable = false;
+
+                                if(!string.IsNullOrEmpty(blockValue))
+                                    parameters.Add(new VariableCommandParameter(blockValue));
+                                    else
+                                        throw new ParseException(token.Location, Texts.MissingVariableName);
+
+                                block.Clear();
+                            }
+                            else
+                            {
+                                isVariable = true;
+
+                                if(!string.IsNullOrEmpty(blockValue))
+                                    parameters.Add(new LiteralCommandParameter(blockValue));
+
+                                block.Clear();
+                            }
+                        break;
+
+                        case SpecialTokenType.ParameterName:
+                            if(blockStartCount == 0 &&block.Length == 0)
+                                isParameterName = true;
+                            else
+                                block.Append("-");
+                            break;
+
                         default:
                             throw new ParseException(specialToken.Location, string.Format(Texts.UnexpectedToken, specialToken.Type));
                     }
@@ -111,16 +149,27 @@ namespace Chel.Parsing
                 }       
             }
 
+            if(isVariable)
+                throw new ParseException(locationStart, Texts.UnpairedVariableToken);
+
             var parsedBlock = block.ToString();
 
-            if(string.IsNullOrEmpty(parsedBlock))
-                parsedBlock = null;
+            if(isParameterName)
+                parameters.Add(new ParameterNameCommandParameter(block.ToString()));
+            else if(!string.IsNullOrEmpty(parsedBlock))
+                parameters.Add(new LiteralCommandParameter(block.ToString()));
 
             var location = locationStart;
             if(location == null)
                 location = new SourceLocation(_lastTokenLocation.LineNumber, _lastTokenLocation.CharacterNumber + 1);
 
-            return new ParseBlock(location, parsedBlock, isEndOfLine: isEndOfLine);
+            if(parameters.Count == 0)
+                return new ParseBlock(location, null, isEndOfLine: isEndOfLine);
+
+            if(parameters.Count == 1)
+                return new ParseBlock(location, parameters[0], isEndOfLine: isEndOfLine);
+
+            return new ParseBlock(location, new AggregateCommandParameter(parameters), isEndOfLine: isEndOfLine);
         }
     }
 }

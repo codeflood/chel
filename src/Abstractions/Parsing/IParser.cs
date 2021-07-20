@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Chel.Abstractions
+namespace Chel.Abstractions.Parsing
 {
     /// <summary>
     /// Parses command inputs from textual input.

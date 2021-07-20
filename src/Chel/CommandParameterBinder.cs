@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Reflection;
 using Chel.Abstractions;
+using Chel.Abstractions.Parsing;
 using Chel.Abstractions.Variables;
 using Chel.Exceptions;
 
@@ -53,7 +54,7 @@ namespace Chel
             if(descriptor == null)
                 throw new InvalidOperationException(string.Format(Texts.DescriptorForCommandCouldNotBeResolved, input.CommandName));
 
-            var parameters = new List<string>(input.Parameters);
+            var parameters = new List<CommandParameter>(input.Parameters);
 
             BindFlagParameters(instance, descriptor, parameters, result);
             BindNamedParameters(instance, descriptor, parameters, result);
@@ -71,25 +72,24 @@ namespace Chel
             return result;
         }
 
-        private void BindFlagParameters(ICommand instance, CommandDescriptor descriptor, List<string> parameters, ParameterBindResult result)
+        private void BindFlagParameters(ICommand instance, CommandDescriptor descriptor, List<CommandParameter> parameters, ParameterBindResult result)
         {
             foreach(var describedParameter in descriptor.FlagParameters)
             {
-                var flagParameterMarker = Symbols.ParameterName + describedParameter.Name;
-                var markerIndex = FindParameterMarker(flagParameterMarker, parameters);
+                var markerIndex = FindParameterMarker(describedParameter.Name, parameters);
 
                 if(markerIndex < 0)
                     continue;
                 
                 AssertWritableProperty(describedParameter, instance);
-                BindProperty(instance, describedParameter.Property, "True", result);
+                BindProperty(instance, describedParameter.Property, new LiteralCommandParameter("True"), result);
 
                 // Make sure there's no duplicates
                 var repeatParameter = false;
                 while(markerIndex >= 0)
                 {
                     parameters.RemoveAt(markerIndex);
-                    markerIndex = FindParameterMarker(flagParameterMarker, parameters);
+                    markerIndex = FindParameterMarker(describedParameter.Name, parameters);
                     if(markerIndex >= 0)
                         repeatParameter = true;
                 }
@@ -99,12 +99,11 @@ namespace Chel
             }
         }
 
-        private void BindNamedParameters(ICommand instance, CommandDescriptor descriptor, List<string> parameters, ParameterBindResult result)
+        private void BindNamedParameters(ICommand instance, CommandDescriptor descriptor, List<CommandParameter> parameters, ParameterBindResult result)
         {
             foreach(var describedParameter in descriptor.NamedParameters.Values)
             {
-                var namedParameterMarker = Symbols.ParameterName + describedParameter.Name;
-                var markerIndex = FindParameterMarker(namedParameterMarker, parameters);
+                var markerIndex = FindParameterMarker(describedParameter.Name, parameters);
 
                 if(markerIndex >= 0)
                 {
@@ -116,15 +115,13 @@ namespace Chel
                     }
 
                     var value = parameters[markerIndex + 1];
-                    if(value.StartsWith(Symbols.ParameterName))
+                    if(value is ParameterNameCommandParameter commandParameter)
                     {
-                        // This is a name marker, which cannot be a value.
+                        // This is a parameter name, which cannot be a value.
                         result.AddError(string.Format(Texts.MissingValueForNamedParameter, describedParameter.Name));
                         parameters.RemoveAt(markerIndex);
                         continue;
                     }
-
-                    value = UnescapeValue(value);
 
                     AssertWritableProperty(describedParameter, instance);
 
@@ -145,7 +142,7 @@ namespace Chel
                             parameters.RemoveAt(markerIndex + 1);
 
                         parameters.RemoveAt(markerIndex);
-                        markerIndex = FindParameterMarker(namedParameterMarker, parameters);
+                        markerIndex = FindParameterMarker(describedParameter.Name, parameters);
                         if(markerIndex >= 0)
                             repeatParameter = true;
                     }
@@ -161,7 +158,7 @@ namespace Chel
             }
         }
 
-        private void BindNumberedParameters(ICommand instance, CommandDescriptor descriptor, List<string> parameters, ParameterBindResult result)
+        private void BindNumberedParameters(ICommand instance, CommandDescriptor descriptor, List<CommandParameter> parameters, ParameterBindResult result)
         {
             var boundParameterIndexes = new List<int>();
 
@@ -171,7 +168,6 @@ namespace Chel
                 {
                     // Parameter numbers are 1 indexed, not zero.
                     var value = parameters[describedParameter.Number - 1];
-                    value = UnescapeValue(value);
 
                     AssertWritableProperty(describedParameter, instance);
 
@@ -198,30 +194,34 @@ namespace Chel
                 parameters.RemoveAt(index);
         }
 
-        private void AssertNoNamedOrFlagParameters(List<string> parameters, ParameterBindResult result)
+        private void AssertNoNamedOrFlagParameters(List<CommandParameter> parameters, ParameterBindResult result)
         {
             for(var i = parameters.Count - 1; i >= 0; i--)
             {
-                if(parameters[i].StartsWith(Symbols.ParameterName))
+                if(parameters[i] is ParameterNameCommandParameter commandParameter)
                 {
-                    // If the following parameter starts with a dash, we'll treat this one as a flag parameter.
-                    
+                    // If the following parameter is a parameter name, we'll treat this one as a flag parameter.
                     if(parameters.Count > i + 1)
                     {
-                        result.AddError(string.Format(Texts.UnknownNamedParameter, parameters[i].Substring(1)));
+                        result.AddError(string.Format(Texts.UnknownNamedParameter, commandParameter.ParameterName));
                         parameters.RemoveAt(i + 1);
                     }
                     else
-                        result.AddError(string.Format(Texts.UnknownFlagParameter, parameters[i].Substring(1)));
+                        result.AddError(string.Format(Texts.UnknownFlagParameter, commandParameter.ParameterName));
 
                     parameters.RemoveAt(i);
                 }
             }
         }
 
-        private int FindParameterMarker(string marker, List<string> parameters)
+        private int FindParameterMarker(string marker, List<CommandParameter> parameters)
         {
-            return parameters.FindIndex(x => x.Equals(marker, StringComparison.OrdinalIgnoreCase));
+            return parameters.FindIndex(x => {
+                if(x is ParameterNameCommandParameter commandParameter)
+                    return commandParameter.ParameterName.Equals(marker, StringComparison.OrdinalIgnoreCase);
+                
+                return false;
+            });
         }
 
         private void AssertWritableProperty(ParameterDescriptor descriptor, object instance)
@@ -230,17 +230,9 @@ namespace Chel
                 throw new InvalidOperationException(string.Format(Texts.PropertyMissingSetter, descriptor.Property.Name, instance.GetType().FullName));
         }
 
-        private string UnescapeValue(string parameterValue)
+        private void BindProperty(ICommand instance, PropertyInfo property, CommandParameter value, ParameterBindResult result)
         {
-            if(parameterValue.StartsWith(Symbols.Escape.ToString()))
-                return parameterValue.Substring(1);
-
-            return parameterValue;
-        }
-
-        private void BindProperty(ICommand instance, PropertyInfo property, string value, ParameterBindResult result)
-        {
-            var bindingValue = value;
+            var bindingValue = string.Empty;
 
             try
             {
