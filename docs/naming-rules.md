@@ -14,4 +14,6 @@ Names cannot use any of the special characters used in the language. These inclu
 
 Names cannot contain whitespace, including spaces, tabs and newline characters.
 
+Names cannot start with a dash `-`.
+
 Names can use any other characters, including unicode and even emoji.

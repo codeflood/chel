@@ -17,11 +17,6 @@ namespace Chel.Parsing
 	public class Tokenizer : ITokenizer, IDisposable
 	{
 		private const char NewLine = '\n';
-		private const char Escape = '\\';
-		private const char BlockStart = '(';
-		private const char BlockEnd = ')';
-		private const char Comment = '#';
-		private const char Variable = '$';
 
 		private StringReader _reader = null;
 		private int _currentLineNumber = 1;
@@ -54,17 +49,17 @@ namespace Chel.Parsing
 				case NewLine:
 					return HandleNewLine();
 				
-				case Escape:
+				case Symbol.Escape:
 					return HandleEscaped();
 
-				case Comment:
-					if(PeekNext() == BlockEnd)
+				case Symbol.Comment:
+					if(PeekNext() == Symbol.BlockEnd)
 						throw new ParseException(CurrentLocation, Texts.MissingCommentBlockStart);
 
 					return SkipToEndOfLine();
 
-				case BlockStart:
-					if(PeekNext() == Comment)
+				case Symbol.BlockStart:
+					if(PeekNext() == Symbol.Comment)
 					{
 						ReadNext();
 						SkipToEndOfCommentBlock();
@@ -73,13 +68,13 @@ namespace Chel.Parsing
 
 					return HandleSpecial(SpecialTokenType.BlockStart);
 
-				case BlockEnd:
+				case Symbol.BlockEnd:
 					return HandleSpecial(SpecialTokenType.BlockEnd);
 
-				case Variable:
+				case Symbol.Variable:
 					return HandleSpecial(SpecialTokenType.VariableMarker);
 
-				case Symbols.ParameterName:
+				case Symbol.ParameterName:
 					return HandleSpecial(SpecialTokenType.ParameterName);
 
 				case -1:
@@ -125,7 +120,7 @@ namespace Chel.Parsing
 			var nextChar = ReadNext();
 			var prevChar = nextChar;
 
-			while(nextChar != -1 && prevChar != Comment && nextChar != BlockEnd)
+			while(nextChar != -1 && prevChar != Symbol.Comment && nextChar != Symbol.BlockEnd)
 			{
 				prevChar = nextChar;
 				nextChar = ReadNext();
@@ -155,12 +150,12 @@ namespace Chel.Parsing
 			if(nextChar == -1)
 				return null;
 
-			if(nextChar == BlockStart ||
-				nextChar == BlockEnd ||
-				nextChar == Escape ||
-				nextChar == Variable ||
-				nextChar == Symbols.ParameterName ||
-				nextChar == Comment)
+			if(nextChar == Symbol.BlockStart ||
+				nextChar == Symbol.BlockEnd ||
+				nextChar == Symbol.Escape ||
+				nextChar == Symbol.Variable ||
+				nextChar == Symbol.ParameterName ||
+				nextChar == Symbol.Comment)
 				return HandleLiteral((char)nextChar);
 
 			// Report the error location as the escape character

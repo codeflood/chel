@@ -5,12 +5,33 @@ namespace Chel.UnitTests
     public class NameValidatorTests
     {
         [Theory]
+        [InlineData(null)]
         [InlineData("")]
         [InlineData(" ")]
+        [InlineData("na me")]
         [InlineData("\r\n")]
+        [InlineData("na\r\nme")]
         [InlineData("\n")]
+        [InlineData("na\nme")]
         [InlineData("\t")]
+        [InlineData("na\tme")]
         [InlineData("-name")]
+        [InlineData("(")]
+        [InlineData(")")]
+        [InlineData("(name)")]
+        [InlineData("[")]
+        [InlineData("]")]
+        [InlineData("na[me]")]
+        [InlineData("{")]
+        [InlineData("}")]
+        [InlineData("\\")]
+        [InlineData("na\\me")]
+        [InlineData("#")]
+        [InlineData("na#me")]
+        [InlineData("$")]
+        [InlineData("na$me")]
+        [InlineData(":")]
+        [InlineData("na:me")]
         public void IsValid_NameIsInvalid_ReturnsFalse(string name)
         {
             // arrange
@@ -24,9 +45,11 @@ namespace Chel.UnitTests
         }
 
         [Theory]
+        [InlineData("a")]
         [InlineData("command")]
+        [InlineData("comm-and")]
         [InlineData("COMMAND")]
-        [InlineData("cØmÆnd")]
+        [InlineData("cØmÆnd")]
         [InlineData("±⇸")]
         [InlineData("👏")]
         public void IsValid_NameIsValid_ReturnsTrue(string name)

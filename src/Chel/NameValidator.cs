@@ -7,6 +7,19 @@ namespace Chel
     /// </summary>
     public class NameValidator : INameValidator
     {
+        private static char[] s_invalidCharacters = {
+            Symbol.Escape,
+            Symbol.BlockStart,
+            Symbol.BlockEnd,
+            Symbol.Comment,
+            Symbol.Variable,
+            Symbol.ListStart,
+            Symbol.ListEnd,
+            Symbol.MapStart,
+            Symbol.MapEnd,
+            Symbol.SubName
+        };
+
         /// <summary>
         /// Determines whether the name is valid.
         /// </summary>
@@ -16,8 +29,17 @@ namespace Chel
             if(string.IsNullOrWhiteSpace(name))
                 return false;
 
-            if(name.StartsWith(Symbols.ParameterName.ToString()))
+            if(name[0] == Symbol.ParameterName)
                 return false;
+
+            if(name.IndexOfAny(s_invalidCharacters) >= 0)
+                return false;
+
+            foreach(var c in name)
+            {
+                if(char.IsWhiteSpace(c))
+                    return false;
+            }
 
             return true;
         }
