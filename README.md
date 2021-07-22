@@ -2,7 +2,7 @@
 
 A simple scripting environment for .net applications.
 
-> **Work in Progress:** This project is currently a work in progress and is not ready to be consumed.
+> :warning: **Work in Progress:** This project is currently a work in progress and is not ready to be consumed. Any aspect of the code or language specification may change during initial development.
 
 Chel is modelled after shell scripting languages like the Windows command prompt, or Bash, to provide a simple and intuative scripting environment.
 
@@ -17,7 +17,7 @@ Chel in a nutshell:
 	sub rigel (
 		command -flag
 		command -param value
-	)
+	) (# block comment #)
 
 	var list [1 2 3 4]
 	var params {
@@ -27,5 +27,5 @@ Chel in a nutshell:
 		foo : $list$
 		bar : $params$
 	}
-	command @moreparams -flag
+	command @moreparams -flag -param $list:2$
 	rigel
