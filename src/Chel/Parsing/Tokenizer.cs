@@ -77,6 +77,12 @@ namespace Chel.Parsing
 				case Symbol.ParameterName:
 					return HandleSpecial(SpecialTokenType.ParameterName);
 
+				case Symbol.ListStart:
+					return HandleSpecial(SpecialTokenType.ListStart);
+
+				case Symbol.ListEnd:
+					return HandleSpecial(SpecialTokenType.ListEnd);
+
 				case -1:
 					HandleEndOfStream();
 					return null;
@@ -155,7 +161,9 @@ namespace Chel.Parsing
 				nextChar == Symbol.Escape ||
 				nextChar == Symbol.Variable ||
 				nextChar == Symbol.ParameterName ||
-				nextChar == Symbol.Comment)
+				nextChar == Symbol.Comment ||
+				nextChar == Symbol.ListStart ||
+				nextChar == Symbol.ListEnd)
 				return HandleLiteral((char)nextChar);
 
 			// Report the error location as the escape character

@@ -67,6 +67,8 @@ namespace Chel.Parsing
             var isEndOfLine = false;
             var isVariable = false;
             var isParameterName = false;
+            var isList = false;
+            var listValues = new List<CommandParameter>();
             var blockStartCount = 0;
             SourceLocation locationStart = null;
 
@@ -127,13 +129,38 @@ namespace Chel.Parsing
 
                                 block.Clear();
                             }
-                        break;
+                            break;
 
                         case SpecialTokenType.ParameterName:
                             if(blockStartCount == 0 &&block.Length == 0)
                                 isParameterName = true;
                             else
                                 block.Append("-");
+                            break;
+
+                        case SpecialTokenType.ListStart:
+                            isList = true;
+                            break;
+
+                        case SpecialTokenType.ListEnd:
+                            if(!isList)
+                                throw new ParseException(token.Location, Texts.MissingListStart);
+
+                            isList = false;
+
+                            if(block.Length > 0 || parameters.Count > 0)
+                            {
+                                var parsedBlockInner = block.ToString();
+                                if(!string.IsNullOrEmpty(parsedBlockInner))
+                                    parameters.Add(new LiteralCommandParameter(parsedBlockInner));
+
+                                var value = parameters.Count == 1 ? parameters[0] : new AggregateCommandParameter(parameters);
+                                listValues.Add(value);
+                            }
+
+                            block.Clear();
+                            parameters.Clear();
+                            parameters.Add(new ListCommandParameter(listValues));
                             break;
 
                         default:
@@ -143,21 +170,40 @@ namespace Chel.Parsing
                 else if(token is LiteralToken literalToken)
                 {
                     if(blockStartCount == 0 && char.IsWhiteSpace(literalToken.Value))
-                        break;
+                    {
+                        if(isList && (block.Length > 0 || parameters.Count > 0))
+                        {
+                            // this will need attention
+                            var parsedBlockInner = block.ToString();
+                            if(!string.IsNullOrEmpty(parsedBlockInner))
+                                parameters.Add(new LiteralCommandParameter(parsedBlockInner));
 
-                    block.Append(literalToken.Value);
+                            var value = parameters.Count == 1 ? parameters[0] : new AggregateCommandParameter(parameters);
+                            listValues.Add(value);
+
+                            block.Clear();
+                            parameters.Clear();
+                        }
+                        else
+                            break;
+                    }
+                    else
+                        block.Append(literalToken.Value);
                 }       
             }
 
             if(isVariable)
                 throw new ParseException(locationStart, Texts.UnpairedVariableToken);
 
+            if(isList)
+                throw new ParseException(locationStart, Texts.MissingListEnd);
+
             var parsedBlock = block.ToString();
 
             if(isParameterName)
-                parameters.Add(new ParameterNameCommandParameter(block.ToString()));
+                parameters.Add(new ParameterNameCommandParameter(parsedBlock));
             else if(!string.IsNullOrEmpty(parsedBlock))
-                parameters.Add(new LiteralCommandParameter(block.ToString()));
+                parameters.Add(new LiteralCommandParameter(parsedBlock));
 
             var location = locationStart;
             if(location == null)

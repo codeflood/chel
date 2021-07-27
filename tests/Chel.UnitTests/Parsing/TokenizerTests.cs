@@ -439,6 +439,42 @@ namespace Chel.UnitTests.Parsing
             AssertTokenStream(expected, sut);
         }
 
+        [Fact]
+        public void GetNextToken_ListInInput_IncludesListTokens()
+        {
+            // arrange
+            var sut = new Tokenizer("[a b]");
+            
+            var expected = new Token[] {
+                new SpecialToken(new SourceLocation(1, 1), SpecialTokenType.ListStart),
+                new LiteralToken(new SourceLocation(1, 2), 'a'),
+                new LiteralToken(new SourceLocation(1, 3), ' '),
+                new LiteralToken(new SourceLocation(1, 4), 'b'),
+                new SpecialToken(new SourceLocation(1, 5), SpecialTokenType.ListEnd)
+            };
+
+            // act, assert
+            AssertTokenStream(expected, sut);
+        }
+
+        [Fact]
+        public void GetNextToken_EscapedListSymbolsInInput_IncludesListTokensAsLiterals()
+        {
+            // arrange
+            var sut = new Tokenizer(@"\[a b\]");
+            
+            var expected = new Token[] {
+                new LiteralToken(new SourceLocation(1, 2), '['),
+                new LiteralToken(new SourceLocation(1, 3), 'a'),
+                new LiteralToken(new SourceLocation(1, 4), ' '),
+                new LiteralToken(new SourceLocation(1, 5), 'b'),
+                new LiteralToken(new SourceLocation(1, 7), ']')
+            };
+
+            // act, assert
+            AssertTokenStream(expected, sut);
+        }
+
         private void AssertTokenStream(IEnumerable<Token> expected, Tokenizer sut, bool expectError = false)
         {
             // act, assert

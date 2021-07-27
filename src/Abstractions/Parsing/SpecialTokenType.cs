@@ -9,6 +9,8 @@ namespace Chel.Abstractions.Parsing
         BlockStart = 1,
         BlockEnd = 2,
         VariableMarker = 3,
-        ParameterName = 4
+        ParameterName = 4,
+        ListStart = 5,
+        ListEnd = 6
     }
 }

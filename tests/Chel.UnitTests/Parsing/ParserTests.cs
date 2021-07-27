@@ -533,6 +533,86 @@ namespace Chel.UnitTests.Parsing
             Assert.Equal(expectedCommand, result[0], new CommandInputEqualityComparer());
         }
 
+        [Fact]
+        public void Parse_InputContainsListParameter_ParsesList()
+        {
+            // arrange
+            var expectedList = new ListCommandParameter(new CommandParameter[]{
+                new LiteralCommandParameter("a"),
+                new VariableCommandParameter("b")
+            });
+
+            var builder = new CommandInput.Builder(1, "cmd");
+            builder.AddParameter(expectedList);
+            var expectedCommand = builder.Build();
+
+            var sut = new Parser();
+
+            // act
+            var result = sut.Parse("cmd [a $b$]");
+
+            // assert
+            Assert.Equal(expectedCommand, result[0], new CommandInputEqualityComparer());
+        }
+
+        [Fact]
+        public void Parse_InputMissingListEnd_ThrowsException()
+        {
+            // arrange
+            var sut = new Parser();
+            Action sutAction = () => sut.Parse("cmd [a ");
+
+            // act, assert
+            var exception = Assert.Throws<ParseException>(sutAction);
+            Assert.Equal(Texts.MissingListEnd, exception.Message);
+        }
+
+        [Fact]
+        public void Parse_InputMissingListStart_ThrowsException()
+        {
+            // arrange
+            var sut = new Parser();
+            Action sutAction = () => sut.Parse("cmd a]");
+
+            // act, assert
+            var exception = Assert.Throws<ParseException>(sutAction);
+            Assert.Equal(Texts.MissingListStart, exception.Message);
+        }
+
+        [Fact]
+        public void Parse_InputContainsEscapedListParameter_ParsesAsLiteral()
+        {
+            // arrange
+            var builder = new CommandInput.Builder(1, "cmd");
+            builder.AddParameter(new LiteralCommandParameter("[a]"));
+            var expectedCommand = builder.Build();
+
+            var sut = new Parser();
+
+            // act
+            var result = sut.Parse(@"cmd \[a\]");
+
+            // assert
+            Assert.Equal(expectedCommand, result[0], new CommandInputEqualityComparer());
+        }
+
+        [Fact]
+        public void Parse_InputContainsListParameterInbrackets_ParsesAsLiteral()
+        {
+            // arrange
+            var builder = new CommandInput.Builder(1, "cmd");
+            builder.AddParameter(new LiteralCommandParameter("[a b]"));
+            var expectedCommand = builder.Build();
+
+            var sut = new Parser();
+
+            // act
+            var result = sut.Parse(@"cmd ([a b])");
+
+            // assert
+            Assert.Equal(expectedCommand, result[0], new CommandInputEqualityComparer());
+        }
+
         private CommandInput CreateCommandInput(int sourceLine, string commandName)
         {
             var builder = new CommandInput.Builder(sourceLine, commandName);

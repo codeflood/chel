@@ -32,6 +32,10 @@ namespace Chel
 
         public const string MissingCommentBlockStart = "Missing comment block start.";
 
+        public const string MissingListEnd = "Missing list end ]";
+
+        public const string MissingListStart = "Missing list start [";
+
         public const string MissingParameterName = "Missing parameter name after -";
 
         public const string MissingRequiredNamedParameter = "Missing required named parameter '{0}'";
