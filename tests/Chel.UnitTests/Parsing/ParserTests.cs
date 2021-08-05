@@ -43,6 +43,20 @@ namespace Chel.UnitTests.Parsing
         }
 
         [Theory]
+        [InlineData("(command)")]
+        [InlineData("$command$")]
+        [InlineData("[command]")]
+        public void Parse_SpecialTokenInCommandName_ThrowsException(string input)
+        {
+            // arrange
+            var sut = new Parser();
+            Action sutAction = () => sut.Parse(input);
+
+            // act, assert
+            Assert.Throws<ParseException>(sutAction);
+        }
+
+        [Theory]
         [InlineData("command\ncommand", 1, 2)]
         [InlineData("\n\ncommand\n\n\n\n\ncommand\n\n", 3, 8)]
         [InlineData("command\r\ncommand", 1, 2)]
@@ -182,6 +196,19 @@ namespace Chel.UnitTests.Parsing
 
             // assert
             Assert.Equal(expectedCommand, result[0], new CommandInputEqualityComparer());
+        }
+
+        [Theory]
+        [InlineData("command -")]
+        [InlineData("command - num")]
+        public void Parse_ParameterNameTokenWithoutName_THrowsException(string input)
+        {
+            // arrange
+            var sut = new Parser();
+            Action sutAction = () => sut.Parse(input);
+
+            // act, assert
+            Assert.Throws<ParseException>(sutAction);
         }
 
         [Fact]

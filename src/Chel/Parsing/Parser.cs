@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text;
-using Chel.Abstractions;
 using Chel.Abstractions.Parsing;
 using Chel.Exceptions;
 
@@ -9,10 +9,15 @@ namespace Chel.Parsing
 	/// <summary>
 	/// The default implementation of the <see cref="IParser" />.
 	/// </summary>
+    /// <remarks>This class is not thread-safe.</remarks>
 	public class Parser : IParser
     {
+        private const char Newline = '\n';
+
         private ITokenizer _tokenizer = null;
         private SourceLocation _lastTokenLocation = new SourceLocation(1, 1);
+        private Token _nextToken = null;
+        private StringBuilder _buffer = new StringBuilder();
 
         public IList<CommandInput> Parse(string input)
         {
@@ -39,19 +44,22 @@ namespace Chel.Parsing
 
         private CommandInput ParseCommandInput()
         {
-            var parsedBlock = ParseBlock();
-
-            if(parsedBlock.Block == null)
+            var token = SkipWhiteSpace();
+            if(token == null)
                 return null;
 
-            if(parsedBlock.Block.GetType() != typeof(LiteralCommandParameter))
-                throw new ParseException(parsedBlock.LocationStart, "Command name must be a literal.");
+            var commandName = ParseName(token);
 
-            var commandInputBuilder = new CommandInput.Builder(parsedBlock.LocationStart.LineNumber, (parsedBlock.Block as LiteralCommandParameter).Value);
+            if(commandName == null)
+                return null;
+
+            var commandInputBuilder = new CommandInput.Builder(commandName.LocationStart.LineNumber, (commandName.Block as LiteralCommandParameter).Value);
+
+            var parsedBlock = commandName;
 
             while(!parsedBlock.IsEndOfLine)
             {
-                parsedBlock = ParseBlock();
+                parsedBlock = ParseParameters();
                 
                 if(parsedBlock.Block != null)
                     commandInputBuilder.AddParameter(parsedBlock.Block);
@@ -60,37 +68,116 @@ namespace Chel.Parsing
             return commandInputBuilder.Build();
         }
 
-        private ParseBlock ParseBlock()
+        private ParseBlock ParseParameters()
         {
-            var parameters = new List<CommandParameter>();
             var block = new StringBuilder();
             var isEndOfLine = false;
-            var isVariable = false;
-            var isParameterName = false;
-            var isList = false;
-            var listValues = new List<CommandParameter>();
-            var blockStartCount = 0;
             SourceLocation locationStart = null;
+
+            var token = SkipWhiteSpace();
+            if(token == null)
+                return new ParseBlock(_lastTokenLocation, null, isEndOfLine: true);
 
             while(!isEndOfLine)
             {
-                var token = _tokenizer.GetNextToken();
-                if(token != null)
-                    _lastTokenLocation = token.Location;
-
                 if(locationStart == null)
                     locationStart = token?.Location;
                 
-                if(token == null || (token is LiteralToken lt && lt.Value == '\n' && blockStartCount == 0))
+                if(token == null || (token is LiteralToken lt && lt.Value == Newline))
                 {
-                    if(blockStartCount > 0)
-                        throw new ParseException(_lastTokenLocation, Texts.MissingBlockEnd);
-                    else if(blockStartCount < 0)
-                        throw new ParseException(_lastTokenLocation, Texts.MissingBlockStart);
-
                     isEndOfLine = true;
                     break;
                 }
+
+                if(token is SpecialToken specialToken)
+                {
+                    switch(specialToken.Type)
+                    {
+                        case SpecialTokenType.ParameterName:
+                            return ParseParameterName(token);
+
+                        case SpecialTokenType.BlockEnd:
+                            throw new ParseException(locationStart, Texts.MissingBlockStart);
+
+                        case SpecialTokenType.ListEnd:
+                            throw new ParseException(locationStart, Texts.MissingListStart);
+
+                        default:
+                            return ParseParameterValue(token);
+                    }
+                }
+                else if(token is LiteralToken literalToken)
+                {
+                    if(char.IsWhiteSpace(literalToken.Value))
+                    {
+                        break;
+                    }
+                    else
+                        return ParseParameterValue(token);
+                }       
+            }
+
+            var parsedBlock = block.ToString();
+
+            var location = locationStart;
+            if(location == null)
+                location = new SourceLocation(_lastTokenLocation.LineNumber, _lastTokenLocation.CharacterNumber + 1);
+
+            return new ParseBlock(location, null, isEndOfLine: isEndOfLine);
+        }
+
+        private ParseBlock ParseName(Token token)
+        {
+            _buffer.Clear();
+
+            var isEndOfLine = false;
+            var locationStart = _lastTokenLocation;
+
+            while(token != null)
+            {
+                if(token is SpecialToken specialToken)
+                    throw new ParseException(_lastTokenLocation, string.Format(Texts.UnexpectedToken, specialToken.Type));
+
+                var literalToken = token as LiteralToken;
+
+                if(literalToken.Value == Newline)
+                {
+                    isEndOfLine = true;
+                    break;
+                }
+                
+                if(char.IsWhiteSpace(literalToken.Value))
+                    break;
+
+                _buffer.Append(literalToken.Value);
+
+                token = GetNextToken();
+            }
+
+            var name = _buffer.ToString();
+
+            if(string.IsNullOrWhiteSpace(name))
+                return null;
+
+            var parameter = new LiteralCommandParameter(name);
+            return new ParseBlock(locationStart, parameter, isEndOfLine: isEndOfLine);
+        }
+
+        private ParseBlock ParseBlock(Token token)
+        {
+            if(!(token is SpecialToken specialTokenGuard) || specialTokenGuard.Type != SpecialTokenType.BlockStart)
+                throw new ParseException(_lastTokenLocation, Texts.MissingBlockStart);
+
+            _buffer.Clear();
+            var blockStartCount = 1;
+            var locationStart = _lastTokenLocation;
+
+            while(blockStartCount > 0)
+            {
+                token = GetNextToken();
+
+                if(token == null)
+                    throw new ParseException(_lastTokenLocation, Texts.MissingBlockEnd);
 
                 if(token is SpecialToken specialToken)
                 {
@@ -107,7 +194,102 @@ namespace Chel.Parsing
                             break;
 
                         case SpecialTokenType.VariableMarker:
-                            var blockValue = block.ToString();
+                            _buffer.Append("$");
+                            break;
+
+                        case SpecialTokenType.ParameterName:
+                            _buffer.Append("-");
+                            break;
+
+                        case SpecialTokenType.ListStart:
+                            _buffer.Append("[");
+                            break;
+
+                        case SpecialTokenType.ListEnd:
+                            _buffer.Append("]");
+                            break;
+
+                        default:
+                            // todo: Change SpecialTokenType to be a class which we can call ToString() on to get the token.
+                            // This would avoid all the cases above.
+                            throw new ParseException(specialToken.Location, string.Format(Texts.UnexpectedToken, specialToken.Type));
+                    }
+                }
+                else if(token is LiteralToken literalToken)
+                {
+                    _buffer.Append(literalToken.Value);
+                }
+            }
+
+            var parameter = new LiteralCommandParameter(_buffer.ToString());
+            return new ParseBlock(locationStart, parameter, isEndOfLine: false);
+        }
+
+        private ParseBlock ParseParameterName(Token token)
+        {
+            if(!(token is SpecialToken specialTokenGuard) || specialTokenGuard.Type != SpecialTokenType.ParameterName)
+                throw new ParseException(_lastTokenLocation, string.Format(Texts.UnexpectedToken, token));
+
+            var locationStart = _lastTokenLocation;
+
+            token = GetNextToken();
+            if(token == null)
+                throw new ParseException(_lastTokenLocation, Texts.MissingParameterName);
+
+            var name = ParseName(token);
+            if(name == null)
+                throw new ParseException(_lastTokenLocation, Texts.MissingParameterName);
+
+            var parameter = new ParameterNameCommandParameter((name.Block as LiteralCommandParameter).Value);
+            return new ParseBlock(locationStart, parameter, isEndOfLine: name.IsEndOfLine);
+        }
+
+        private ParseBlock ParseParameterValue(Token token)
+        {
+            if(token is SpecialToken specialToken)
+            {
+                switch(specialToken.Type)
+                {
+                    case SpecialTokenType.BlockStart:
+                        return ParseBlock(token);
+
+                    case SpecialTokenType.VariableMarker:
+                        return ParseSimpleValue(token);
+
+                    case SpecialTokenType.ListStart:
+                        return ParseList(token);
+
+                    case SpecialTokenType.BlockEnd:
+                    case SpecialTokenType.ParameterName:
+                    case SpecialTokenType.ListEnd:
+                        throw new ParseException(_lastTokenLocation, string.Format(Texts.UnexpectedToken, token));
+
+                    default:
+                        throw new ParseException(specialToken.Location, string.Format(Texts.UnexpectedToken, specialToken.Type));
+                }
+            }
+
+            return ParseSimpleValue(token);
+        }
+
+        private ParseBlock ParseSimpleValue(Token token)
+        {
+            _buffer.Clear();
+
+            var isEndOfLine = false;
+            var isVariable = false;
+            var locationStart = _lastTokenLocation;
+            var parameters = new List<CommandParameter>();
+            var done = false;
+            
+            while(token != null && !done)
+            {
+                if(token is SpecialToken specialToken)
+                {
+                    switch(specialToken.Type)
+                    {
+                        case SpecialTokenType.VariableMarker:
+                            var blockValue = _buffer.ToString();
 
                             if(isVariable)
                             {
@@ -118,7 +300,7 @@ namespace Chel.Parsing
                                     else
                                         throw new ParseException(token.Location, Texts.MissingVariableName);
 
-                                block.Clear();
+                                _buffer.Clear();
                             }
                             else
                             {
@@ -127,95 +309,134 @@ namespace Chel.Parsing
                                 if(!string.IsNullOrEmpty(blockValue))
                                     parameters.Add(new LiteralCommandParameter(blockValue));
 
-                                block.Clear();
+                                _buffer.Clear();
                             }
                             break;
 
                         case SpecialTokenType.ParameterName:
-                            if(blockStartCount == 0 &&block.Length == 0)
-                                isParameterName = true;
-                            else
-                                block.Append("-");
-                            break;
-
-                        case SpecialTokenType.ListStart:
-                            isList = true;
-                            break;
-
-                        case SpecialTokenType.ListEnd:
-                            if(!isList)
-                                throw new ParseException(token.Location, Texts.MissingListStart);
-
-                            isList = false;
-
-                            if(block.Length > 0 || parameters.Count > 0)
-                            {
-                                var parsedBlockInner = block.ToString();
-                                if(!string.IsNullOrEmpty(parsedBlockInner))
-                                    parameters.Add(new LiteralCommandParameter(parsedBlockInner));
-
-                                var value = parameters.Count == 1 ? parameters[0] : new AggregateCommandParameter(parameters);
-                                listValues.Add(value);
-                            }
-
-                            block.Clear();
-                            parameters.Clear();
-                            parameters.Add(new ListCommandParameter(listValues));
+                            _buffer.Append("-");
                             break;
 
                         default:
-                            throw new ParseException(specialToken.Location, string.Format(Texts.UnexpectedToken, specialToken.Type));
+                            PushNextToken(token);
+                            done = true;
+                            break;
                     }
                 }
                 else if(token is LiteralToken literalToken)
                 {
-                    if(blockStartCount == 0 && char.IsWhiteSpace(literalToken.Value))
+                    if(literalToken.Value == Newline)
                     {
-                        if(isList && (block.Length > 0 || parameters.Count > 0))
-                        {
-                            // this will need attention
-                            var parsedBlockInner = block.ToString();
-                            if(!string.IsNullOrEmpty(parsedBlockInner))
-                                parameters.Add(new LiteralCommandParameter(parsedBlockInner));
-
-                            var value = parameters.Count == 1 ? parameters[0] : new AggregateCommandParameter(parameters);
-                            listValues.Add(value);
-
-                            block.Clear();
-                            parameters.Clear();
-                        }
-                        else
-                            break;
+                        isEndOfLine = true;
+                        break;
                     }
-                    else
-                        block.Append(literalToken.Value);
-                }       
+
+                    if(char.IsWhiteSpace(literalToken.Value))
+                        break;
+
+                    _buffer.Append(literalToken.Value);
+                }
+
+                if(!done)
+                    token = GetNextToken();
             }
 
             if(isVariable)
                 throw new ParseException(locationStart, Texts.UnpairedVariableToken);
 
-            if(isList)
-                throw new ParseException(locationStart, Texts.MissingListEnd);
-
-            var parsedBlock = block.ToString();
-
-            if(isParameterName)
-                parameters.Add(new ParameterNameCommandParameter(parsedBlock));
-            else if(!string.IsNullOrEmpty(parsedBlock))
-                parameters.Add(new LiteralCommandParameter(parsedBlock));
-
-            var location = locationStart;
-            if(location == null)
-                location = new SourceLocation(_lastTokenLocation.LineNumber, _lastTokenLocation.CharacterNumber + 1);
+            var value = _buffer.ToString();
+            if(!string.IsNullOrEmpty(value))
+                parameters.Add(new LiteralCommandParameter(value));
 
             if(parameters.Count == 0)
-                return new ParseBlock(location, null, isEndOfLine: isEndOfLine);
+                return new ParseBlock(locationStart, null, isEndOfLine: isEndOfLine);
 
             if(parameters.Count == 1)
-                return new ParseBlock(location, parameters[0], isEndOfLine: isEndOfLine);
+                return new ParseBlock(locationStart, parameters[0], isEndOfLine: isEndOfLine);
 
-            return new ParseBlock(location, new AggregateCommandParameter(parameters), isEndOfLine: isEndOfLine);
+            return new ParseBlock(locationStart, new AggregateCommandParameter(parameters), isEndOfLine: isEndOfLine);
+        }
+
+        private ParseBlock ParseList(Token token)
+        {
+            if(token == null)
+                return null;
+
+            if(!(token is SpecialToken specialTokenGuard) || specialTokenGuard.Type != SpecialTokenType.ListStart)
+                throw new ParseException(_lastTokenLocation, string.Format(Texts.MissingListStart, token));
+
+            token = GetNextToken();
+            var startLocation = _lastTokenLocation;
+
+            var listValues = new List<CommandParameter>();
+            var listCompleted = false;
+
+            while(token != null)
+            {
+                if(token is SpecialToken specialToken && specialToken.Type == SpecialTokenType.ListEnd)
+                {
+                    listCompleted = true;
+                    break;
+                }
+
+                var value = ParseParameterValue(token);
+                if(value?.Block != null)
+                    listValues.Add(value.Block);                
+                
+                token = GetNextToken();
+            }
+
+            if(!listCompleted)
+                throw new ParseException(startLocation, Texts.MissingListEnd);
+
+            var parameter = new ListCommandParameter(listValues);
+            return new ParseBlock(startLocation, parameter);
+        }
+
+        private Token GetNextToken()
+        {
+            Token token = null;
+
+            if(_nextToken != null)
+            {
+                token = _nextToken;
+                _nextToken = null;
+            }
+            else
+                token = _tokenizer.GetNextToken();
+
+            if(token != null)
+                _lastTokenLocation = token.Location;
+            
+            return token;
+        }
+
+        private void PushNextToken(Token token)
+        {
+            if(_nextToken != null)
+                throw new InvalidOperationException("Internal error. A token has already been pushed.");
+
+            _nextToken = token;
+        }
+
+        private Token SkipWhiteSpace()
+        {
+            var token = GetNextToken();
+            while(token != null)
+            {
+                if(token is SpecialToken)
+                    return token;
+
+                if(token is LiteralToken literalToken &&
+                    (!char.IsWhiteSpace(literalToken.Value) || literalToken.Value == Newline))
+                {
+                    return token;
+                }
+
+                token = GetNextToken();
+            }
+
+            return null;
         }
     }
 }

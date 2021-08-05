@@ -115,5 +115,18 @@ namespace Chel.Abstractions.UnitTests.Parsing
             // act, assert
             Assert.NotEqual(hashCode1, hashCode2);
         }
+
+        [Fact]
+        public void ToString_WhenCalled_ReturnsLocation()
+        {
+            // arrange
+            var sut = new SourceLocation(2, 16);
+
+            // act
+            var result = sut.ToString();
+
+            // assert
+            Assert.Equal("(2, 16)", result);
+        }
     }
 }

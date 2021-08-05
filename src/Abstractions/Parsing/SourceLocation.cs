@@ -54,5 +54,10 @@ namespace Chel.Abstractions.Parsing
                 LineNumber.GetHashCode() +
                 CharacterNumber.GetHashCode();
         }
+
+        public override string ToString()
+        {
+            return $"({LineNumber}, {CharacterNumber})";
+        }
     }
 }
