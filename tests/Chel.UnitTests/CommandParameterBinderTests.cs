@@ -1205,7 +1205,36 @@ namespace Chel.UnitTests
             Assert.Equal(new[]{ "Invalid parameter value 'Chel.Abstractions.Parsing.ListCommandParameter' for named parameter 'dictionary'." }, result.Errors);
         }
 
-        // variables in list values
+        [Fact]
+        public void Bind_VariableInList_SubstitutesVariableValue()
+        {
+            // arrange
+            var registry = CreateCommandRegistry(typeof(ListParameterCommand));
+            var variables = new VariableCollection();
+            variables.Set(new ValueVariable("foo", "bar"));
+
+            var replacer = new VariableReplacer();
+
+            var sut = new CommandParameterBinder(registry, replacer, variables);
+
+            var command = new ListParameterCommand();
+            var input = CreateCommandInput(
+                "list-params",
+                new ParameterNameCommandParameter("list"),
+                new ListCommandParameter(new CommandParameter[]
+                {
+                    new LiteralCommandParameter("a"),
+                    new VariableCommandParameter("foo")
+                })
+            );
+
+            // act
+            var result = sut.Bind(command, input);
+
+            // assert
+            Assert.True(result.Success);
+            Assert.Equal(new[] { "a", "bar" }, command.List);
+        }
 
         private CommandParameterBinder CreateCommandParameterBinder(params Type[] commandTypes)
         {
