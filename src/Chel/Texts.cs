@@ -8,6 +8,8 @@ namespace Chel
 
         public const string CommandNameAlreadyUsed = "Command name '{0}' on command type {1} is already used on command type {2}";
 
+        public const string CannotBindListToNonListParameter = "Cannot bind a list to a non-list parameter '{0}'";
+
         public const string CannotDisplayHelpUnknownCommnad = "Cannot display help for unknown command '{0}'";
 
         public const string CannotRepeatFlagParameter = "Cannot repeat flag parameter '{0}'";

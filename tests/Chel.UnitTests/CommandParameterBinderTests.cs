@@ -1120,6 +1120,93 @@ namespace Chel.UnitTests
             Assert.Equal(new[]{ "Variable $foo$ is not set" }, result.Errors);
         }
 
+        [Theory]
+        [MemberData(nameof(Bind_SetList_BindsParameter_DataSource))]
+        public void Bind_SetList_BindsParameter(string parameterName, Func<ListParameterCommand, IEnumerable<string>> propertyExtractor)
+        {
+            // arrange
+            var sut = CreateCommandParameterBinder(typeof(ListParameterCommand));
+            var command = new ListParameterCommand();
+            var input = CreateCommandInput(
+                "list-params",
+                new ParameterNameCommandParameter(parameterName),
+                new ListCommandParameter(new[]
+                {
+                    new LiteralCommandParameter("a"),
+                    new LiteralCommandParameter("b")
+                })
+            );
+
+            // act
+            var result = sut.Bind(command, input);
+
+            // assert
+            Assert.True(result.Success);
+            var values = propertyExtractor(command);
+            Assert.Equal(new[] { "a", "b" }, values);
+        }
+
+        public static IEnumerable<object[]> Bind_SetList_BindsParameter_DataSource()
+        {
+            yield return new object[] { "array", new Func<ListParameterCommand, IEnumerable<string>>(command => command.Array) };
+            yield return new object[] { "enumerable", new Func<ListParameterCommand, IEnumerable<string>>(command => command.Enumerable) };
+            yield return new object[] { "list", new Func<ListParameterCommand, IEnumerable<string>>(command => command.List) };
+            yield return new object[] { "collection", new Func<ListParameterCommand, IEnumerable<string>>(command => command.Collection) };
+            yield return new object[] { "rocollection", new Func<ListParameterCommand, IEnumerable<string>>(command => command.ReadOnlyCollection) };
+            yield return new object[] { "concretelist", new Func<ListParameterCommand, IEnumerable<string>>(command => command.ConcreteList) };
+
+        }
+
+        [Fact]
+        public void Bind_SetListOnString_ErrorIncludedInResult()
+        {
+            // arrange
+            var sut = CreateCommandParameterBinder(typeof(NamedParameterCommand));
+            var command = new NamedParameterCommand();
+            var input = CreateCommandInput(
+                "nam",
+                new ParameterNameCommandParameter("param1"),
+                new ListCommandParameter(new[]
+                {
+                    new LiteralCommandParameter("a"),
+                    new LiteralCommandParameter("b")
+                })
+            );
+
+            // act
+            var result = sut.Bind(command, input);
+
+            // assert
+            Assert.False(result.Success);
+            Assert.Equal(new[]{ "Cannot bind a list to a non-list parameter 'param1'" }, result.Errors);
+        }
+
+        [Fact]
+        public void Bind_SetListOnIncompatibleEnumerable_ErrorIncludedInResult()
+        {
+            // arrange
+            var sut = CreateCommandParameterBinder(typeof(ListParameterCommand));
+            var command = new ListParameterCommand();
+            var input = CreateCommandInput(
+                "list-params",
+                new ParameterNameCommandParameter("dictionary"),
+                new ListCommandParameter(new[]
+                {
+                    new LiteralCommandParameter("a"),
+                    new LiteralCommandParameter("b")
+                })
+            );
+
+            // act
+            var result = sut.Bind(command, input);
+
+            // assert
+            Assert.False(result.Success);
+            Assert.Equal(new[]{ "Invalid parameter value 'Chel.Abstractions.Parsing.ListCommandParameter' for named parameter 'dictionary'." }, result.Errors);
+        }
+
+        // variables in list values
+
         private CommandParameterBinder CreateCommandParameterBinder(params Type[] commandTypes)
         {
             var registry = CreateCommandRegistry(commandTypes);

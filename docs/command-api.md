@@ -42,6 +42,23 @@ A parameter can be marked as required by annotating it with the `Required` attri
 
 Required parameters must be provided when the command is invoked, otherwise an error will occur.
 
+### List Parameters ###
+
+Parameters that accept list values must be of one of the following types:
+
+* `IEnumerable<T>`
+* `IReadOnlyCollection<T>`
+* `IList<T>`
+* `List<T>`
+* `IReadOnlyCollection<T>`
+* `ICollection<T>`
+* An array
+
+The following is an example of a parameter which accepts a list value.
+
+    [NamedParameter("list", "values")]
+    public IList<string> List { get; set; }
+
 ## Descriptions ##
 
 To support the help system, command implementations can add the `Description` attribute to the class and all parameters.

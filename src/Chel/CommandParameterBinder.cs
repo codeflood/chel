@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Reflection;
@@ -82,7 +83,7 @@ namespace Chel
                     continue;
                 
                 AssertWritableProperty(describedParameter, instance);
-                BindProperty(instance, describedParameter.Property, new LiteralCommandParameter("True"), result);
+                BindProperty(instance, describedParameter.Property, describedParameter.Name, new LiteralCommandParameter("True"), result);
 
                 // Make sure there's no duplicates
                 var repeatParameter = false;
@@ -127,7 +128,7 @@ namespace Chel
 
                     try
                     {
-                        BindProperty(instance, describedParameter.Property, value, result);
+                        BindProperty(instance, describedParameter.Property, describedParameter.Name, value, result);
                     }
                     catch(Exception)
                     {
@@ -173,7 +174,7 @@ namespace Chel
 
                     try
                     {
-                        BindProperty(instance, describedParameter.Property, value, result);
+                        BindProperty(instance, describedParameter.Property, describedParameter.Number.ToString(), value, result);
                     }
                     catch(Exception)
                     {
@@ -230,27 +231,105 @@ namespace Chel
                 throw new InvalidOperationException(string.Format(Texts.PropertyMissingSetter, descriptor.Property.Name, instance.GetType().FullName));
         }
 
-        private void BindProperty(ICommand instance, PropertyInfo property, CommandParameter value, ParameterBindResult result)
+        private void BindProperty(ICommand instance, PropertyInfo property, string parameterIdentifier, CommandParameter value, ParameterBindResult result)
         {
-            var bindingValue = string.Empty;
+            if(value is ListCommandParameter listCommandParameter)
+            {
+                BindListProperty(instance, property, parameterIdentifier, listCommandParameter, result);
+                return;
+            }
 
+            var bindingValue = ReplaceVariables(value, result);
+            if(bindingValue == null)
+                return;
+
+            var convertedValue = ConvertPropertyValue(bindingValue, property.PropertyType, property);
+            if(convertedValue == null)
+                return;
+
+            property.SetValue(instance, convertedValue);
+        }
+
+        private void BindListProperty(ICommand instance, PropertyInfo property, string parameterIdentifier, ListCommandParameter value, ParameterBindResult result)
+        {
+            Type elementType = null;
+
+            if(property.PropertyType.IsGenericType)
+            {
+                var genericTypeDefinition = property.PropertyType.GetGenericTypeDefinition();
+
+                if(genericTypeDefinition == typeof(IEnumerable<>))
+                    elementType = property.PropertyType.GetGenericArguments()[0];
+                else
+                {
+                    var interfaces = property.PropertyType.GetInterfaces();
+                    foreach(var inf in interfaces)
+                    {
+                        if(!inf.IsGenericType)
+                            continue;
+
+                        if(typeof(IEnumerable<>) == inf.GetGenericTypeDefinition())
+                        {
+                            elementType = inf.GetGenericArguments()[0];
+                            break;
+                        }
+                    }
+                }
+            }
+            else if(property.PropertyType.HasElementType)
+                elementType = property.PropertyType.GetElementType();
+
+            if(elementType == null)
+            {
+                result.AddError(string.Format(Texts.CannotBindListToNonListParameter, parameterIdentifier));
+                return;
+            }
+            
+            var valuesType = typeof(List<>).MakeGenericType(elementType);
+            var values = Activator.CreateInstance(valuesType) as IList;
+            foreach(var listValue in value.Values)
+            {
+                var bindingValue = ReplaceVariables(listValue, result);
+                if(bindingValue == null)
+                    continue;
+
+                var convertedValue = ConvertPropertyValue(bindingValue, elementType, property);
+                
+                values.Add(convertedValue);
+            }
+
+            if(property.PropertyType.IsArray)
+            {
+                var arrayValue = Array.CreateInstance(elementType, values.Count);
+                values.CopyTo(arrayValue, 0);
+                property.SetValue(instance, arrayValue);
+            }
+            else
+                property.SetValue(instance, values);
+        }
+
+        private string ReplaceVariables(CommandParameter value, ParameterBindResult result)
+        {
             try
             {
-                bindingValue = _variableReplacer.ReplaceVariables(_variables, value);
+                return _variableReplacer.ReplaceVariables(_variables, value);
             }
             catch(UnsetVariableException ex)
             {
                 result.AddError(ex.Message);
-                return;
             }
             catch(ArgumentException ex)
             {
                 result.AddError(ex.Message);
-                return;
             }
 
-            if (property.PropertyType.IsAssignableFrom(bindingValue.GetType()))
-                property.SetValue(instance, bindingValue);
+            return null;
+        }
+
+        private object ConvertPropertyValue(object bindingValue, Type targetType, PropertyInfo property)
+        {
+            if (targetType.IsAssignableFrom(bindingValue.GetType()))
+                return bindingValue;
             else
             {
                 // Find an appropriate type converter.
@@ -265,11 +344,13 @@ namespace Chel
                 }
                 else
                     // Otherwise allow type descriptor to find a converter
-                    converter = TypeDescriptor.GetConverter(property.PropertyType);
+                    converter = TypeDescriptor.GetConverter(targetType);
 
                 if (converter != null)
-                    property.SetValue(instance, converter.ConvertFrom(bindingValue));
+                    return converter.ConvertFrom(bindingValue);
             }
+
+            return null;
         }
     }
 }
