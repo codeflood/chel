@@ -3,6 +3,7 @@ using System.Text;
 using System.Threading;
 using Chel.Abstractions;
 using Chel.Abstractions.Results;
+using Chel.Abstractions.Types;
 using Chel.Abstractions.Variables;
 
 namespace Chel
@@ -22,7 +23,7 @@ namespace Chel
 
         [NumberedParameter(2, "value")]
         [Description("The value for the variable.")]
-        public string Value { get; set; }
+        public ChelType Value { get; set; }
 
         public Var(VariableCollection variables, IPhraseDictionary phraseDictionary)
         {
@@ -43,7 +44,7 @@ namespace Chel
             // todo: temporary implementation. Variables should be output as a list once we have those in the type system.
             var output = new StringBuilder();
 
-            if(string.IsNullOrEmpty(Value))
+            if(Value == null)
             {
                 if(string.IsNullOrEmpty(Name))
                     ListVariables(output);
@@ -52,7 +53,7 @@ namespace Chel
             }
             else
             {
-                var variable = new ValueVariable(Name, Value);
+                var variable = new Variable(Name, Value);
                 _variables.Set(variable);
                 output.Append(Value);
             }
@@ -71,14 +72,14 @@ namespace Chel
 
             foreach(var name in names)
             {
-                var variable = _variables.Get(name) as ValueVariable;
+                var variable = _variables.Get(name);
                 output.Append($"{name, Constants.FirstColumnWidth}{variable.Value}{Environment.NewLine}");
             }
         }
 
         private void ShowVariable(StringBuilder output, string name)
         {
-            var variable = _variables.Get(name) as ValueVariable;
+            var variable = _variables.Get(name);
             if(variable == null)
             {
                 var template = _phraseDictionary.GetPhrase(Texts.PhraseKeys.VariableNotSet, _executionCultureName);

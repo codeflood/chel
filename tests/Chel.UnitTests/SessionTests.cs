@@ -2,6 +2,7 @@ using System;
 using Chel.Abstractions;
 using Chel.Abstractions.Parsing;
 using Chel.Abstractions.Results;
+using Chel.Abstractions.Types;
 using Chel.Abstractions.Variables;
 using Chel.Exceptions;
 using Chel.Parsing;
@@ -235,7 +236,7 @@ namespace Chel.UnitTests
             var sut = CreateSession(
                 sessionObjectsConfigurator: x => {
                     x.Register<VariableCollection>();
-                    ((VariableCollection)x.Resolve(typeof(VariableCollection))).Set(new ValueVariable("foo", "lorem"));
+                    ((VariableCollection)x.Resolve(typeof(VariableCollection))).Set(new Variable("foo", new SingleValue("lorem")));
                 },
                 typeof(NamedParameterCommand));
 

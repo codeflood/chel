@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Chel.Abstractions.Parsing;
+using Chel.Abstractions.Types;
 using Chel.Abstractions.Variables;
 using Chel.UnitTests.SampleCommands;
 using Xunit;
@@ -1050,7 +1051,7 @@ namespace Chel.UnitTests
             // arrange
             var registry = CreateCommandRegistry(typeof(NamedParameterCommand));
             var variables = new VariableCollection();
-            variables.Set(new ValueVariable("foo", "bar"));
+            variables.Set(new Variable("foo", new SingleValue("bar")));
 
             var replacer = new VariableReplacer();
 
@@ -1088,7 +1089,7 @@ namespace Chel.UnitTests
             // arrange
             var registry = CreateCommandRegistry(typeof(NumericNumberedParameterCommand));
             var variables = new VariableCollection();
-            variables.Set(new ValueVariable("foo", "10"));
+            variables.Set(new Variable("foo", new SingleValue("10")));
 
             var replacer = new VariableReplacer();
 
@@ -1211,7 +1212,7 @@ namespace Chel.UnitTests
             // arrange
             var registry = CreateCommandRegistry(typeof(ListParameterCommand));
             var variables = new VariableCollection();
-            variables.Set(new ValueVariable("foo", "bar"));
+            variables.Set(new Variable("foo", new SingleValue("bar")));
 
             var replacer = new VariableReplacer();
 

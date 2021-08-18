@@ -56,7 +56,7 @@ namespace Chel
             if(variable == null)
                 throw new UnsetVariableException(parameter.VariableName);
 
-            output.Append((variable as ValueVariable).Value);
+            output.Append(variable.Value);
         }
     }
 }

@@ -1,16 +1,18 @@
 using System;
+using Chel.Abstractions.Types;
 using Chel.Abstractions.Variables;
 using Xunit;
 
 namespace Chel.Abstractions.UnitTests.Variables
 {
-    public class ValueVariableTests
+    public class VariableTests
     {
         [Fact]
         public void Ctor_NameIsNull_ThrowsException()
         {
             // arrange
-            Action sutAction = () => new ValueVariable(null, "value");
+            var value = new SingleValue("value");
+            Action sutAction = () => new Variable(null, value);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -21,7 +23,8 @@ namespace Chel.Abstractions.UnitTests.Variables
         public void Ctor_NameIsEmpty_ThrowsException()
         {
             // arrange
-            Action sutAction = () => new ValueVariable("", "value");
+            var value = new SingleValue("value");
+            Action sutAction = () => new Variable("", value);
 
             // act, assert
             var ex = Assert.Throws<ArgumentException>(sutAction);
@@ -32,7 +35,7 @@ namespace Chel.Abstractions.UnitTests.Variables
         public void Ctor_ValueIsNull_ThrowsException()
         {
             // arrange
-            Action sutAction = () => new ValueVariable("name", null);
+            Action sutAction = () => new Variable("name", null);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -40,19 +43,16 @@ namespace Chel.Abstractions.UnitTests.Variables
         }
 
         [Fact]
-        public void Ctor_ValueIsEmpty_DoesNotThrow()
-        {
-            new ValueVariable("name", "");
-        }
-
-        [Fact]
         public void Ctor_WhenCalled_SetsProperties()
         {
-            // arrange, act
-            var sut = new ValueVariable("name", "value");
+            // arrange
+            var value = new SingleValue("value");
+
+            // act
+            var sut = new Variable("name", value);
 
             // assert
-            Assert.Equal("value", sut.Value);
+            Assert.Equal(value, sut.Value);
         }
     }
 }

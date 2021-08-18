@@ -1,4 +1,5 @@
 using System;
+using Chel.Abstractions.Types;
 using Chel.Abstractions.Variables;
 using Xunit;
 
@@ -23,14 +24,15 @@ namespace Chel.Abstractions.UnitTests.Variables
         {
             // arrange
             var sut = new VariableCollection();
-            var variable = new ValueVariable("name", "alpha");
+            var value = new SingleValue("alpha");
+            var variable = new Variable("name", value);
 
             // act
             sut.Set(variable);
 
             // assert
-            var result = sut.Get("name") as ValueVariable;
-            Assert.Equal("alpha", variable.Value);
+            var result = sut.Get("name");
+            Assert.Equal(value, result.Value);
         }
 
         [Fact]
@@ -38,16 +40,16 @@ namespace Chel.Abstractions.UnitTests.Variables
         {
             // arrange
             var sut = new VariableCollection();
-            var variable1 = new ValueVariable("name", "alpha");
-            var variable2 = new ValueVariable("name", "beta");
+            var variable1 = new Variable("name", new SingleValue("alpha"));
+            var variable2 = new Variable("name", new SingleValue("beta"));
             sut.Set(variable1);
 
             // act
             sut.Set(variable2);
 
             // assert
-            var result = sut.Get("name") as ValueVariable;
-            Assert.Equal("beta", result.Value);
+            var result = sut.Get("name");
+            Assert.Equal("beta", result.Value.ToString());
         }
 
         [Fact]
@@ -71,11 +73,12 @@ namespace Chel.Abstractions.UnitTests.Variables
         {
             // arrange
             var sut = new VariableCollection();
-            var variable = new ValueVariable("name", "alpha");
+            var value = new SingleValue("alpha");
+            var variable = new Variable("name", value);
             sut.Set(variable);
 
             // act
-            var result = sut.Get(name) as ValueVariable;
+            var result = sut.Get(name);
 
             // assert
             Assert.Equal(variable, result);
@@ -86,7 +89,7 @@ namespace Chel.Abstractions.UnitTests.Variables
         {
             // arrange
             var sut = new VariableCollection();
-            sut.Set(new ValueVariable("name", "value"));
+            sut.Set(new Variable("name", new SingleValue("value")));
             
             Action sutAction = () => sut.Remove(null);
 
@@ -100,7 +103,7 @@ namespace Chel.Abstractions.UnitTests.Variables
         {
             // arrange
             var sut = new VariableCollection();
-            sut.Set(new ValueVariable("name", "value"));
+            sut.Set(new Variable("name", new SingleValue("value")));
             
             Action sutAction = () => sut.Remove("");
 
@@ -127,7 +130,7 @@ namespace Chel.Abstractions.UnitTests.Variables
         {
             // arrange
             var sut = new VariableCollection();
-            var variable = new ValueVariable("name", "alpha");
+            var variable = new Variable("name", new SingleValue("alpha"));
             sut.Set(variable);
 
             // act
@@ -143,7 +146,7 @@ namespace Chel.Abstractions.UnitTests.Variables
         {
             // arrange
             var sut = new VariableCollection();
-            var variable = new ValueVariable("name", "alpha");
+            var variable = new Variable("name", new SingleValue("alpha"));
             sut.Set(variable);
 
             // act
@@ -172,8 +175,8 @@ namespace Chel.Abstractions.UnitTests.Variables
         {
             // arrange
             var sut = new VariableCollection();
-            sut.Set(new ValueVariable("name1", "value1"));
-            sut.Set(new ValueVariable("name2", "value2"));
+            sut.Set(new Variable("name1", new SingleValue("value1")));
+            sut.Set(new Variable("name2", new SingleValue("value2")));
 
             // act
             var names = sut.Names;

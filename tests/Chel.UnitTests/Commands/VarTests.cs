@@ -1,6 +1,8 @@
 using System;
+using System.Linq;
 using Chel.Abstractions;
 using Chel.Abstractions.Results;
+using Chel.Abstractions.Types;
 using Chel.Abstractions.Variables;
 using NSubstitute;
 using Xunit;
@@ -50,8 +52,8 @@ namespace Chel.UnitTests.Commands
         {
             // arrange
             var variables = new VariableCollection();
-            variables.Set(new ValueVariable("name1", "value1"));
-            variables.Set(new ValueVariable("name2", "value2"));
+            variables.Set(new Variable("name1", new SingleValue("value1")));
+            variables.Set(new Variable("name2", new SingleValue("value2")));
 
             var sut = new Var(variables, new PhraseDictionary());
 
@@ -82,7 +84,7 @@ namespace Chel.UnitTests.Commands
         {
             // arrange
             var variables = new VariableCollection();
-            variables.Set(new ValueVariable("name", "value"));
+            variables.Set(new Variable("name", new SingleValue("value")));
 
             var sut = new Var(variables, new PhraseDictionary());
             sut.Name = "name";
@@ -102,7 +104,7 @@ namespace Chel.UnitTests.Commands
 
             var sut = new Var(variables, new PhraseDictionary());
             sut.Name = "name";
-            sut.Value = "value";
+            sut.Value = new SingleValue("value");
 
             // act
             var result = sut.Execute() as ValueResult;
@@ -110,8 +112,30 @@ namespace Chel.UnitTests.Commands
             // assert
             Assert.Equal("value", result.Value);
 
-            var variable = variables.Get("name") as ValueVariable;
-            Assert.Equal("value", variable.Value);
+            var variable = variables.Get("name");
+            Assert.Equal("value", variable.Value.ToString());
+        }
+
+        [Fact]
+        public void Execute_ListProvided_SetsVariableAsList()
+        {
+            // arrange
+            var variables = new VariableCollection();
+
+            var sut = new Var(variables, new PhraseDictionary());
+            sut.Name = "name";
+            sut.Value = new List(new[] {
+                new SingleValue("val1"),
+                new SingleValue("val2")
+            });
+
+            // act
+            var result = sut.Execute() as ValueResult;
+
+            // assert
+            var variable = variables.Get("name");
+            var values = ((List)variable.Value).Values.Select(x => x.ToString());
+            Assert.Equal(new[]{ "val1", "val2" }, values);
         }
     }
 }

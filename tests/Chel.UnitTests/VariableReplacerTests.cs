@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Chel.Abstractions.Parsing;
+using Chel.Abstractions.Types;
 using Chel.Abstractions.Variables;
 using Chel.Exceptions;
 using Xunit;
@@ -70,7 +71,7 @@ namespace Chel.UnitTests
             // arrange
             var sut = new VariableReplacer();
             var variables = new VariableCollection();
-            variables.Set(new ValueVariable("foo", "bar"));
+            variables.Set(new Variable("foo", new SingleValue("bar")));
 
             // act
             var result = sut.ReplaceVariables(variables, input);
