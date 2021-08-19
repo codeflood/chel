@@ -1257,6 +1257,36 @@ namespace Chel.UnitTests
             Assert.Equal(new[] { "a", "bar" }, command.List);
         }
 
+        [Theory]
+        [MemberData(nameof(Bind_PropertyIsChelType_BindsParameter_DataSource))]
+        public void Bind_PropertyIsChelType_BindsParameter(ChelType value)
+        {
+            // arrange
+            var sut = CreateCommandParameterBinder(typeof(Var));
+            var variables = new VariableCollection();
+            var command = new Var(variables, new PhraseDictionary());
+            var input = CreateCommandInput(
+                "var",
+                new Literal("foo"),
+                value
+            );
+
+            // act
+            var result = sut.Bind(command, input);
+
+            // assert
+            Assert.True(result.Success);
+            Assert.Equal(value, command.Value);
+        }
+
+        public static IEnumerable<object[]> Bind_PropertyIsChelType_BindsParameter_DataSource()
+        {
+            yield return new[] { new Literal("lit") };
+            yield return new[] { new VariableReference("ref") };
+            yield return new[] { new SingleValue(new ChelType[] { new Literal("lit"), new VariableReference("ref") }) };
+            yield return new[] { new List(new ChelType[] { new Literal("lit1"), new Literal("lit2") }) };
+        }
+
         private CommandParameterBinder CreateCommandParameterBinder(params Type[] commandTypes)
         {
             var registry = CreateCommandRegistry(commandTypes);

@@ -235,6 +235,12 @@ namespace Chel
 
         private void BindProperty(ICommand instance, PropertyInfo property, string parameterIdentifier, ChelType value, ParameterBindResult result)
         {
+            if(property.PropertyType == typeof(ChelType))
+            {
+                property.SetValue(instance, value);
+                return;
+            }
+
             if(value is List list)
             {
                 BindListProperty(instance, property, parameterIdentifier, list, result);
