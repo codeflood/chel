@@ -24,7 +24,7 @@ namespace Chel.Abstractions.UnitTests.Variables
         {
             // arrange
             var sut = new VariableCollection();
-            var value = new SingleValue("alpha");
+            var value = new Literal("alpha");
             var variable = new Variable("name", value);
 
             // act
@@ -40,8 +40,8 @@ namespace Chel.Abstractions.UnitTests.Variables
         {
             // arrange
             var sut = new VariableCollection();
-            var variable1 = new Variable("name", new SingleValue("alpha"));
-            var variable2 = new Variable("name", new SingleValue("beta"));
+            var variable1 = new Variable("name", new Literal("alpha"));
+            var variable2 = new Variable("name", new Literal("beta"));
             sut.Set(variable1);
 
             // act
@@ -73,7 +73,7 @@ namespace Chel.Abstractions.UnitTests.Variables
         {
             // arrange
             var sut = new VariableCollection();
-            var value = new SingleValue("alpha");
+            var value = new Literal("alpha");
             var variable = new Variable("name", value);
             sut.Set(variable);
 
@@ -89,7 +89,7 @@ namespace Chel.Abstractions.UnitTests.Variables
         {
             // arrange
             var sut = new VariableCollection();
-            sut.Set(new Variable("name", new SingleValue("value")));
+            sut.Set(new Variable("name", new Literal("value")));
             
             Action sutAction = () => sut.Remove(null);
 
@@ -103,7 +103,7 @@ namespace Chel.Abstractions.UnitTests.Variables
         {
             // arrange
             var sut = new VariableCollection();
-            sut.Set(new Variable("name", new SingleValue("value")));
+            sut.Set(new Variable("name", new Literal("value")));
             
             Action sutAction = () => sut.Remove("");
 
@@ -130,7 +130,7 @@ namespace Chel.Abstractions.UnitTests.Variables
         {
             // arrange
             var sut = new VariableCollection();
-            var variable = new Variable("name", new SingleValue("alpha"));
+            var variable = new Variable("name", new Literal("alpha"));
             sut.Set(variable);
 
             // act
@@ -146,7 +146,7 @@ namespace Chel.Abstractions.UnitTests.Variables
         {
             // arrange
             var sut = new VariableCollection();
-            var variable = new Variable("name", new SingleValue("alpha"));
+            var variable = new Variable("name", new Literal("alpha"));
             sut.Set(variable);
 
             // act
@@ -175,8 +175,8 @@ namespace Chel.Abstractions.UnitTests.Variables
         {
             // arrange
             var sut = new VariableCollection();
-            sut.Set(new Variable("name1", new SingleValue("value1")));
-            sut.Set(new Variable("name2", new SingleValue("value2")));
+            sut.Set(new Variable("name1", new Literal("value1")));
+            sut.Set(new Variable("name2", new Literal("value2")));
 
             // act
             var names = sut.Names;

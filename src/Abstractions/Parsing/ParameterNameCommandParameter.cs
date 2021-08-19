@@ -1,11 +1,12 @@
 using System;
+using Chel.Abstractions.Types;
 
 namespace Chel.Abstractions.Parsing
 {
     /// <summary>
     /// A parameter name used to mark a named parameter or flag parameter.
     /// </summary>
-    public class ParameterNameCommandParameter : CommandParameter
+    public class ParameterNameCommandParameter : ChelType
     {
         /// <summary>
         /// Gets the name of the parameter.

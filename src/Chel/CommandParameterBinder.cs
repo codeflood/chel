@@ -2,9 +2,11 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Reflection;
 using Chel.Abstractions;
 using Chel.Abstractions.Parsing;
+using Chel.Abstractions.Types;
 using Chel.Abstractions.Variables;
 using Chel.Exceptions;
 
@@ -55,7 +57,7 @@ namespace Chel
             if(descriptor == null)
                 throw new InvalidOperationException(string.Format(Texts.DescriptorForCommandCouldNotBeResolved, input.CommandName));
 
-            var parameters = new List<CommandParameter>(input.Parameters);
+            var parameters = input.Parameters.ToList();
 
             BindFlagParameters(instance, descriptor, parameters, result);
             BindNamedParameters(instance, descriptor, parameters, result);
@@ -73,7 +75,7 @@ namespace Chel
             return result;
         }
 
-        private void BindFlagParameters(ICommand instance, CommandDescriptor descriptor, List<CommandParameter> parameters, ParameterBindResult result)
+        private void BindFlagParameters(ICommand instance, CommandDescriptor descriptor, List<ChelType> parameters, ParameterBindResult result)
         {
             foreach(var describedParameter in descriptor.FlagParameters)
             {
@@ -83,7 +85,7 @@ namespace Chel
                     continue;
                 
                 AssertWritableProperty(describedParameter, instance);
-                BindProperty(instance, describedParameter.Property, describedParameter.Name, new LiteralCommandParameter("True"), result);
+                BindProperty(instance, describedParameter.Property, describedParameter.Name, new Literal("True"), result);
 
                 // Make sure there's no duplicates
                 var repeatParameter = false;
@@ -100,7 +102,7 @@ namespace Chel
             }
         }
 
-        private void BindNamedParameters(ICommand instance, CommandDescriptor descriptor, List<CommandParameter> parameters, ParameterBindResult result)
+        private void BindNamedParameters(ICommand instance, CommandDescriptor descriptor, List<ChelType> parameters, ParameterBindResult result)
         {
             foreach(var describedParameter in descriptor.NamedParameters.Values)
             {
@@ -159,7 +161,7 @@ namespace Chel
             }
         }
 
-        private void BindNumberedParameters(ICommand instance, CommandDescriptor descriptor, List<CommandParameter> parameters, ParameterBindResult result)
+        private void BindNumberedParameters(ICommand instance, CommandDescriptor descriptor, List<ChelType> parameters, ParameterBindResult result)
         {
             var boundParameterIndexes = new List<int>();
 
@@ -195,7 +197,7 @@ namespace Chel
                 parameters.RemoveAt(index);
         }
 
-        private void AssertNoNamedOrFlagParameters(List<CommandParameter> parameters, ParameterBindResult result)
+        private void AssertNoNamedOrFlagParameters(List<ChelType> parameters, ParameterBindResult result)
         {
             for(var i = parameters.Count - 1; i >= 0; i--)
             {
@@ -215,7 +217,7 @@ namespace Chel
             }
         }
 
-        private int FindParameterMarker(string marker, List<CommandParameter> parameters)
+        private int FindParameterMarker(string marker, List<ChelType> parameters)
         {
             return parameters.FindIndex(x => {
                 if(x is ParameterNameCommandParameter commandParameter)
@@ -231,11 +233,11 @@ namespace Chel
                 throw new InvalidOperationException(string.Format(Texts.PropertyMissingSetter, descriptor.Property.Name, instance.GetType().FullName));
         }
 
-        private void BindProperty(ICommand instance, PropertyInfo property, string parameterIdentifier, CommandParameter value, ParameterBindResult result)
+        private void BindProperty(ICommand instance, PropertyInfo property, string parameterIdentifier, ChelType value, ParameterBindResult result)
         {
-            if(value is ListCommandParameter listCommandParameter)
+            if(value is List list)
             {
-                BindListProperty(instance, property, parameterIdentifier, listCommandParameter, result);
+                BindListProperty(instance, property, parameterIdentifier, list, result);
                 return;
             }
 
@@ -250,7 +252,7 @@ namespace Chel
             property.SetValue(instance, convertedValue);
         }
 
-        private void BindListProperty(ICommand instance, PropertyInfo property, string parameterIdentifier, ListCommandParameter value, ParameterBindResult result)
+        private void BindListProperty(ICommand instance, PropertyInfo property, string parameterIdentifier, List value, ParameterBindResult result)
         {
             Type elementType = null;
 
@@ -308,7 +310,7 @@ namespace Chel
                 property.SetValue(instance, values);
         }
 
-        private string ReplaceVariables(CommandParameter value, ParameterBindResult result)
+        private string ReplaceVariables(ChelType value, ParameterBindResult result)
         {
             try
             {

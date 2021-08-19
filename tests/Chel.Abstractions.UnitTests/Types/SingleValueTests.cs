@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Chel.Abstractions.Types;
 using Xunit;
 
@@ -7,101 +8,73 @@ namespace Chel.Abstractions.UnitTests.Types
     public class SingleValueTests
     {
         [Fact]
-        public void Ctor_ValueIsNull_ThrowsExceptino()
-        {
-            // arrange
-            Action sutAction = () => new SingleValue(null);
-
-            // act, assert
-            var ex = Assert.Throws<ArgumentNullException>(sutAction);
-            Assert.Equal("value", ex.ParamName);
-        }
-
-        [Fact]
-        public void Ctor_ValueIsEmpty_DoesNotThrow()
-        {
-            var sut = new SingleValue("");
-        }
-
-        [Fact]
-        public void Ctor_WhenCalled_SetsProperties()
+        public void Ctor_NullLiteral_SetsPropertyToEmptyCollection()
         {
             // arrange, act
-            var sut = new SingleValue("val");
+            var sut = new SingleValue((Literal)null);
 
             // assert
-            Assert.Equal("val", sut.Value);
+            Assert.Empty(sut.Values);
         }
 
         [Fact]
-        public void Equals_ValuesAreEqual_ReturnsTrue()
+        public void Ctor_LiteralProvided_SetsProperty()
         {
             // arrange
-            var sut1 = new SingleValue("val1");
-            var sut2 = new SingleValue("val1");
+            var value = new Literal("lit");
 
             // act
-            var result = sut1.Equals(sut2);
+            var sut = new SingleValue(value);
 
             // assert
-            Assert.True(result);
+            Assert.Equal(new[] { value }, sut.Values);
         }
 
         [Fact]
-        public void Equals_ValuesAreDifferent_ReturnsFalse()
+        public void Ctor_NullVariableReference_SetsPropertyToEmptyCollection()
         {
-            // arrange
-            var sut1 = new SingleValue("val1");
-            var sut2 = new SingleValue("val2");
-
-            // act
-            var result = sut1.Equals(sut2);
+            // arrange, act
+            var sut = new SingleValue((VariableReference)null);
 
             // assert
-            Assert.False(result);
+            Assert.Empty(sut.Values);
         }
 
         [Fact]
-        public void GetHashCode_ValuesAreEqual_ReturnsSameHashCode()
+        public void Ctor_VariableReferenceProvided_SetsProperty()
         {
             // arrange
-            var sut1 = new SingleValue("val1");
-            var sut2 = new SingleValue("val1");
+            var value = new VariableReference("var");
 
             // act
-            var hashCode1 = sut1.GetHashCode();
-            var hashCode2 = sut2.GetHashCode();
+            var sut = new SingleValue(value);
 
             // assert
-            Assert.Equal(hashCode1, hashCode2);
+            Assert.Equal(new[] { value }, sut.Values);
         }
 
         [Fact]
-        public void GetHashCode_ValuesAreNotEqual_ReturnsDifferentHashCodes()
+        public void Ctor_NullList_SetsPropertyToEmptyCollection()
         {
-            // arrange
-            var sut1 = new SingleValue("val1");
-            var sut2 = new SingleValue("val2");
+            // arrange, act
+            var sut = new SingleValue((IReadOnlyList<ChelType>)null);
 
-            // act
-            var hashCode1 = sut1.GetHashCode();
-            var hashCode2 = sut2.GetHashCode();
-
-            // act, assert
-            Assert.NotEqual(hashCode1, hashCode2);
+            // assert
+            Assert.Empty(sut.Values);
         }
 
         [Fact]
-        public void ToString_WhenCalled_ReturnsValue()
+        public void Ctor_ListProvided_SetsProperty()
         {
             // arrange
-            var sut = new SingleValue("val");
+            var val1 = new Literal("val1");
+            var val2 = new Literal("val2");
 
             // act
-            var result = sut.ToString();
+            var sut = new SingleValue(new List<ChelType> { val1, val2 });
 
             // assert
-            Assert.Equal("val", result);
+            Assert.Equal(new[] { val1, val2 }, sut.Values);
         }
     }
 }

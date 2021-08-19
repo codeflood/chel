@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using Chel.Abstractions.Parsing;
+using Chel.Abstractions.Types;
 using Chel.Exceptions;
 
 namespace Chel.Parsing
@@ -53,7 +54,7 @@ namespace Chel.Parsing
             if(commandName == null)
                 return null;
 
-            var commandInputBuilder = new CommandInput.Builder(commandName.LocationStart.LineNumber, (commandName.Block as LiteralCommandParameter).Value);
+            var commandInputBuilder = new CommandInput.Builder(commandName.LocationStart.LineNumber, (commandName.Block as Literal).Value);
 
             var parsedBlock = commandName;
 
@@ -159,7 +160,7 @@ namespace Chel.Parsing
             if(string.IsNullOrWhiteSpace(name))
                 return null;
 
-            var parameter = new LiteralCommandParameter(name);
+            var parameter = new Literal(name);
             return new ParseBlock(locationStart, parameter, isEndOfLine: isEndOfLine);
         }
 
@@ -221,7 +222,7 @@ namespace Chel.Parsing
                 }
             }
 
-            var parameter = new LiteralCommandParameter(_buffer.ToString());
+            var parameter = new Literal(_buffer.ToString());
             return new ParseBlock(locationStart, parameter, isEndOfLine: false);
         }
 
@@ -240,7 +241,7 @@ namespace Chel.Parsing
             if(name == null)
                 throw new ParseException(_lastTokenLocation, Texts.MissingParameterName);
 
-            var parameter = new ParameterNameCommandParameter((name.Block as LiteralCommandParameter).Value);
+            var parameter = new ParameterNameCommandParameter((name.Block as Literal).Value);
             return new ParseBlock(locationStart, parameter, isEndOfLine: name.IsEndOfLine);
         }
 
@@ -254,7 +255,7 @@ namespace Chel.Parsing
                         return ParseBlock(token);
 
                     case SpecialTokenType.VariableMarker:
-                        return ParseSimpleValue(token);
+                        return ParseSingleValue(token);
 
                     case SpecialTokenType.ListStart:
                         return ParseList(token);
@@ -269,17 +270,17 @@ namespace Chel.Parsing
                 }
             }
 
-            return ParseSimpleValue(token);
+            return ParseSingleValue(token);
         }
 
-        private ParseBlock ParseSimpleValue(Token token)
+        private ParseBlock ParseSingleValue(Token token)
         {
             _buffer.Clear();
 
             var isEndOfLine = false;
             var isVariable = false;
             var locationStart = _lastTokenLocation;
-            var parameters = new List<CommandParameter>();
+            var parameters = new List<ChelType>();
             var done = false;
             
             while(token != null && !done)
@@ -296,7 +297,7 @@ namespace Chel.Parsing
                                 isVariable = false;
 
                                 if(!string.IsNullOrEmpty(blockValue))
-                                    parameters.Add(new VariableCommandParameter(blockValue));
+                                    parameters.Add(new VariableReference(blockValue));
                                     else
                                         throw new ParseException(token.Location, Texts.MissingVariableName);
 
@@ -307,7 +308,7 @@ namespace Chel.Parsing
                                 isVariable = true;
 
                                 if(!string.IsNullOrEmpty(blockValue))
-                                    parameters.Add(new LiteralCommandParameter(blockValue));
+                                    parameters.Add(new Literal(blockValue));
 
                                 _buffer.Clear();
                             }
@@ -346,7 +347,7 @@ namespace Chel.Parsing
 
             var value = _buffer.ToString();
             if(!string.IsNullOrEmpty(value))
-                parameters.Add(new LiteralCommandParameter(value));
+                parameters.Add(new Literal(value));
 
             if(parameters.Count == 0)
                 return new ParseBlock(locationStart, null, isEndOfLine: isEndOfLine);
@@ -354,7 +355,7 @@ namespace Chel.Parsing
             if(parameters.Count == 1)
                 return new ParseBlock(locationStart, parameters[0], isEndOfLine: isEndOfLine);
 
-            return new ParseBlock(locationStart, new AggregateCommandParameter(parameters), isEndOfLine: isEndOfLine);
+            return new ParseBlock(locationStart, new SingleValue(parameters), isEndOfLine: isEndOfLine);
         }
 
         private ParseBlock ParseList(Token token)
@@ -368,7 +369,7 @@ namespace Chel.Parsing
             token = GetNextToken();
             var startLocation = _lastTokenLocation;
 
-            var listValues = new List<CommandParameter>();
+            var listValues = new List<ChelType>();
             var listCompleted = false;
 
             while(token != null)
@@ -389,7 +390,7 @@ namespace Chel.Parsing
             if(!listCompleted)
                 throw new ParseException(startLocation, Texts.MissingListEnd);
 
-            var parameter = new ListCommandParameter(listValues);
+            var parameter = new List(listValues);
             return new ParseBlock(startLocation, parameter);
         }
 

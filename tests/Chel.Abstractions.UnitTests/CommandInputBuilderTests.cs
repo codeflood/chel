@@ -1,5 +1,6 @@
 using System;
 using Chel.Abstractions.Parsing;
+using Chel.Abstractions.Types;
 using Xunit;
 
 namespace Chel.Abstractions.UnitTests
@@ -74,15 +75,15 @@ namespace Chel.Abstractions.UnitTests
         {
             // arrange
             var sut = new CommandInput.Builder(3, "command");
-            sut.AddParameter(new LiteralCommandParameter("value1"));
-            sut.AddParameter(new LiteralCommandParameter("value2"));
+            sut.AddParameter(new Literal("value1"));
+            sut.AddParameter(new Literal("value2"));
 
             // act
             var commandInput = sut.Build();
 
             // assert
-            Assert.Equal("value1", (commandInput.Parameters[0] as LiteralCommandParameter).Value);
-            Assert.Equal("value2", (commandInput.Parameters[1] as LiteralCommandParameter).Value);
+            Assert.Equal("value1", (commandInput.Parameters[0] as Literal).Value);
+            Assert.Equal("value2", (commandInput.Parameters[1] as Literal).Value);
         }
 
         [Theory]
@@ -94,13 +95,13 @@ namespace Chel.Abstractions.UnitTests
         {
             // arrange
             var sut = new CommandInput.Builder(3, "command");
-            sut.AddParameter(new LiteralCommandParameter(value));
+            sut.AddParameter(new Literal(value));
 
             // act
             var commandInput = sut.Build();
 
             // assert
-            Assert.Equal(value, (commandInput.Parameters[0] as LiteralCommandParameter).Value);
+            Assert.Equal(value, (commandInput.Parameters[0] as Literal).Value);
         }
     }
 }

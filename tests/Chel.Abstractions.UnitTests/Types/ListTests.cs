@@ -20,8 +20,8 @@ namespace Chel.Abstractions.UnitTests.Types
         public void Ctor_WhenCalled_SetsProperties()
         {
             // arrange
-            var val1 = new SingleValue("val1");
-            var val2 = new SingleValue("val2");
+            var val1 = new Literal("val1");
+            var val2 = new Literal("val2");
 
             // act
             var sut = new List(new List<ChelType> { val1, val2 });
@@ -48,11 +48,11 @@ namespace Chel.Abstractions.UnitTests.Types
         public void Equals_ValuesBothContainEqualElements_ReturnsTrue()
         {
             // arrange
-            var param11 = new SingleValue("val1");
-            var param21 = new SingleValue("val1");
+            var param11 = new Literal("val1");
+            var param21 = new Literal("val1");
 
-            var param12 = new SingleValue("val2");
-            var param22 = new SingleValue("val2");
+            var param12 = new Literal("val2");
+            var param22 = new Literal("val2");
 
             var sut1 = new List(new[] { param11, param12 });
             var sut2 = new List(new[] { param21, param22 });
@@ -68,11 +68,11 @@ namespace Chel.Abstractions.UnitTests.Types
         public void Equals_SameValuesOutOfOrder_ReturnsFalse()
         {
             // arrange
-            var param11 = new SingleValue("val1");
-            var param21 = new SingleValue("val1");
+            var param11 = new Literal("val1");
+            var param21 = new Literal("val1");
 
-            var param12 = new SingleValue("val2");
-            var param22 = new SingleValue("val2");
+            var param12 = new Literal("val2");
+            var param22 = new Literal("val2");
 
             var sut1 = new List(new[] { param11, param12 });
             var sut2 = new List(new[] { param22, param21 });
@@ -88,8 +88,8 @@ namespace Chel.Abstractions.UnitTests.Types
         public void Equals_DifferentValues_ReturnsFalse()
         {
             // arrange
-            var param1 = new SingleValue("val");
-            var param2 = new SingleValue("other");
+            var param1 = new Literal("val");
+            var param2 = new Literal("other");
 
             var sut1 = new List(new[] { param1 });
             var sut2 = new List(new[] { param2 });
@@ -105,11 +105,11 @@ namespace Chel.Abstractions.UnitTests.Types
         public void GetHashCode_ValuesAreEqual_ReturnsSameHashCode()
         {
             // arrange
-            var param11 = new SingleValue("val1");
-            var param21 = new SingleValue("val1");
+            var param11 = new Literal("val1");
+            var param21 = new Literal("val1");
 
-            var param12 = new SingleValue("val2");
-            var param22 = new SingleValue("val2");
+            var param12 = new Literal("val2");
+            var param22 = new Literal("val2");
 
             var sut1 = new List(new[] { param11, param12 });
             var sut2 = new List(new[] { param21, param22 });
@@ -126,11 +126,11 @@ namespace Chel.Abstractions.UnitTests.Types
         public void GetHashCode_ValuesAreDifferent_ReturnsDifferentHashCodes()
         {
             // arrange
-            var param11 = new SingleValue("val1");
-            var param21 = new SingleValue("val1");
+            var param11 = new Literal("val1");
+            var param21 = new Literal("val1");
 
-            var param12 = new SingleValue("val2");
-            var param22 = new SingleValue("val3");
+            var param12 = new Literal("val2");
+            var param22 = new Literal("val3");
 
             var sut1 = new List(new[] { param11, param12 });
             var sut2 = new List(new[] { param21, param22 });

@@ -11,7 +11,7 @@ namespace Chel.Abstractions.UnitTests.Variables
         public void Ctor_NameIsNull_ThrowsException()
         {
             // arrange
-            var value = new SingleValue("value");
+            var value = new Literal("value");
             Action sutAction = () => new Variable(null, value);
 
             // act, assert
@@ -23,7 +23,7 @@ namespace Chel.Abstractions.UnitTests.Variables
         public void Ctor_NameIsEmpty_ThrowsException()
         {
             // arrange
-            var value = new SingleValue("value");
+            var value = new Literal("value");
             Action sutAction = () => new Variable("", value);
 
             // act, assert
@@ -46,7 +46,7 @@ namespace Chel.Abstractions.UnitTests.Variables
         public void Ctor_WhenCalled_SetsProperties()
         {
             // arrange
-            var value = new SingleValue("value");
+            var value = new Literal("value");
 
             // act
             var sut = new Variable("name", value);

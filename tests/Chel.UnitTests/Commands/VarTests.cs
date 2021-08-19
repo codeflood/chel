@@ -52,8 +52,8 @@ namespace Chel.UnitTests.Commands
         {
             // arrange
             var variables = new VariableCollection();
-            variables.Set(new Variable("name1", new SingleValue("value1")));
-            variables.Set(new Variable("name2", new SingleValue("value2")));
+            variables.Set(new Variable("name1", new Literal("value1")));
+            variables.Set(new Variable("name2", new Literal("value2")));
 
             var sut = new Var(variables, new PhraseDictionary());
 
@@ -84,7 +84,7 @@ namespace Chel.UnitTests.Commands
         {
             // arrange
             var variables = new VariableCollection();
-            variables.Set(new Variable("name", new SingleValue("value")));
+            variables.Set(new Variable("name", new Literal("value")));
 
             var sut = new Var(variables, new PhraseDictionary());
             sut.Name = "name";
@@ -104,7 +104,7 @@ namespace Chel.UnitTests.Commands
 
             var sut = new Var(variables, new PhraseDictionary());
             sut.Name = "name";
-            sut.Value = new SingleValue("value");
+            sut.Value = new Literal("value");
 
             // act
             var result = sut.Execute() as ValueResult;
@@ -125,8 +125,8 @@ namespace Chel.UnitTests.Commands
             var sut = new Var(variables, new PhraseDictionary());
             sut.Name = "name";
             sut.Value = new List(new[] {
-                new SingleValue("val1"),
-                new SingleValue("val2")
+                new Literal("val1"),
+                new Literal("val2")
             });
 
             // act

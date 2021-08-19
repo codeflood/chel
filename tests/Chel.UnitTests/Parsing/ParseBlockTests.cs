@@ -1,5 +1,6 @@
 using System;
 using Chel.Abstractions.Parsing;
+using Chel.Abstractions.Types;
 using Chel.Parsing;
 using Xunit;
 
@@ -17,7 +18,7 @@ namespace Chel.UnitTests.Parsing
         public void Ctor_LocationIsNull_Throws()
         {
             // arrange
-            Action sutAction = () => new ParseBlock(null, new LiteralCommandParameter("abc"));
+            Action sutAction = () => new ParseBlock(null, new Literal("abc"));
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -27,7 +28,7 @@ namespace Chel.UnitTests.Parsing
         [Fact]
         public void Ctor_BlockIsEmpty_DoesNotThrow()
         {
-            var sut = new ParseBlock(new SourceLocation(1, 1), new AggregateCommandParameter(new LiteralCommandParameter[0]));
+            var sut = new ParseBlock(new SourceLocation(1, 1), new SingleValue(new Literal[0]));
         }
 
         [Fact]
@@ -35,7 +36,7 @@ namespace Chel.UnitTests.Parsing
         {
             // arrange, act
             var location = new SourceLocation(1, 1);
-            var parameter = new LiteralCommandParameter("param");
+            var parameter = new Literal("param");
             var sut = new ParseBlock(location, parameter);
 
             // assert
@@ -47,7 +48,7 @@ namespace Chel.UnitTests.Parsing
         public void Ctor_EndOfLineIsTrue_SetsProperty()
         {
             // arrange, act
-            var sut = new ParseBlock(new SourceLocation(1, 1), new LiteralCommandParameter("param"), isEndOfLine: true);
+            var sut = new ParseBlock(new SourceLocation(1, 1), new Literal("param"), isEndOfLine: true);
 
             // assert
             Assert.True(sut.IsEndOfLine);

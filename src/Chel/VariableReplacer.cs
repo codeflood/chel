@@ -1,7 +1,7 @@
 using System;
 using System.Text;
 using Chel.Abstractions;
-using Chel.Abstractions.Parsing;
+using Chel.Abstractions.Types;
 using Chel.Abstractions.Variables;
 using Chel.Exceptions;
 
@@ -9,7 +9,7 @@ namespace Chel
 {
 	internal class VariableReplacer : IVariableReplacer
     {
-        public string ReplaceVariables(VariableCollection variables, CommandParameter input)
+        public string ReplaceVariables(VariableCollection variables, ChelType input)
         {
             if(variables == null)
                 throw new ArgumentNullException(nameof(variables));
@@ -23,38 +23,38 @@ namespace Chel
             return output.ToString();
         }
 
-        private void ProcessParameter(CommandParameter parameter, StringBuilder output, VariableCollection variables)
+        private void ProcessParameter(ChelType input, StringBuilder output, VariableCollection variables)
         {
-            switch(parameter)
+            switch(input)
             {
-                case AggregateCommandParameter aggregateCommandParameter:
-                    ProcessAggregateParameter(aggregateCommandParameter, output, variables);
+                case SingleValue singleValue:
+                    ProcessSingleValue(singleValue, output, variables);
                     break;
 
-                case LiteralCommandParameter literalCommandParameter:
-                    output.Append(literalCommandParameter.Value);
+                case Literal literal:
+                    output.Append(literal.Value);
                     break;
 
-                case VariableCommandParameter variableCommandParameter:
-                    ProcessVariableParameter(variableCommandParameter, output, variables);
+                case VariableReference variableReference:
+                    ProcessVariableReference(variableReference, output, variables);
                     break;
             }
         }
 
-        private void ProcessAggregateParameter(AggregateCommandParameter parameter, StringBuilder output, VariableCollection variables)
+        private void ProcessSingleValue(SingleValue input, StringBuilder output, VariableCollection variables)
         {
-            foreach(var subparameter in parameter.Parameters)
+            foreach(var subvalue in input.Values)
             {
-                ProcessParameter(subparameter, output, variables);
+                ProcessParameter(subvalue, output, variables);
             }
         }
 
-        private void ProcessVariableParameter(VariableCommandParameter parameter, StringBuilder output, VariableCollection variables)
+        private void ProcessVariableReference(VariableReference input, StringBuilder output, VariableCollection variables)
         {
-            var variable = variables.Get(parameter.VariableName);
+            var variable = variables.Get(input.VariableName);
 
             if(variable == null)
-                throw new UnsetVariableException(parameter.VariableName);
+                throw new UnsetVariableException(input.VariableName);
 
             output.Append(variable.Value);
         }

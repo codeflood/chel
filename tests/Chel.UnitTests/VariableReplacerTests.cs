@@ -15,7 +15,7 @@ namespace Chel.UnitTests
         {
             // arange
             var sut = new VariableReplacer();
-            Action sutAction = () => sut.ReplaceVariables(null, new LiteralCommandParameter("input"));
+            Action sutAction = () => sut.ReplaceVariables(null, new Literal("input"));
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -43,7 +43,7 @@ namespace Chel.UnitTests
             var variables = new VariableCollection();
 
             // act
-            var result = sut.ReplaceVariables(variables, new AggregateCommandParameter(new LiteralCommandParameter[0]));
+            var result = sut.ReplaceVariables(variables, new SingleValue(new Literal[0]));
 
             // assert
             Assert.Empty(result);
@@ -58,7 +58,7 @@ namespace Chel.UnitTests
             var input = "Input without variables";
 
             // act
-            var result = sut.ReplaceVariables(variables, new LiteralCommandParameter(input));
+            var result = sut.ReplaceVariables(variables, new Literal(input));
 
             // assert
             Assert.Equal(input, result);
@@ -66,12 +66,12 @@ namespace Chel.UnitTests
 
         [Theory]
         [MemberData(nameof(ReplaceVariables_InputContainsSetVariable_ReplacesVariable_DataSource))]
-        public void ReplaceVariables_InputContainsSetVariable_ReplacesVariable(CommandParameter input, string expected)
+        public void ReplaceVariables_InputContainsSetVariable_ReplacesVariable(ChelType input, string expected)
         {
             // arrange
             var sut = new VariableReplacer();
             var variables = new VariableCollection();
-            variables.Set(new Variable("foo", new SingleValue("bar")));
+            variables.Set(new Variable("foo", new Literal("bar")));
 
             // act
             var result = sut.ReplaceVariables(variables, input);
@@ -83,43 +83,43 @@ namespace Chel.UnitTests
         public static IEnumerable<object[]> ReplaceVariables_InputContainsSetVariable_ReplacesVariable_DataSource()
         {
             yield return new object[] {
-                new AggregateCommandParameter(new CommandParameter[]{
-                    new VariableCommandParameter("foo"),
-                    new LiteralCommandParameter(" ipsum")
+                new SingleValue(new ChelType[]{
+                    new VariableReference("foo"),
+                    new Literal(" ipsum")
                 }),
                 "bar ipsum"
             };
 
             yield return new object[] {
-                new AggregateCommandParameter(new CommandParameter[]{
-                    new VariableCommandParameter("Foo"),
-                    new LiteralCommandParameter(" ipsum")
+                new SingleValue(new ChelType[]{
+                    new VariableReference("Foo"),
+                    new Literal(" ipsum")
                 }),
                 "bar ipsum"
             };
 
             yield return new object[] {
-                new AggregateCommandParameter(new CommandParameter[]{
-                    new LiteralCommandParameter("lorem "),
-                    new VariableCommandParameter("FOO"),
-                    new LiteralCommandParameter(" ipsum")
+                new SingleValue(new ChelType[]{
+                    new Literal("lorem "),
+                    new VariableReference("FOO"),
+                    new Literal(" ipsum")
                 }),
                 "lorem bar ipsum"
             };
 
             yield return new object[] {
-                new AggregateCommandParameter(new CommandParameter[]{
-                    new LiteralCommandParameter("lorem "),
-                    new VariableCommandParameter("foo")
+                new SingleValue(new ChelType[]{
+                    new Literal("lorem "),
+                    new VariableReference("foo")
                 }),
                 "lorem bar"
             };
 
             yield return new object[] {
-                new AggregateCommandParameter(new CommandParameter[]{
-                    new LiteralCommandParameter("lorem"),
-                    new VariableCommandParameter("foo"),
-                    new LiteralCommandParameter("ipsum")
+                new SingleValue(new ChelType[]{
+                    new Literal("lorem"),
+                    new VariableReference("foo"),
+                    new Literal("ipsum")
                 }),
                 "lorembaripsum"
             };
@@ -131,7 +131,7 @@ namespace Chel.UnitTests
             // arrange
             var sut = new VariableReplacer();
             var variables = new VariableCollection();
-            Action sutAction = () => sut.ReplaceVariables(variables, new VariableCommandParameter("foo"));
+            Action sutAction = () => sut.ReplaceVariables(variables, new VariableReference("foo"));
 
             // act, assert
             var ex = Assert.Throws<UnsetVariableException>(sutAction);

@@ -236,7 +236,7 @@ namespace Chel.UnitTests
             var sut = CreateSession(
                 sessionObjectsConfigurator: x => {
                     x.Register<VariableCollection>();
-                    ((VariableCollection)x.Resolve(typeof(VariableCollection))).Set(new Variable("foo", new SingleValue("lorem")));
+                    ((VariableCollection)x.Resolve(typeof(VariableCollection))).Set(new Variable("foo", new Literal("lorem")));
                 },
                 typeof(NamedParameterCommand));
 
