@@ -2,8 +2,6 @@ namespace Chel
 {
     internal static class Texts
     {
-        public const string ArgumentCannotContainEmptyElement = "'{0}' cannot contain an empty element";
-
         public const string CommandDependencyNotRegistered = "Command dependency implementing {0} has not been registered";
 
         public const string CommandNameAlreadyUsed = "Command name '{0}' on command type {1} is already used on command type {2}";
@@ -22,7 +20,7 @@ namespace Chel
 
         public const string FlagParametersCannotBeRequired = "Flag parameters cannot be marked as required ({0})";
 
-        public const string InvalidParameterValueForNamedParameter = "Invalid parameter value '{0}' for named parameter '{1}'.";
+        public const string InvalidParameterValueForNamedParameter = "Invalid parameter value '{0}' for named parameter '{1}'. {2}";
 
         public const string InvalidParameterValueForNumberedParameter = "Invalid parameter value '{0}' for numbered parameter '{1}'.";
 

@@ -142,5 +142,34 @@ namespace Chel.Abstractions.UnitTests.Types
             // assert
             Assert.NotEqual(hashCode1, hashCode2);
         }
+
+        [Fact]
+        public void ToString_ListIsEmpty_ReturnsEmptyList()
+        {
+            // arrange
+            var sut = new List(null);
+
+            // act
+            var result = sut.ToString();
+
+            // assert
+            Assert.Equal("[ ]", result);
+        }
+
+        [Fact]
+        public void ToString_ListHasElements_IncludesAllElementValues()
+        {
+            // arrange
+            var param1 = new Literal("val1");
+            var param2 = new Literal("val2");
+
+            var sut = new List(new[] { param1, param2 });
+
+            // act
+            var result = sut.ToString();
+
+            // assert
+            Assert.Equal("[ val1 val2 ]", result);
+        }
     }
 }

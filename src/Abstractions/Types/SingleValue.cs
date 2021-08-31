@@ -7,6 +7,9 @@ namespace Chel.Abstractions.Types
 	/// </summary>
 	public class SingleValue : List
     {
+        //todo: Rename to CompoundValue
+        // todo: only accept Literals and variables.
+
         public SingleValue(Literal value)
             : base(value == null ? null : new List<ChelType> { value })
         {

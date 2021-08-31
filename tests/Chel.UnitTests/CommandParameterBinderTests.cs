@@ -1004,7 +1004,7 @@ namespace Chel.UnitTests
 
             // assert
             Assert.False(result.Success);
-            Assert.Contains($"Invalid parameter value '{value}' for named parameter 'guid'.", result.Errors);
+            Assert.StartsWith($"Invalid parameter value '{value}' for named parameter 'guid'.", result.Errors[0]);
         }
 
         public static IEnumerable<object[]> Bind_GuidTypeParameterInvalidValue_ErrorIncludedInResult_Data()
@@ -1040,7 +1040,7 @@ namespace Chel.UnitTests
 
             // assert
             Assert.False(result.Success);
-            Assert.Contains($"Invalid parameter value '{value}' for named parameter '{parameter}'.", result.Errors);
+            Assert.StartsWith($"Invalid parameter value '{value}' for named parameter '{parameter}'.", result.Errors[0]);
         }
 
         [Fact]
@@ -1210,7 +1210,7 @@ namespace Chel.UnitTests
             var command = new ListParameterCommand();
             var input = CreateCommandInput(
                 "list-params",
-                new ParameterNameCommandParameter("dictionary"),
+                new ParameterNameCommandParameter("intlist"),
                 new List(new[]
                 {
                     new Literal("a"),
@@ -1223,7 +1223,7 @@ namespace Chel.UnitTests
 
             // assert
             Assert.False(result.Success);
-            Assert.Equal(new[]{ "Invalid parameter value 'Chel.Abstractions.Types.List' for named parameter 'dictionary'." }, result.Errors);
+            Assert.StartsWith("Invalid parameter value '[ a b ]' for named parameter 'intlist'.", result.Errors[0]);
         }
 
         [Fact]
@@ -1255,6 +1255,36 @@ namespace Chel.UnitTests
             // assert
             Assert.True(result.Success);
             Assert.Equal(new[] { "a", "bar" }, command.List);
+        }
+
+        [Fact]
+        public void Bind_VariableIsList_BindsParameter()
+        {
+            // arrange
+            var registry = CreateCommandRegistry(typeof(ListParameterCommand));
+            var variables = new VariableCollection();
+            variables.Set(new Variable("foo", new List(new ChelType[] {
+                new Literal("val1"),
+                new Literal("val2")
+            })));
+
+            var replacer = new VariableReplacer();
+
+            var sut = new CommandParameterBinder(registry, replacer, variables);
+
+            var command = new ListParameterCommand();
+            var input = CreateCommandInput(
+                "list-params",
+                new ParameterNameCommandParameter("list"),
+                new VariableReference("foo")
+            );
+
+            // act
+            var result = sut.Bind(command, input);
+
+            // assert
+            Assert.True(result.Success);
+            Assert.Equal(new[] { "val1", "val2" }, command.List);
         }
 
         [Theory]

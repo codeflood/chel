@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Chel.Abstractions.Parsing;
 using Chel.Abstractions.Types;
 using Chel.Abstractions.Variables;
 using Chel.Exceptions;
@@ -8,7 +7,7 @@ using Xunit;
 
 namespace Chel.UnitTests
 {
-    public class VariableReplacerTests
+	public class VariableReplacerTests
     {
         [Fact]
         public void ReplaceVariables_VariablesIsNull_ThrowsException()
@@ -46,7 +45,8 @@ namespace Chel.UnitTests
             var result = sut.ReplaceVariables(variables, new SingleValue(new Literal[0]));
 
             // assert
-            Assert.Empty(result);
+            var singleValueResult = Assert.IsType<SingleValue>(result);
+            Assert.Empty(singleValueResult.Values);
         }
 
         [Fact]
@@ -61,7 +61,8 @@ namespace Chel.UnitTests
             var result = sut.ReplaceVariables(variables, new Literal(input));
 
             // assert
-            Assert.Equal(input, result);
+            var literalResult = Assert.IsType<Literal>(result);
+            Assert.Equal(input, literalResult.Value);
         }
 
         [Theory]
@@ -77,7 +78,9 @@ namespace Chel.UnitTests
             var result = sut.ReplaceVariables(variables, input);
 
             // assert
-            Assert.Equal(expected, result);
+            var singleValueResult = Assert.IsType<SingleValue>(result);
+            var resultValue = string.Join("", singleValueResult.Values);
+            Assert.Equal(expected, resultValue);
         }
 
         public static IEnumerable<object[]> ReplaceVariables_InputContainsSetVariable_ReplacesVariable_DataSource()
@@ -136,6 +139,50 @@ namespace Chel.UnitTests
             // act, assert
             var ex = Assert.Throws<UnsetVariableException>(sutAction);
             Assert.Equal("foo", ex.VariableName);
+        }
+
+        [Fact]
+        public void ReplaceVariables_InputIsListWithNoVariables_ReturnsListUnaltered()
+        {
+            // arrange
+            var sut = new VariableReplacer();
+            var variables = new VariableCollection();
+            var input = new List(new[]{ new Literal("val1") });
+
+            // act
+            var result = sut.ReplaceVariables(variables, input);
+
+            // assert
+            var listResult = Assert.IsType<List>(result);
+            Assert.Equal(input, listResult);
+        }
+
+        [Fact]
+        public void ReplaceVariables_InputIsListWithVariables_ReturnsListWithVariablesReplaced()
+        {
+            // arrange
+            var sut = new VariableReplacer();
+            var variables = new VariableCollection();
+            variables.Set(new Variable("foo1", new Literal("bar1")));
+            variables.Set(new Variable("foo2", new Literal("bar2")));
+
+            var input = new List(new ChelType[]
+            {
+                new VariableReference("foo1"),
+                new Literal("val"),
+                new VariableReference("foo2")
+            });
+
+            // act
+            var result = sut.ReplaceVariables(variables, input);
+
+            // assert
+            var listResult = Assert.IsType<List>(result);
+            Assert.Equal(new List(new[] {
+                new Literal("bar1"),
+                new Literal("val"),
+                new Literal("bar2")
+            }), listResult);
         }
     }
 }

@@ -1,5 +1,5 @@
 using System;
-using System.Text;
+using System.Collections.Generic;
 using Chel.Abstractions;
 using Chel.Abstractions.Types;
 using Chel.Abstractions.Variables;
@@ -9,7 +9,7 @@ namespace Chel
 {
 	internal class VariableReplacer : IVariableReplacer
     {
-        public string ReplaceVariables(VariableCollection variables, ChelType input)
+        public ChelType ReplaceVariables(VariableCollection variables, ChelType input)
         {
             if(variables == null)
                 throw new ArgumentNullException(nameof(variables));
@@ -17,46 +17,63 @@ namespace Chel
             if(input == null)
                 throw new ArgumentNullException(nameof(input));
 
-            var output = new StringBuilder();
-
-            ProcessParameter(input, output, variables);
-            return output.ToString();
+            return ProcessParameter(input, variables);
         }
 
-        private void ProcessParameter(ChelType input, StringBuilder output, VariableCollection variables)
+        private ChelType ProcessParameter(ChelType input, VariableCollection variables)
         {
             switch(input)
             {
                 case SingleValue singleValue:
-                    ProcessSingleValue(singleValue, output, variables);
-                    break;
+                    return ProcessSingleValue(singleValue, variables);
 
                 case Literal literal:
-                    output.Append(literal.Value);
-                    break;
+                    return literal;
 
                 case VariableReference variableReference:
-                    ProcessVariableReference(variableReference, output, variables);
-                    break;
+                    return ProcessVariableReference(variableReference, variables);
+
+                case List listValue:
+                    return ProcessList(listValue, variables);
             }
+
+            throw new InvalidOperationException("Internal error: Unknown ChelType.");
         }
 
-        private void ProcessSingleValue(SingleValue input, StringBuilder output, VariableCollection variables)
+        private ChelType ProcessSingleValue(SingleValue input, VariableCollection variables)
         {
+            var replacedValues = new List<ChelType>(input.Values.Count);
+
             foreach(var subvalue in input.Values)
             {
-                ProcessParameter(subvalue, output, variables);
+                var replaced = ProcessParameter(subvalue, variables);
+                replacedValues.Add(replaced);
             }
+
+            return new SingleValue(replacedValues);
         }
 
-        private void ProcessVariableReference(VariableReference input, StringBuilder output, VariableCollection variables)
+        private ChelType ProcessList(List input, VariableCollection variables)
+        {
+            var replacedValues = new List<ChelType>(input.Values.Count);
+
+            foreach(var subvalue in input.Values)
+            {
+                var replaced = ProcessParameter(subvalue, variables);
+                replacedValues.Add(replaced);
+            }
+
+            return new List(replacedValues);
+        }
+
+        private ChelType ProcessVariableReference(VariableReference input, VariableCollection variables)
         {
             var variable = variables.Get(input.VariableName);
 
             if(variable == null)
                 throw new UnsetVariableException(input.VariableName);
 
-            output.Append(variable.Value);
+            return variable.Value;
         }
     }
 }

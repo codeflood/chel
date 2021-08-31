@@ -97,6 +97,26 @@ namespace Chel.UnitTests.Commands
         }
 
         [Fact]
+        public void Execute_NameProvidedListVariableSet_ReturnsListVariableValue()
+        {
+            // arrange
+            var variables = new VariableCollection();
+            variables.Set(new Variable("name", new List(new[] {
+                new Literal("val1"),
+                new Literal("val2")
+            })));
+
+            var sut = new Var(variables, new PhraseDictionary());
+            sut.Name = "name";
+
+            // act
+            var result = sut.Execute() as ValueResult;
+
+            // assert
+            Assert.Equal("[ val1 val2 ]", result.Value);
+        }
+
+        [Fact]
         public void Execute_ValueProvided_SetsVariable()
         {
             // arrange

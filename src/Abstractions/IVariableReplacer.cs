@@ -14,6 +14,6 @@ namespace Chel.Abstractions
         /// <param name="variables">The variables available for replacing.</param>
         /// <param name="input">The input to replace the variables in.</param>
         /// <returns>A string with the variables replaced.</returns>
-        string ReplaceVariables(VariableCollection variables, ChelType input);
+        ChelType ReplaceVariables(VariableCollection variables, ChelType input);
     }
 }

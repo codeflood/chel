@@ -16,6 +16,9 @@ namespace Chel.UnitTests.SampleCommands
         [NamedParameter("list", "list")]
         public IList<string> List { get; set; }
 
+        [NamedParameter("intlist", "intlist")]
+        public IList<int> IntList { get; set; }
+
         [NamedParameter("collection", "collection")]
         public ICollection<string> Collection { get; set; }
 

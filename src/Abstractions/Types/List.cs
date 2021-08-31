@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace Chel.Abstractions.Types
 {
@@ -50,6 +51,22 @@ namespace Chel.Abstractions.Types
             }
 
             return hasCode;
+        }
+
+        public override string ToString()
+        {
+            var output = new StringBuilder();
+            output.Append("[ ");
+
+            foreach(var value in Values)
+            {
+                output.Append(value.ToString());
+                output.Append(" ");
+            }
+
+            output.Append("]");
+
+            return output.ToString();
         }
     }
 }

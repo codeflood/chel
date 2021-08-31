@@ -132,9 +132,9 @@ namespace Chel
                     {
                         BindProperty(instance, describedParameter.Property, describedParameter.Name, value, result);
                     }
-                    catch(Exception)
+                    catch(Exception ex)
                     {
-                        result.AddError(string.Format(Texts.InvalidParameterValueForNamedParameter, value, describedParameter.Name));
+                        result.AddError(string.Format(Texts.InvalidParameterValueForNamedParameter, value, describedParameter.Name, ex.Message));
                     }
 
                     // Make sure there's no duplicates
@@ -241,15 +241,15 @@ namespace Chel
                 return;
             }
 
-            if(value is List list)
+            var bindingValue = ReplaceVariables(value, result);
+            if(bindingValue == null)
+                return;
+
+            if(bindingValue is List list)
             {
                 BindListProperty(instance, property, parameterIdentifier, list, result);
                 return;
             }
-
-            var bindingValue = ReplaceVariables(value, result);
-            if(bindingValue == null)
-                return;
 
             var convertedValue = ConvertPropertyValue(bindingValue, property.PropertyType, property);
             if(convertedValue == null)
@@ -316,7 +316,7 @@ namespace Chel
                 property.SetValue(instance, values);
         }
 
-        private string ReplaceVariables(ChelType value, ParameterBindResult result)
+        private ChelType ReplaceVariables(ChelType value, ParameterBindResult result)
         {
             try
             {
@@ -336,6 +336,11 @@ namespace Chel
 
         private object ConvertPropertyValue(object bindingValue, Type targetType, PropertyInfo property)
         {
+            if(bindingValue is Literal literalBindingValue)
+                bindingValue = literalBindingValue.Value;
+            else if(bindingValue is SingleValue singleValueBindingValue)
+                bindingValue = string.Join(string.Empty, singleValueBindingValue.Values);
+
             if (targetType.IsAssignableFrom(bindingValue.GetType()))
                 return bindingValue;
             else
