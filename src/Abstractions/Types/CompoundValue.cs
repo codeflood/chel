@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace Chel.Abstractions.Types
@@ -7,8 +8,6 @@ namespace Chel.Abstractions.Types
 	/// </summary>
 	public class CompoundValue : List
     {
-        // todo: only accept Literals and variables.
-
         public CompoundValue(Literal value)
             : base(value == null ? null : new List<ChelType> { value })
         {
@@ -22,6 +21,11 @@ namespace Chel.Abstractions.Types
         public CompoundValue(IReadOnlyList<ChelType> values)
             : base(values)
         {
+            foreach(var value in values)
+            {
+                if(!(value is Literal) && !(value is VariableReference))
+                    throw new ArgumentException(Texts.CompoundValueOnlyConsistsLiteralsAndVariables, nameof(values));
+            }
         }
     }
 }

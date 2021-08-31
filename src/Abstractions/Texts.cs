@@ -14,6 +14,8 @@ namespace Chel.Abstractions
 
         public const string ArgumentCannotBeNullOrEmpty = "'{0}' cannot be null or empty";
 
+        public const string CompoundValueOnlyConsistsLiteralsAndVariables = "Compound values can only consist of literals and variable references.";
+        
         public const string DescriptorAlreadyAdded = "Descriptor '{0}' has already been added.";
 
         public const string ErrorOnLine = "ERROR (Line {0})";

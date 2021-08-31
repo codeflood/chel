@@ -53,28 +53,32 @@ namespace Chel.Abstractions.UnitTests.Types
             Assert.Equal(new[] { value }, sut.Values);
         }
 
-        [Fact]
-        public void Ctor_NullList_SetsPropertyToEmptyCollection()
-        {
-            // arrange, act
-            var sut = new CompoundValue((IReadOnlyList<ChelType>)null);
-
-            // assert
-            Assert.Empty(sut.Values);
-        }
-
-        [Fact]
-        public void Ctor_ListProvided_SetsProperty()
+        [Theory]
+        [MemberData(nameof(Ctor_ListContainsUnexpectedTypes_ThrowsException_DataSource))]
+        public void Ctor_ListContainsUnexpectedTypes_ThrowsException(IReadOnlyList<ChelType> input)
         {
             // arrange
-            var val1 = new Literal("val1");
-            var val2 = new Literal("val2");
+            Action sutAction = () => new CompoundValue(input);
 
-            // act
-            var sut = new CompoundValue(new List<ChelType> { val1, val2 });
+            // act, assert
+            var ex = Assert.Throws<ArgumentException>(sutAction);
+            Assert.Equal("values", ex.ParamName);
+        }
 
-            // assert
-            Assert.Equal(new[] { val1, val2 }, sut.Values);
+        public static IEnumerable<object[]> Ctor_ListContainsUnexpectedTypes_ThrowsException_DataSource()
+        {
+            yield return new[] {
+                new ChelType[] {
+                    new Literal("val"),
+                    new List(new[] { new Literal("val") })
+                }
+            };
+
+            yield return new[] {
+                new ChelType[] {
+                    new CompoundValue(new Literal("val"))
+                }
+            };
         }
     }
 }
