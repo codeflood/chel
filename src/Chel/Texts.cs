@@ -20,6 +20,8 @@ namespace Chel
 
         public const string FlagParametersCannotBeRequired = "Flag parameters cannot be marked as required ({0})";
 
+        public const string InternalErrorUnknownChelType = "Internal error: Unknown ChelType.";
+
         public const string InvalidParameterValueForNamedParameter = "Invalid parameter value '{0}' for named parameter '{1}'. {2}";
 
         public const string InvalidParameterValueForNumberedParameter = "Invalid parameter value '{0}' for numbered parameter '{1}'.";
@@ -75,6 +77,12 @@ namespace Chel
         public const string UnpairedVariableToken = "Unpaired variable token $";
 
         public const string VariableIsUnset = "Variable ${0}$ is not set";
+
+        public const string VariableNameIsMissing = "Variable name is missing";
+
+        public const string VariableSubreferenceIsInvalid = "Variable ${0}$ subreference '{1}' is invalid";
+
+        public const string VariableSubreferenceIsMissing = "Variable ${0}$ subreference is missing";
 
         public class PhraseKeys {
 

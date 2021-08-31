@@ -93,10 +93,16 @@ Indexes can also be negative which counts from the end of the list. -1 is the la
     command $foo:1$ # 27
     command $foo:-1$ # 95
 
-If the index is larger than the number of values in the list, an error is raised. The number of values inside a list can be accessed through the special name `length`:
+The first and last values in a list can be accessed through the special subreferences `first` and `last`:
 
     var foo (27 12 35 95)
-    echo (length is $foo:length$)
+    echo (first value is $foo:first$)
+    echo (last value is $foo:last$)
+
+If the index is larger than the number of values in the list, an error is raised. The number of values inside a list can be accessed through the special subreference `count`:
+
+    var foo (27 12 35 95)
+    echo (length is $foo:count$)
 
 To use just a single value of a map during substitution, append a colon (`:`) and the value name.
 

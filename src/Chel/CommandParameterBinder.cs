@@ -330,6 +330,10 @@ namespace Chel
             {
                 result.AddError(ex.Message);
             }
+            catch(InvalidOperationException ex)
+            {
+                result.AddError(ex.Message);
+            }
 
             return null;
         }

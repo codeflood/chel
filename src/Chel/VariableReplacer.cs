@@ -9,6 +9,8 @@ namespace Chel
 {
 	internal class VariableReplacer : IVariableReplacer
     {
+        private const string SubreferenceToken = ":";
+
         public ChelType ReplaceVariables(VariableCollection variables, ChelType input)
         {
             if(variables == null)
@@ -37,7 +39,7 @@ namespace Chel
                     return ProcessList(listValue, variables);
             }
 
-            throw new InvalidOperationException("Internal error: Unknown ChelType.");
+            throw new InvalidOperationException(Texts.InternalErrorUnknownChelType);
         }
 
         private ChelType ProcessCompoundValue(CompoundValue input, VariableCollection variables)
@@ -68,12 +70,67 @@ namespace Chel
 
         private ChelType ProcessVariableReference(VariableReference input, VariableCollection variables)
         {
-            var variable = variables.Get(input.VariableName);
+            var variableName = input.VariableName;
+            var subreference = string.Empty;
+
+            var separatorIndex = input.VariableName.IndexOf(SubreferenceToken);
+
+            if(separatorIndex >= 0)
+            {
+                variableName = input.VariableName.Substring(0, separatorIndex);
+                subreference = input.VariableName.Substring(separatorIndex + 1);
+
+                if(string.IsNullOrWhiteSpace(variableName))
+                    throw new InvalidOperationException(Texts.VariableNameIsMissing);
+                
+                if(string.IsNullOrWhiteSpace(subreference))
+                    throw new InvalidOperationException(string.Format(Texts.VariableSubreferenceIsMissing, variableName));
+            }
+
+            var variable = variables.Get(variableName);
 
             if(variable == null)
                 throw new UnsetVariableException(input.VariableName);
 
+            if(variable.Value is List listValue)
+                return ProcessListVariableReference(listValue, variableName, subreference);
+
             return variable.Value;
+        }
+
+        private ChelType ProcessListVariableReference(List listValue, string variableName, string subreference)
+        {
+            if(string.IsNullOrWhiteSpace(subreference))
+                return listValue;
+
+            var oneBasedIndex = 0;
+
+            switch(subreference.ToUpper())
+            {
+                case "COUNT":
+                    return new Literal(listValue.Values.Count.ToString());
+
+                case "FIRST":
+                    oneBasedIndex = 1;
+                    break;
+
+                case "LAST":
+                    oneBasedIndex = listValue.Values.Count;
+                    break;
+
+                default:
+                    if(!int.TryParse(subreference, out oneBasedIndex))
+                        throw new InvalidOperationException(string.Format(Texts.VariableSubreferenceIsInvalid, variableName, subreference));
+                    break;
+            }
+
+            if(oneBasedIndex < 0)
+                oneBasedIndex = listValue.Values.Count + (oneBasedIndex + 1);
+
+            if(oneBasedIndex < 1 || oneBasedIndex > listValue.Values.Count)
+                throw new InvalidOperationException(string.Format(Texts.VariableSubreferenceIsInvalid, variableName, subreference));
+
+            return listValue.Values[oneBasedIndex - 1];
         }
     }
 }

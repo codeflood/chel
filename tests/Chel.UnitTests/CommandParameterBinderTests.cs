@@ -1104,6 +1104,28 @@ namespace Chel.UnitTests
         }
 
         [Fact]
+        public void Bind_NamedParameterContainsInvalidVariableSubreference_ErrorIncludedInResult()
+        {
+            // arrange
+            var registry = CreateCommandRegistry(typeof(ListParameterCommand));
+            var variables = new VariableCollection();
+            variables.Set(new Variable("foo", new List(new[]{ new Literal("bar") })));
+
+            var replacer = new VariableReplacer();
+
+            var sut = new CommandParameterBinder(registry, replacer, variables);
+            var command = new ListParameterCommand();
+            var input = CreateCommandInput("list-params", new ParameterNameCommandParameter("list"), new VariableReference("foo:200"));
+            
+            // act
+            var result = sut.Bind(command, input);
+
+            // assert
+            Assert.False(result.Success);
+            Assert.Equal(new[]{ "Variable $foo$ subreference '200' is invalid" }, result.Errors);
+        }
+
+        [Fact]
         public void Bind_NumberedParameterContainsVariable_VariableIsReplaced()
         {
             // arrange

@@ -184,5 +184,133 @@ namespace Chel.UnitTests
                 new Literal("bar2")
             }), listResult);
         }
+
+        [Fact]
+        public void ReplaceVariables_VariableReferenceWithSubReferenceButNoVariableName_ThrowsException()
+        {
+            // arrange
+            var sut = new VariableReplacer();
+            var variables = new VariableCollection();
+            variables.Set(new Variable("list", new List(new ChelType[] {
+                new Literal("val1"),
+                new Literal("val2")
+            })));
+
+            var input = new VariableReference(":2");
+            Action sutAction = () => sut.ReplaceVariables(variables, input);
+
+            // act, assert
+            var ex = Assert.Throws<InvalidOperationException>(sutAction);
+            Assert.Equal("Variable name is missing", ex.Message);
+        }
+
+        [Fact]
+        public void ReplaceVariables_VariableReferenceWithEmptySubReference_ThrowsException()
+        {
+            // arrange
+            var sut = new VariableReplacer();
+            var variables = new VariableCollection();
+            variables.Set(new Variable("list", new List(new ChelType[] {
+                new Literal("val1"),
+                new Literal("val2")
+            })));
+
+            var input = new VariableReference("list:");
+            Action sutAction = () => sut.ReplaceVariables(variables, input);
+
+            // act, assert
+            var ex = Assert.Throws<InvalidOperationException>(sutAction);
+            Assert.Equal("Variable $list$ subreference is missing", ex.Message);
+        }
+
+        [Fact]
+        public void ReplaceVariables_VariableReferenceWithOutOfBoundsSubReference_ThrowsException()
+        {
+            // arrange
+            var sut = new VariableReplacer();
+            var variables = new VariableCollection();
+            variables.Set(new Variable("list", new List(new ChelType[] {
+                new Literal("val1"),
+                new Literal("val2")
+            })));
+
+            var input = new VariableReference("list:100");
+            Action sutAction = () => sut.ReplaceVariables(variables, input);
+
+            // act, assert
+            var ex = Assert.Throws<InvalidOperationException>(sutAction);
+            Assert.Equal("Variable $list$ subreference '100' is invalid", ex.Message);
+        }
+
+        [Fact]
+        public void ReplaceVariables_VariableReferenceWithInvalidSubReference_ThrowsException()
+        {
+            // arrange
+            var sut = new VariableReplacer();
+            var variables = new VariableCollection();
+            variables.Set(new Variable("list", new List(new ChelType[] {
+                new Literal("val1"),
+                new Literal("val2")
+            })));
+
+            var input = new VariableReference("list:abc");
+            Action sutAction = () => sut.ReplaceVariables(variables, input);
+
+            // act, assert
+            var ex = Assert.Throws<InvalidOperationException>(sutAction);
+            Assert.Equal("Variable $list$ subreference 'abc' is invalid", ex.Message);
+        }
+
+        [Fact]
+        public void ReplaceVariables_VariableReferenceWithNegativeSubReference_ReturnsListElementFromEnd()
+        {
+            // arrange
+            var sut = new VariableReplacer();
+            var variables = new VariableCollection();
+            variables.Set(new Variable("list", new List(new ChelType[] {
+                new Literal("val1"),
+                new Literal("val2")
+            })));
+
+            var input = new VariableReference("list:-2");
+
+            // act
+            var result = sut.ReplaceVariables(variables, input);
+
+            // assert
+            var literalResult = Assert.IsType<Literal>(result);
+            Assert.Equal("val1", literalResult.Value);
+        }
+        
+        [Theory]
+        [MemberData(nameof(ReplaceVariables_VariableReferenceWithValidSubReference_ReturnsListElement_DataSource))]
+        public void ReplaceVariables_VariableReferenceWithValidSubReference_ReturnsListElement(string variableName, string expected)
+        {
+            // arrange
+            var sut = new VariableReplacer();
+            var variables = new VariableCollection();
+            variables.Set(new Variable("list", new List(new ChelType[] {
+                new Literal("val1"),
+                new Literal("val2"),
+                new Literal("val3")
+            })));
+
+            var input = new VariableReference(variableName);
+
+            // act
+            var result = sut.ReplaceVariables(variables, input);
+
+            // assert
+            var literalResult = Assert.IsType<Literal>(result);
+            Assert.Equal(expected, literalResult.Value);
+        }
+
+        public static IEnumerable<object[]> ReplaceVariables_VariableReferenceWithValidSubReference_ReturnsListElement_DataSource()
+        {
+            yield return new[]{ "list:2", "val2" };
+            yield return new[]{ "list:first", "val1" };
+            yield return new[]{ "list:last", "val3" };
+            yield return new[]{ "list:count", "3" };
+        }
     }
 }
