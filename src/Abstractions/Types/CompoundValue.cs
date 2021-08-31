@@ -5,22 +5,21 @@ namespace Chel.Abstractions.Types
 	/// <summary>
 	/// A single compound value.
 	/// </summary>
-	public class SingleValue : List
+	public class CompoundValue : List
     {
-        //todo: Rename to CompoundValue
         // todo: only accept Literals and variables.
 
-        public SingleValue(Literal value)
+        public CompoundValue(Literal value)
             : base(value == null ? null : new List<ChelType> { value })
         {
         }
 
-        public SingleValue(VariableReference value)
+        public CompoundValue(VariableReference value)
             : base(value == null ? null : new List<ChelType> { value })
         {
         }
 
-        public SingleValue(IReadOnlyList<ChelType> values)
+        public CompoundValue(IReadOnlyList<ChelType> values)
             : base(values)
         {
         }

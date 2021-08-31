@@ -24,8 +24,8 @@ namespace Chel
         {
             switch(input)
             {
-                case SingleValue singleValue:
-                    return ProcessSingleValue(singleValue, variables);
+                case CompoundValue compoundValue:
+                    return ProcessCompoundValue(compoundValue, variables);
 
                 case Literal literal:
                     return literal;
@@ -40,7 +40,7 @@ namespace Chel
             throw new InvalidOperationException("Internal error: Unknown ChelType.");
         }
 
-        private ChelType ProcessSingleValue(SingleValue input, VariableCollection variables)
+        private ChelType ProcessCompoundValue(CompoundValue input, VariableCollection variables)
         {
             var replacedValues = new List<ChelType>(input.Values.Count);
 
@@ -50,7 +50,7 @@ namespace Chel
                 replacedValues.Add(replaced);
             }
 
-            return new SingleValue(replacedValues);
+            return new CompoundValue(replacedValues);
         }
 
         private ChelType ProcessList(List input, VariableCollection variables)

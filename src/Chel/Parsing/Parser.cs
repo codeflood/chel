@@ -255,7 +255,7 @@ namespace Chel.Parsing
                         return ParseBlock(token);
 
                     case SpecialTokenType.VariableMarker:
-                        return ParseSingleValue(token);
+                        return ParseCompoundValue(token);
 
                     case SpecialTokenType.ListStart:
                         return ParseList(token);
@@ -270,10 +270,10 @@ namespace Chel.Parsing
                 }
             }
 
-            return ParseSingleValue(token);
+            return ParseCompoundValue(token);
         }
 
-        private ParseBlock ParseSingleValue(Token token)
+        private ParseBlock ParseCompoundValue(Token token)
         {
             _buffer.Clear();
 
@@ -355,7 +355,7 @@ namespace Chel.Parsing
             if(parameters.Count == 1)
                 return new ParseBlock(locationStart, parameters[0], isEndOfLine: isEndOfLine);
 
-            return new ParseBlock(locationStart, new SingleValue(parameters), isEndOfLine: isEndOfLine);
+            return new ParseBlock(locationStart, new CompoundValue(parameters), isEndOfLine: isEndOfLine);
         }
 
         private ParseBlock ParseList(Token token)

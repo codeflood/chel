@@ -28,7 +28,7 @@ namespace Chel.UnitTests.Parsing
         [Fact]
         public void Ctor_BlockIsEmpty_DoesNotThrow()
         {
-            var sut = new ParseBlock(new SourceLocation(1, 1), new SingleValue(new Literal[0]));
+            var sut = new ParseBlock(new SourceLocation(1, 1), new CompoundValue(new Literal[0]));
         }
 
         [Fact]

@@ -42,11 +42,11 @@ namespace Chel.UnitTests
             var variables = new VariableCollection();
 
             // act
-            var result = sut.ReplaceVariables(variables, new SingleValue(new Literal[0]));
+            var result = sut.ReplaceVariables(variables, new CompoundValue(new Literal[0]));
 
             // assert
-            var singleValueResult = Assert.IsType<SingleValue>(result);
-            Assert.Empty(singleValueResult.Values);
+            var compoundValueResult = Assert.IsType<CompoundValue>(result);
+            Assert.Empty(compoundValueResult.Values);
         }
 
         [Fact]
@@ -78,15 +78,15 @@ namespace Chel.UnitTests
             var result = sut.ReplaceVariables(variables, input);
 
             // assert
-            var singleValueResult = Assert.IsType<SingleValue>(result);
-            var resultValue = string.Join("", singleValueResult.Values);
+            var compoundValueResult = Assert.IsType<CompoundValue>(result);
+            var resultValue = string.Join("", compoundValueResult.Values);
             Assert.Equal(expected, resultValue);
         }
 
         public static IEnumerable<object[]> ReplaceVariables_InputContainsSetVariable_ReplacesVariable_DataSource()
         {
             yield return new object[] {
-                new SingleValue(new ChelType[]{
+                new CompoundValue(new ChelType[]{
                     new VariableReference("foo"),
                     new Literal(" ipsum")
                 }),
@@ -94,7 +94,7 @@ namespace Chel.UnitTests
             };
 
             yield return new object[] {
-                new SingleValue(new ChelType[]{
+                new CompoundValue(new ChelType[]{
                     new VariableReference("Foo"),
                     new Literal(" ipsum")
                 }),
@@ -102,7 +102,7 @@ namespace Chel.UnitTests
             };
 
             yield return new object[] {
-                new SingleValue(new ChelType[]{
+                new CompoundValue(new ChelType[]{
                     new Literal("lorem "),
                     new VariableReference("FOO"),
                     new Literal(" ipsum")
@@ -111,7 +111,7 @@ namespace Chel.UnitTests
             };
 
             yield return new object[] {
-                new SingleValue(new ChelType[]{
+                new CompoundValue(new ChelType[]{
                     new Literal("lorem "),
                     new VariableReference("foo")
                 }),
@@ -119,7 +119,7 @@ namespace Chel.UnitTests
             };
 
             yield return new object[] {
-                new SingleValue(new ChelType[]{
+                new CompoundValue(new ChelType[]{
                     new Literal("lorem"),
                     new VariableReference("foo"),
                     new Literal("ipsum")

@@ -1313,7 +1313,7 @@ namespace Chel.UnitTests
         {
             yield return new[] { new Literal("lit") };
             yield return new[] { new VariableReference("ref") };
-            yield return new[] { new SingleValue(new ChelType[] { new Literal("lit"), new VariableReference("ref") }) };
+            yield return new[] { new CompoundValue(new ChelType[] { new Literal("lit"), new VariableReference("ref") }) };
             yield return new[] { new List(new ChelType[] { new Literal("lit1"), new Literal("lit2") }) };
         }
 

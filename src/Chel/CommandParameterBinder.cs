@@ -338,8 +338,8 @@ namespace Chel
         {
             if(bindingValue is Literal literalBindingValue)
                 bindingValue = literalBindingValue.Value;
-            else if(bindingValue is SingleValue singleValueBindingValue)
-                bindingValue = string.Join(string.Empty, singleValueBindingValue.Values);
+            else if(bindingValue is CompoundValue compoundValueBindingValue)
+                bindingValue = string.Join(string.Empty, compoundValueBindingValue.Values);
 
             if (targetType.IsAssignableFrom(bindingValue.GetType()))
                 return bindingValue;

@@ -5,13 +5,13 @@ using Xunit;
 
 namespace Chel.Abstractions.UnitTests.Types
 {
-    public class SingleValueTests
+    public class CompoundValueTests
     {
         [Fact]
         public void Ctor_NullLiteral_SetsPropertyToEmptyCollection()
         {
             // arrange, act
-            var sut = new SingleValue((Literal)null);
+            var sut = new CompoundValue((Literal)null);
 
             // assert
             Assert.Empty(sut.Values);
@@ -24,7 +24,7 @@ namespace Chel.Abstractions.UnitTests.Types
             var value = new Literal("lit");
 
             // act
-            var sut = new SingleValue(value);
+            var sut = new CompoundValue(value);
 
             // assert
             Assert.Equal(new[] { value }, sut.Values);
@@ -34,7 +34,7 @@ namespace Chel.Abstractions.UnitTests.Types
         public void Ctor_NullVariableReference_SetsPropertyToEmptyCollection()
         {
             // arrange, act
-            var sut = new SingleValue((VariableReference)null);
+            var sut = new CompoundValue((VariableReference)null);
 
             // assert
             Assert.Empty(sut.Values);
@@ -47,7 +47,7 @@ namespace Chel.Abstractions.UnitTests.Types
             var value = new VariableReference("var");
 
             // act
-            var sut = new SingleValue(value);
+            var sut = new CompoundValue(value);
 
             // assert
             Assert.Equal(new[] { value }, sut.Values);
@@ -57,7 +57,7 @@ namespace Chel.Abstractions.UnitTests.Types
         public void Ctor_NullList_SetsPropertyToEmptyCollection()
         {
             // arrange, act
-            var sut = new SingleValue((IReadOnlyList<ChelType>)null);
+            var sut = new CompoundValue((IReadOnlyList<ChelType>)null);
 
             // assert
             Assert.Empty(sut.Values);
@@ -71,7 +71,7 @@ namespace Chel.Abstractions.UnitTests.Types
             var val2 = new Literal("val2");
 
             // act
-            var sut = new SingleValue(new List<ChelType> { val1, val2 });
+            var sut = new CompoundValue(new List<ChelType> { val1, val2 });
 
             // assert
             Assert.Equal(new[] { val1, val2 }, sut.Values);
