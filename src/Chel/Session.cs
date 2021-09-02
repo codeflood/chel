@@ -75,7 +75,12 @@ namespace Chel
                         var bindingResult = _parameterBinder.Bind(command, commandInput);
 
                         if(bindingResult.Success)
+                        {
                             commandResult = command.Execute();
+
+                            if(commandResult is FailureResult failureResult && failureResult.SourceLine == Constants.CurrentSourceLine)
+                                commandResult = new FailureResult(commandInput.SourceLine, failureResult.Messages.ToArray());
+                        }
                         else
                             commandResult = new FailureResult(commandInput.SourceLine, bindingResult.Errors.ToArray());
                     }

@@ -14,6 +14,7 @@ namespace Chel
     {
         private VariableCollection _variables = null;
         private IPhraseDictionary _phraseDictionary = null;
+        private INameValidator _nameValidator = null;
 
         private string _executionCultureName = string.Empty;
 
@@ -25,7 +26,7 @@ namespace Chel
         [Description("The value for the variable.")]
         public ChelType Value { get; set; }
 
-        public Var(VariableCollection variables, IPhraseDictionary phraseDictionary)
+        public Var(VariableCollection variables, IPhraseDictionary phraseDictionary, INameValidator nameValidator)
         {
             if(variables == null)
                 throw new ArgumentNullException(nameof(variables));
@@ -33,8 +34,12 @@ namespace Chel
             if(phraseDictionary == null)
                 throw new ArgumentNullException(nameof(phraseDictionary));
 
+            if(nameValidator == null)
+                throw new ArgumentNullException(nameof(nameValidator));
+
             _variables = variables;
             _phraseDictionary = phraseDictionary;
+            _nameValidator = nameValidator;
         }
 
         public CommandResult Execute()
@@ -43,6 +48,9 @@ namespace Chel
 
             // todo: temporary implementation. Variables should be output as a list once we have those in the type system.
             var output = new StringBuilder();
+
+            if(!string.IsNullOrEmpty(Name) && !_nameValidator.IsValid(Name))
+                return new FailureResult(Constants.CurrentSourceLine, new[] { string.Format(Texts.InvalidCharacterInVariableName, Name) });
 
             if(Value == null)
             {

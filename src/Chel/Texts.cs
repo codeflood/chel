@@ -22,6 +22,8 @@ namespace Chel
 
         public const string InternalErrorUnknownChelType = "Internal error: Unknown ChelType.";
 
+        public const string InvalidCharacterInVariableName = "Invalid character in variable name '{0}'.";
+
         public const string InvalidParameterValueForNamedParameter = "Invalid parameter value '{0}' for named parameter '{1}'. {2}";
 
         public const string InvalidParameterValueForNumberedParameter = "Invalid parameter value '{0}' for numbered parameter '{1}'.";

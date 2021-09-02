@@ -250,6 +250,20 @@ namespace Chel.UnitTests
             Assert.Equal("lorem lorem", (executionResult as ValueResult).Value);
         }
 
+        [Fact]
+        public void Execute_CommandReturnsFailureWithCurrentSourceLineToken_ReportsProperSourceLine()
+        {
+            // arrange
+            var sut = CreateSession(typeof(FailureCommand));
+            FailureResult executionResult = null;
+
+            // act
+            sut.Execute("fail", result => executionResult = result as FailureResult);
+
+            // assert
+            Assert.Equal(1, executionResult.SourceLine);
+        }
+
         private Session CreateSession(params Type[] commandTypes)
         {
             return CreateSession(null, commandTypes);

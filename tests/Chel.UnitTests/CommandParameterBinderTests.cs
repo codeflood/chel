@@ -1316,7 +1316,7 @@ namespace Chel.UnitTests
             // arrange
             var sut = CreateCommandParameterBinder(typeof(Var));
             var variables = new VariableCollection();
-            var command = new Var(variables, new PhraseDictionary());
+            var command = new Var(variables, new PhraseDictionary(), new NameValidator());
             var input = CreateCommandInput(
                 "var",
                 new Literal("foo"),
