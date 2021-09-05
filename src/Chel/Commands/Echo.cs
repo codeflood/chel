@@ -23,7 +23,7 @@ namespace Chel.Commands
             if(Uppercase)
                 message = message.ToUpper();
 
-            return new ValueResult(message);
+            return new ValueResult(new Literal(message));
         }
     }
 }

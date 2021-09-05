@@ -1,5 +1,5 @@
 using System;
-using System.Text;
+using System.Collections.Generic;
 using System.Threading;
 using Chel.Abstractions;
 using Chel.Abstractions.Results;
@@ -46,8 +46,7 @@ namespace Chel
         {
             _executionCultureName = Thread.CurrentThread.CurrentCulture.Name;
 
-            // todo: temporary implementation. Variables should be output as a list once we have those in the type system.
-            var output = new StringBuilder();
+            ChelType output = null;
 
             if(!string.IsNullOrEmpty(Name) && !_nameValidator.IsValid(Name))
                 return new FailureResult(Constants.CurrentSourceLine, new[] { string.Format(Texts.InvalidCharacterInVariableName, Name) });
@@ -55,47 +54,47 @@ namespace Chel
             if(Value == null)
             {
                 if(string.IsNullOrEmpty(Name))
-                    ListVariables(output);
+                    output = ListVariables();
                 else
-                    ShowVariable(output, Name);
+                    output = ShowVariable(Name);
             }
             else
             {
                 var variable = new Variable(Name, Value);
                 _variables.Set(variable);
-                output.Append(Value);
+                output = Value;
             }
 
-            return new ValueResult(output.ToString());
+            return new ValueResult(output);
         }
 
-        private void ListVariables(StringBuilder output)
+        private ChelType ListVariables()
         {
+            var variables = new List<ChelType>();
+
             var names = _variables.Names;
             if(names.Count == 0)
-            {
-                output.Append(_phraseDictionary.GetPhrase(Texts.PhraseKeys.NoVariablesSet, _executionCultureName));
-                return;
-            }
+                return new Literal(_phraseDictionary.GetPhrase(Texts.PhraseKeys.NoVariablesSet, _executionCultureName));
 
             foreach(var name in names)
             {
                 var variable = _variables.Get(name);
-                output.Append($"{name, Constants.FirstColumnWidth}{variable.Value}{Environment.NewLine}");
+                variables.Add(new Literal($"{name, Constants.FirstColumnWidth}{variable.Value}{Environment.NewLine}"));
             }
+
+            return new List(variables);
         }
 
-        private void ShowVariable(StringBuilder output, string name)
+        private ChelType ShowVariable(string name)
         {
             var variable = _variables.Get(name);
             if(variable == null)
             {
                 var template = _phraseDictionary.GetPhrase(Texts.PhraseKeys.VariableNotSet, _executionCultureName);
-                output.Append(string.Format(template, name));
-                return;
+                return new Literal(string.Format(template, name));
             }
 
-            output.Append(variable.Value);
+            return variable.Value;
         }
     }
 }

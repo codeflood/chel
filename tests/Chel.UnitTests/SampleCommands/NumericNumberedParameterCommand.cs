@@ -1,6 +1,7 @@
 using System.Text;
 using Chel.Abstractions;
 using Chel.Abstractions.Results;
+using Chel.Abstractions.Types;
 
 namespace Chel.UnitTests.SampleCommands
 {
@@ -12,7 +13,7 @@ namespace Chel.UnitTests.SampleCommands
 
         public CommandResult Execute()
         {
-            return new ValueResult(NumberedParameter.ToString());
+            return new ValueResult(new Literal(NumberedParameter.ToString()));
         }
     }
 }

@@ -19,7 +19,7 @@ namespace Chel.UnitTests.Commands
 
             // assert
             Assert.True(result.Success);
-            Assert.Empty(result.Value);
+            Assert.Empty(result.Value.ToString());
         }
 
         [Fact]
@@ -34,7 +34,7 @@ namespace Chel.UnitTests.Commands
 
             // assert
             Assert.True(result.Success);
-            Assert.Equal("message", result.Value);
+            Assert.Equal("message", result.Value.ToString());
         }
     }
 }

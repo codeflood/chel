@@ -1,12 +1,13 @@
 using System;
+using Chel.Abstractions.Types;
 
 namespace Chel.Abstractions.Results
 {
     public class ValueResult : SuccessResult
     {
-        public string Value { get; set; }
+        public ChelType Value { get; set; }
 
-        public ValueResult(string value)
+        public ValueResult(ChelType value)
         {
             if(value == null)
                 throw new ArgumentNullException(nameof(value));
@@ -16,7 +17,7 @@ namespace Chel.Abstractions.Results
 
         public override string ToString()
         {
-            return Value;
+            return Value.ToString();
         }
     }
 }

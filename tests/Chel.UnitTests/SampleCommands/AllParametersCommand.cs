@@ -1,6 +1,7 @@
 using System.Text;
 using Chel.Abstractions;
 using Chel.Abstractions.Results;
+using Chel.Abstractions.Types;
 
 namespace Chel.UnitTests.SampleCommands
 {
@@ -29,7 +30,7 @@ namespace Chel.UnitTests.SampleCommands
             if(FlagParameter)
                 output.Append("flag");
 
-            return new ValueResult(output.ToString());
+            return new ValueResult(new Literal(output.ToString()));
         }
     }
 }

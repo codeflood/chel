@@ -1,5 +1,6 @@
 using Chel.Abstractions;
 using Chel.Abstractions.Results;
+using Chel.Abstractions.Types;
 
 namespace Chel.UnitTests.SampleCommands
 {
@@ -16,7 +17,7 @@ namespace Chel.UnitTests.SampleCommands
 
         public CommandResult Execute()
         {
-            return new ValueResult($"p1: {Param1}, p2: {Param2}");
+            return new ValueResult(new Literal($"p1: {Param1}, p2: {Param2}"));
         }
     }
 }

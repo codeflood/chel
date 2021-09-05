@@ -171,5 +171,41 @@ namespace Chel.Abstractions.UnitTests.Types
             // assert
             Assert.Equal("[ val1 val2 ]", result);
         }
+
+        [Fact]
+        public void ToString_ElementsAreLong_OutputsElementPerLine()
+        {
+            // arrange
+            var param1 = new Literal("12345678901234567890");
+            var param2 = new Literal("12345678901234567890");
+
+            var sut = new List(new[] { param1, param2 });
+
+            // act
+            var result = sut.ToString();
+
+            // assert
+            var expected = @"[
+  12345678901234567890
+  12345678901234567890
+]";
+            Assert.Equal(expected, result);
+        }
+
+        [Fact]
+        public void ToString_ElementHasSpaces_OutputElementsWrapped()
+        {
+            // arrange
+            var param1 = new Literal("val 1");
+            var param2 = new Literal("val 2");
+
+            var sut = new List(new[] { param1, param2 });
+
+            // act
+            var result = sut.ToString();
+
+            // assert
+            Assert.Equal("[ (val 1) (val 2) ]", result);
+        }
     }
 }

@@ -1,6 +1,7 @@
 using Xunit;
 using Chel.Abstractions.Results;
 using System;
+using Chel.Abstractions.Types;
 
 namespace Chel.Abstractions.UnitTests.Results
 {
@@ -21,7 +22,7 @@ namespace Chel.Abstractions.UnitTests.Results
         public void ToString_WhenCalled_ReturnsValueAsString()
         {
             // arrange
-            var sut = new ValueResult("the result");
+            var sut = new ValueResult(new Literal("the result"));
 
             // act
             var result = sut.ToString();

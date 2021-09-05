@@ -1,6 +1,7 @@
 using System;
 using Chel.Abstractions;
 using Chel.Abstractions.Results;
+using Chel.Abstractions.Types;
 using Chel.Commands;
 using Chel.UnitTests.SampleCommands;
 using NSubstitute;
@@ -42,8 +43,9 @@ namespace Chel.UnitTests.Commands
             var result = sut.Execute() as ValueResult;
 
             // assert
-            Assert.Contains("help", result.Value);
-            Assert.Contains("num", result.Value);
+            var commands = Assert.IsType<List>(result.Value);
+            Assert.Contains(commands.Values, x => x.ToString().Contains("help"));
+            Assert.Contains(commands.Values, x => x.ToString().Contains("num"));
         }
 
         [Fact]
@@ -56,8 +58,9 @@ namespace Chel.UnitTests.Commands
             var result = sut.Execute() as ValueResult;
 
             // assert
-            Assert.Contains("Lists available commands and displays help for commands.", result.Value);
-            Assert.Contains("A sample command with numbered parameters.", result.Value);
+            var commands = Assert.IsType<List>(result.Value);
+            Assert.Contains(commands.Values, x => x.ToString().Contains("Lists available commands and displays help for commands."));
+            Assert.Contains(commands.Values, x => x.ToString().Contains("A sample command with numbered parameters."));
         }
 
         [Fact]
@@ -75,7 +78,7 @@ namespace Chel.UnitTests.Commands
             var result = sut.Execute() as ValueResult;
 
             // assert
-            Assert.Contains("sample2", result.Value);
+            Assert.Contains("sample2", result.Value.ToString());
         }
 
         [Fact]
@@ -89,10 +92,10 @@ namespace Chel.UnitTests.Commands
             var result = sut.Execute() as ValueResult;
 
             // assert
-            Assert.Contains("usage: num [param1] [param2]", result.Value);
-            Assert.Contains("A sample command with numbered parameters.", result.Value);
-            Assert.Matches(@"param1\s+The first parameter", result.Value);
-            Assert.Matches(@"param2\s+The second parameter", result.Value);
+            Assert.Contains("usage: num [param1] [param2]", result.Value.ToString());
+            Assert.Contains("A sample command with numbered parameters.", result.Value.ToString());
+            Assert.Matches(@"param1\s+The first parameter", result.Value.ToString());
+            Assert.Matches(@"param2\s+The second parameter", result.Value.ToString());
         }
 
         [Fact]
@@ -106,10 +109,10 @@ namespace Chel.UnitTests.Commands
             var result = sut.Execute() as ValueResult;
 
             // assert
-            Assert.Contains("usage: num [param1] [param2]", result.Value);
-            Assert.Contains("A sample command with numbered parameters.", result.Value);
-            Assert.Matches(@"param1\s+The first parameter", result.Value);
-            Assert.Matches(@"param2\s+The second parameter", result.Value);
+            Assert.Contains("usage: num [param1] [param2]", result.Value.ToString());
+            Assert.Contains("A sample command with numbered parameters.", result.Value.ToString());
+            Assert.Matches(@"param1\s+The first parameter", result.Value.ToString());
+            Assert.Matches(@"param2\s+The second parameter", result.Value.ToString());
         }
 
         [Fact]
@@ -137,8 +140,8 @@ namespace Chel.UnitTests.Commands
             var result = sut.Execute() as ValueResult;
 
             // assert
-            Assert.Contains("usage: command param", result.Value);
-            Assert.Matches(@"param\s+Required. The first parameter", result.Value);
+            Assert.Contains("usage: command param", result.Value.ToString());
+            Assert.Matches(@"param\s+Required. The first parameter", result.Value.ToString());
         }
 
         [Fact]
@@ -152,8 +155,8 @@ namespace Chel.UnitTests.Commands
             var result = sut.Execute() as ValueResult;
 
             // assert
-            Assert.Contains("usage: command -param <value>", result.Value);
-            Assert.Matches(@"-param <value>\s+Required. A required parameter.", result.Value);
+            Assert.Contains("usage: command -param <value>", result.Value.ToString());
+            Assert.Matches(@"-param <value>\s+Required. A required parameter.", result.Value.ToString());
         }
 
         [Fact]
@@ -167,9 +170,9 @@ namespace Chel.UnitTests.Commands
             var result = sut.Execute() as ValueResult;
 
             // assert
-            Assert.Contains("usage: nam [-param1 <value1>] [-param2 <value2>]", result.Value);
-            Assert.Matches(@"-param1 <value1>\s+The param1 parameter.", result.Value);
-            Assert.Matches(@"-param2 <value2>\s+The param2 parameter.", result.Value);
+            Assert.Contains("usage: nam [-param1 <value1>] [-param2 <value2>]", result.Value.ToString());
+            Assert.Matches(@"-param1 <value1>\s+The param1 parameter.", result.Value.ToString());
+            Assert.Matches(@"-param2 <value2>\s+The param2 parameter.", result.Value.ToString());
         }
 
         [Fact]
@@ -183,9 +186,9 @@ namespace Chel.UnitTests.Commands
             var result = sut.Execute() as ValueResult;
 
             // assert
-            Assert.Contains("usage: command [-p1] [-p2]", result.Value);
-            Assert.Matches(@"-p1\s+The p1 parameter.", result.Value);
-            Assert.Matches(@"-p2\s+The p2 parameter.", result.Value);
+            Assert.Contains("usage: command [-p1] [-p2]", result.Value.ToString());
+            Assert.Matches(@"-p1\s+The p1 parameter.", result.Value.ToString());
+            Assert.Matches(@"-p2\s+The p2 parameter.", result.Value.ToString());
         }
 
         private Help CreateSut(params Type[] commandTypes)

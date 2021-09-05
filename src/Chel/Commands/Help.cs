@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using Chel.Abstractions;
 using Chel.Abstractions.Results;
+using Chel.Abstractions.Types;
 
 namespace Chel.Commands
 {
@@ -36,31 +38,36 @@ namespace Chel.Commands
             _executionCultureName = Thread.CurrentThread.CurrentCulture.Name;
 
             // todo: temporary implementation. Help should output a hash, once we have those in the type system.
-            var output = new StringBuilder();
+            ChelType output = null;
 
             if(string.IsNullOrEmpty(CommandName))
-                ListCommands(output);
+                output = ListCommands();
             else
             {
-                var successful = DetailCommand(output);
+                var detailOutput = new StringBuilder();
+                var successful = DetailCommand(detailOutput);
                 if(!successful)
                     // todo: How to handle the line number; the command shouldn't know it
                     return new FailureResult(1, new[]{ string.Format(Texts.CannotDisplayHelpUnknownCommnad, CommandName) });
+
+                output = new Literal(detailOutput.ToString());
             }
 
-            return new ValueResult(output.ToString());
+            return new ValueResult(output);
         }
 
-        private void ListCommands(StringBuilder output)
+        private List ListCommands()
         {
-            output.Append(_phraseDictionary.GetPhrase(Texts.PhraseKeys.AvailableCommands, _executionCultureName));
-            output.Append(":");
-            output.Append(Environment.NewLine);
+            var lines = new List<Literal>();
+
+            lines.Add(new Literal(_phraseDictionary.GetPhrase(Texts.PhraseKeys.AvailableCommands, _executionCultureName) + ":"));
 
             foreach(var descriptor in _commandRegistry.GetAllRegistrations())
             {
-                output.Append($"{descriptor.CommandName, Constants.FirstColumnWidth}{descriptor.GetDescription(_executionCultureName)}{Environment.NewLine}");
+                lines.Add(new Literal($"{descriptor.CommandName, Constants.FirstColumnWidth}{descriptor.GetDescription(_executionCultureName)}"));
             }
+
+            return new List(lines);
         }
 
         private bool DetailCommand(StringBuilder output)

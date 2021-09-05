@@ -54,7 +54,7 @@ namespace Chel.UnitTests.Commands
             var result = sut.Execute() as ValueResult;
 
             // assert
-            Assert.Equal("No variables set.", result.Value);
+            Assert.Equal("No variables set.", result.Value.ToString());
         }
 
         [Fact]
@@ -70,8 +70,8 @@ namespace Chel.UnitTests.Commands
             var result = sut.Execute() as ValueResult;
 
             // assert
-            Assert.Matches(@"name1\s+value1", result.Value);
-            Assert.Matches(@"name2\s+value2", result.Value);
+            Assert.Matches(@"name1\s+value1", result.Value.ToString());
+            Assert.Matches(@"name2\s+value2", result.Value.ToString());
         }
 
         [Fact]
@@ -85,7 +85,7 @@ namespace Chel.UnitTests.Commands
             var result = sut.Execute() as ValueResult;
 
             // assert
-            Assert.Equal("Variable 'name' is not set.", result.Value);
+            Assert.Equal("Variable 'name' is not set.", result.Value.ToString());
         }
 
         [Fact]
@@ -101,7 +101,7 @@ namespace Chel.UnitTests.Commands
             var result = sut.Execute() as ValueResult;
 
             // assert
-            Assert.Equal("value", result.Value);
+            Assert.Equal("value", result.Value.ToString());
         }
 
         [Fact]
@@ -137,7 +137,7 @@ namespace Chel.UnitTests.Commands
             var result = sut.Execute() as ValueResult;
 
             // assert
-            Assert.Equal("[ val1 val2 ]", result.Value);
+            Assert.Equal("[ val1 val2 ]", result.Value.ToString());
         }
 
         [Fact]
@@ -153,7 +153,7 @@ namespace Chel.UnitTests.Commands
             var result = sut.Execute() as ValueResult;
 
             // assert
-            Assert.Equal("value", result.Value);
+            Assert.Equal("value", result.Value.ToString());
 
             var variable = variables.Get("name");
             Assert.Equal("value", variable.Value.ToString());

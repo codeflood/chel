@@ -138,7 +138,7 @@ namespace Chel.UnitTests
             sut.Execute("num p1 p2", result => executionResult = result as ValueResult);
             
             // assert
-            Assert.Equal("p1 p2", executionResult.Value);
+            Assert.Equal("p1 p2", executionResult.Value.ToString());
         }
 
         [Fact]
@@ -247,7 +247,7 @@ namespace Chel.UnitTests
 
             // assert
             Assert.IsType<ValueResult>(executionResult);
-            Assert.Equal("lorem lorem", (executionResult as ValueResult).Value);
+            Assert.Equal("lorem lorem", (executionResult as ValueResult).Value.ToString());
         }
 
         [Fact]
