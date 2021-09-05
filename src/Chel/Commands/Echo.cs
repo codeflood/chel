@@ -1,5 +1,6 @@
 using Chel.Abstractions;
 using Chel.Abstractions.Results;
+using Chel.Abstractions.Types;
 
 namespace Chel.Commands
 {
@@ -9,7 +10,7 @@ namespace Chel.Commands
     {
         [NumberedParameter(1, "message")]
         [Description("The message to output.")]
-        public string Message { get; set; }
+        public ChelType Message { get; set; }
 
         [FlagParameter("upper")]
         [Description("Output the message in uppercase.")]
@@ -17,7 +18,7 @@ namespace Chel.Commands
 
         public CommandResult Execute()
         {
-            var message = Message ?? string.Empty;
+            var message = Message?.ToString() ?? string.Empty;
 
             if(Uppercase)
                 message = message.ToUpper();

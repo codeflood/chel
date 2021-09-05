@@ -1047,14 +1047,12 @@ namespace Chel.UnitTests
         public void Bind_PropertyHasTypeConverter_BindsParameter()
         {
             // arrange
-            var guid1 = Guid.NewGuid();
-            var guid2 = Guid.NewGuid();
             var sut = CreateCommandParameterBinder(typeof(ParameterTypesCommand));
             var command = new ParameterTypesCommand();
             var input = CreateCommandInput(
                 "command",
-                new ParameterNameCommandParameter("guidarray"),
-                new Literal($"{guid1}|{guid2}")
+                new ParameterNameCommandParameter("complex"),
+                new Literal($"name:42")
             );
 
             // act
@@ -1062,7 +1060,8 @@ namespace Chel.UnitTests
 
             // assert
             Assert.True(result.Success);
-            Assert.Equal(command.GuidArray, new[]{ guid1, guid2 });
+            Assert.Equal("name", command.ComplexType.Name);
+            Assert.Equal(42, command.ComplexType.Number);
         }
 
         [Fact]
@@ -1246,6 +1245,26 @@ namespace Chel.UnitTests
             // assert
             Assert.False(result.Success);
             Assert.StartsWith("Invalid parameter value '[ a b ]' for named parameter 'intlist'.", result.Errors[0]);
+        }
+
+        [Fact]
+        public void Bind_SetSingleValueOnList_ErrorIncludedInResult()
+        {
+            // arrange
+            var sut = CreateCommandParameterBinder(typeof(ListParameterCommand));
+            var command = new ListParameterCommand();
+            var input = CreateCommandInput(
+                "list-params",
+                new ParameterNameCommandParameter("list"),
+                new Literal("a")
+            );
+
+            // act
+            var result = sut.Bind(command, input);
+
+            // assert
+            Assert.False(result.Success);
+            Assert.StartsWith("Cannot bind a non-list to a list parameter 'list'", result.Errors[0]);
         }
 
         [Fact]

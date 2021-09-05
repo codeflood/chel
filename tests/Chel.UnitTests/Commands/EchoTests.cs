@@ -1,4 +1,5 @@
 using Chel.Abstractions.Results;
+using Chel.Abstractions.Types;
 using Chel.Commands;
 using Xunit;
 
@@ -26,7 +27,7 @@ namespace Chel.UnitTests.Commands
         {
             // arrange
             var sut = new Echo();
-            sut.Message = "message";
+            sut.Message = new Literal("message");
 
             // act
             var result = sut.Execute() as ValueResult;

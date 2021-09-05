@@ -8,6 +8,8 @@ namespace Chel
 
         public const string CannotBindListToNonListParameter = "Cannot bind a list to a non-list parameter '{0}'";
 
+        public const string CannotBindNonListToListParameter = "Cannot bind a non-list to a list parameter '{0}'";
+
         public const string CannotDisplayHelpUnknownCommnad = "Cannot display help for unknown command '{0}'";
 
         public const string CannotRepeatFlagParameter = "Cannot repeat flag parameter '{0}'";

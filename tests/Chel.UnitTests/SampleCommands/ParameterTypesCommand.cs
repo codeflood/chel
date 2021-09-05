@@ -41,9 +41,9 @@ namespace Chel.UnitTests.SampleCommands
         [NamedParameter("guid", "value")]
         public Guid Guid { get; set; }
 
-        [NamedParameter("guidarray", "value")]
-        [TypeConverter(typeof(StringToGuidArrayTypeConverter))]
-        public Guid[] GuidArray { get; set; }
+        [NamedParameter("complex", "value")]
+        [TypeConverter(typeof(StringToComplexTypeTypeConverter))]
+        public ComplexType ComplexType { get; set; }
 
         public CommandResult Execute()
         {

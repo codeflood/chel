@@ -245,9 +245,16 @@ namespace Chel
             if(bindingValue == null)
                 return;
 
+            var listElementType = GetPropertyListType(property);
+
             if(bindingValue is List list)
             {
-                BindListProperty(instance, property, parameterIdentifier, list, result);
+                BindListProperty(instance, property, listElementType, parameterIdentifier, list, result);
+                return;
+            }
+            else if(listElementType != null)
+            {
+                result.AddError(string.Format(Texts.CannotBindNonListToListParameter, parameterIdentifier));
                 return;
             }
 
@@ -258,16 +265,14 @@ namespace Chel
             property.SetValue(instance, convertedValue);
         }
 
-        private void BindListProperty(ICommand instance, PropertyInfo property, string parameterIdentifier, List value, ParameterBindResult result)
+        private Type GetPropertyListType(PropertyInfo property)
         {
-            Type elementType = null;
-
             if(property.PropertyType.IsGenericType)
             {
                 var genericTypeDefinition = property.PropertyType.GetGenericTypeDefinition();
 
                 if(genericTypeDefinition == typeof(IEnumerable<>))
-                    elementType = property.PropertyType.GetGenericArguments()[0];
+                    return property.PropertyType.GetGenericArguments()[0];
                 else
                 {
                     var interfaces = property.PropertyType.GetInterfaces();
@@ -278,22 +283,26 @@ namespace Chel
 
                         if(typeof(IEnumerable<>) == inf.GetGenericTypeDefinition())
                         {
-                            elementType = inf.GetGenericArguments()[0];
-                            break;
+                            return inf.GetGenericArguments()[0];
                         }
                     }
                 }
             }
             else if(property.PropertyType.HasElementType)
-                elementType = property.PropertyType.GetElementType();
+                return property.PropertyType.GetElementType();
 
-            if(elementType == null)
+            return null;
+        }
+
+        private void BindListProperty(ICommand instance, PropertyInfo property, Type listElementType, string parameterIdentifier, List value, ParameterBindResult result)
+        {
+            if(listElementType == null)
             {
                 result.AddError(string.Format(Texts.CannotBindListToNonListParameter, parameterIdentifier));
                 return;
             }
             
-            var valuesType = typeof(List<>).MakeGenericType(elementType);
+            var valuesType = typeof(List<>).MakeGenericType(listElementType);
             var values = Activator.CreateInstance(valuesType) as IList;
             foreach(var listValue in value.Values)
             {
@@ -301,14 +310,14 @@ namespace Chel
                 if(bindingValue == null)
                     continue;
 
-                var convertedValue = ConvertPropertyValue(bindingValue, elementType, property);
+                var convertedValue = ConvertPropertyValue(bindingValue, listElementType, property);
                 
                 values.Add(convertedValue);
             }
 
             if(property.PropertyType.IsArray)
             {
-                var arrayValue = Array.CreateInstance(elementType, values.Count);
+                var arrayValue = Array.CreateInstance(listElementType, values.Count);
                 values.CopyTo(arrayValue, 0);
                 property.SetValue(instance, arrayValue);
             }
