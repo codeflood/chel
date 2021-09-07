@@ -37,37 +37,32 @@ namespace Chel.Commands
         {
             _executionCultureName = Thread.CurrentThread.CurrentCulture.Name;
 
-            // todo: temporary implementation. Help should output a hash, once we have those in the type system.
-            ChelType output = null;
+            var output = new StringBuilder();
 
             if(string.IsNullOrEmpty(CommandName))
-                output = ListCommands();
+                ListCommands(output);
             else
             {
-                var detailOutput = new StringBuilder();
-                var successful = DetailCommand(detailOutput);
+                var successful = DetailCommand(output);
                 if(!successful)
                     // todo: How to handle the line number; the command shouldn't know it
                     return new FailureResult(1, new[]{ string.Format(Texts.CannotDisplayHelpUnknownCommnad, CommandName) });
-
-                output = new Literal(detailOutput.ToString());
             }
 
-            return new ValueResult(output);
+            return new ValueResult(new Literal(output.ToString()));
         }
 
-        private List ListCommands()
+        private void ListCommands(StringBuilder output)
         {
-            var lines = new List<Literal>();
-
-            lines.Add(new Literal(_phraseDictionary.GetPhrase(Texts.PhraseKeys.AvailableCommands, _executionCultureName) + ":"));
+            output.Append(_phraseDictionary.GetPhrase(Texts.PhraseKeys.AvailableCommands, _executionCultureName));
+            output.Append(":");
+            output.Append(Environment.NewLine);
 
             foreach(var descriptor in _commandRegistry.GetAllRegistrations())
             {
-                lines.Add(new Literal($"{descriptor.CommandName, Constants.FirstColumnWidth}{descriptor.GetDescription(_executionCultureName)}"));
+                output.Append($"{descriptor.CommandName, Constants.FirstColumnWidth}{descriptor.GetDescription(_executionCultureName)}");
+                output.Append(Environment.NewLine);
             }
-
-            return new List(lines);
         }
 
         private bool DetailCommand(StringBuilder output)

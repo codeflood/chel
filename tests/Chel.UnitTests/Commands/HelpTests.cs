@@ -43,9 +43,9 @@ namespace Chel.UnitTests.Commands
             var result = sut.Execute() as ValueResult;
 
             // assert
-            var commands = Assert.IsType<List>(result.Value);
-            Assert.Contains(commands.Values, x => x.ToString().Contains("help"));
-            Assert.Contains(commands.Values, x => x.ToString().Contains("num"));
+            var commands = Assert.IsType<Literal>(result.Value);
+            Assert.Contains("help", commands.Value);
+            Assert.Contains("num", commands.Value);
         }
 
         [Fact]
@@ -58,9 +58,9 @@ namespace Chel.UnitTests.Commands
             var result = sut.Execute() as ValueResult;
 
             // assert
-            var commands = Assert.IsType<List>(result.Value);
-            Assert.Contains(commands.Values, x => x.ToString().Contains("Lists available commands and displays help for commands."));
-            Assert.Contains(commands.Values, x => x.ToString().Contains("A sample command with numbered parameters."));
+            var commands = Assert.IsType<Literal>(result.Value);
+            Assert.Contains("Lists available commands and displays help for commands.", commands.Value);
+            Assert.Contains("A sample command with numbered parameters.", commands.Value);
         }
 
         [Fact]
