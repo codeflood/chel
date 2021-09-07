@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Chel.Abstractions.Types
 {
@@ -26,6 +27,11 @@ namespace Chel.Abstractions.Types
                 if(!(value is Literal) && !(value is VariableReference))
                     throw new ArgumentException(Texts.CompoundValueOnlyConsistsLiteralsAndVariables, nameof(values));
             }
+        }
+
+        public override string ToString()
+        {
+            return string.Join(string.Empty, Values.Select(x => x.ToString()));
         }
     }
 }

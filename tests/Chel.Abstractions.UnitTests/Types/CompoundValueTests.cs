@@ -80,5 +80,130 @@ namespace Chel.Abstractions.UnitTests.Types
                 }
             };
         }
+
+        [Fact]
+        public void Equals_ValuesBothContainEqualElements_ReturnsTrue()
+        {
+            // arrange
+            var param11 = new Literal("val1");
+            var param21 = new Literal("val1");
+
+            var param12 = new VariableReference("val2");
+            var param22 = new VariableReference("val2");
+
+            var sut1 = new CompoundValue(new ChelType[] { param11, param12 });
+            var sut2 = new CompoundValue(new ChelType[] { param21, param22 });
+
+            // act
+            var result = sut1.Equals(sut2);
+
+            // assert
+            Assert.True(result);
+        }
+
+        [Fact]
+        public void Equals_SameValuesOutOfOrder_ReturnsFalse()
+        {
+            // arrange
+            var param11 = new Literal("val1");
+            var param21 = new Literal("val1");
+
+            var param12 = new VariableReference("val2");
+            var param22 = new VariableReference("val2");
+
+            var sut1 = new CompoundValue(new ChelType[] { param11, param12 });
+            var sut2 = new CompoundValue(new ChelType[] { param22, param21 });
+
+            // act
+            var result = sut1.Equals(sut2);
+
+            // assert
+            Assert.False(result);
+        }
+
+        [Fact]
+        public void Equals_DifferentValues_ReturnsFalse()
+        {
+            // arrange
+            var param1 = new Literal("val");
+            var param2 = new Literal("other");
+
+            var sut1 = new CompoundValue(param1);
+            var sut2 = new CompoundValue(param2);
+
+            // act
+            var result = sut1.Equals(sut2);
+
+            // assert
+            Assert.False(result);
+        }
+
+        [Fact]
+        public void GetHashCode_ValuesAreEqual_ReturnsSameHashCode()
+        {
+            // arrange
+            var param11 = new Literal("val1");
+            var param21 = new Literal("val1");
+
+            var param12 = new Literal("val2");
+            var param22 = new Literal("val2");
+
+            var sut1 = new CompoundValue(new[] { param11, param12 });
+            var sut2 = new CompoundValue(new[] { param21, param22 });
+
+            // act
+            var hashCode1 = sut1.GetHashCode();
+            var hashCode2 = sut2.GetHashCode();
+
+            // assert
+            Assert.Equal(hashCode1, hashCode2);
+        }
+
+        [Fact]
+        public void GetHashCode_ValuesAreDifferent_ReturnsDifferentHashCodes()
+        {
+            // arrange
+            var param11 = new Literal("val1");
+            var param21 = new Literal("val1");
+
+            var param12 = new Literal("val2");
+            var param22 = new Literal("val3");
+
+            var sut1 = new CompoundValue(new[] { param11, param12 });
+            var sut2 = new CompoundValue(new[] { param21, param22 });
+
+            // act
+            var hashCode1 = sut1.GetHashCode();
+            var hashCode2 = sut2.GetHashCode();
+
+            // assert
+            Assert.NotEqual(hashCode1, hashCode2);
+        }
+
+        [Fact]
+        public void ToString_SingleValue_ReturnsValue()
+        {
+            // arrange
+            var sut = new CompoundValue(new Literal("val"));
+
+            // act
+            var result = sut.ToString();
+
+            // assert
+            Assert.Equal("val", result);
+        }
+
+        [Fact]
+        public void ToString_MultipleValues_ReturnsValues()
+        {
+            // arrange
+            var sut = new CompoundValue(new [] { new Literal("val"), new Literal("val2") });
+
+            // act
+            var result = sut.ToString();
+
+            // assert
+            Assert.Equal("valval2", result);
+        }
     }
 }

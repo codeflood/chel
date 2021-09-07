@@ -1353,15 +1353,65 @@ namespace Chel.UnitTests
         public static IEnumerable<object[]> Bind_PropertyIsChelType_BindsParameter_DataSource()
         {
             yield return new[] { new Literal("lit") };
-            yield return new[] { new VariableReference("ref") };
-            yield return new[] { new CompoundValue(new ChelType[] { new Literal("lit"), new VariableReference("ref") }) };
+            yield return new[] { new CompoundValue(new ChelType[] { new Literal("lit"), new Literal("lit2") }) };
             yield return new[] { new List(new ChelType[] { new Literal("lit1"), new Literal("lit2") }) };
+        }
+
+        [Theory]
+        [MemberData(nameof(Bind_PropertyIsChelTypeValueHasVariableReference_VariableIsReplaced_DataSource))]
+        public void Bind_PropertyIsChelTypeValueHasVariableReference_VariableIsReplaced(ChelType value, ChelType expected)
+        {
+            // arrange
+            var variables = new VariableCollection();
+            variables.Set(new Variable("ref", new Literal("val")));
+
+            var sut = CreateCommandParameterBinder(variables, typeof(Var));
+
+            var command = new Var(variables, new PhraseDictionary(), new NameValidator());
+            var input = CreateCommandInput(
+                "var",
+                new Literal("foo"),
+                value
+            );
+
+            // act
+            var result = sut.Bind(command, input);
+
+            // assert
+            Assert.True(result.Success);
+            Assert.Equal(expected, command.Value);
+        }
+
+        public static IEnumerable<object[]> Bind_PropertyIsChelTypeValueHasVariableReference_VariableIsReplaced_DataSource()
+        {
+            yield return new ChelType[]
+            {
+                new VariableReference("ref"),
+                new Literal("val")
+            };
+
+            yield return new[]
+            {
+                new CompoundValue(new ChelType[] { new Literal("lit"), new VariableReference("ref") }),
+                new CompoundValue(new ChelType[] { new Literal("lit"), new Literal("val") }),
+            };
+
+            yield return new[]
+            {
+                new List(new ChelType[] { new Literal("lit1"), new VariableReference("ref") }),
+                new List(new ChelType[] { new Literal("lit1"), new Literal("val") })
+            };
         }
 
         private CommandParameterBinder CreateCommandParameterBinder(params Type[] commandTypes)
         {
-            var registry = CreateCommandRegistry(commandTypes);
             var variables = new VariableCollection();
+            return CreateCommandParameterBinder(variables, commandTypes);
+        }
+
+        private CommandParameterBinder CreateCommandParameterBinder(VariableCollection variables, params Type[] commandTypes)
+        {
+            var registry = CreateCommandRegistry(commandTypes);
             var replacer = new VariableReplacer();
 
             return new CommandParameterBinder(registry, replacer, variables);

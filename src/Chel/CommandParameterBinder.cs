@@ -235,15 +235,15 @@ namespace Chel
 
         private void BindProperty(ICommand instance, PropertyInfo property, string parameterIdentifier, ChelType value, ParameterBindResult result)
         {
-            if(property.PropertyType == typeof(ChelType))
-            {
-                property.SetValue(instance, value);
-                return;
-            }
-
             var bindingValue = ReplaceVariables(value, result);
             if(bindingValue == null)
                 return;
+
+            if(property.PropertyType == typeof(ChelType))
+            {
+                property.SetValue(instance, bindingValue);
+                return;
+            }
 
             var listElementType = GetPropertyListType(property);
 
