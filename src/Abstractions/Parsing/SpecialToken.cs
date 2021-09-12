@@ -1,7 +1,7 @@
 namespace Chel.Abstractions.Parsing
 {
     /// <summary>
-    /// A literal token with no special meaning.
+    /// A special token with implied meaning.
     /// </summary>
     public class SpecialToken : Token
     {

@@ -9,8 +9,6 @@ namespace Chel
 {
 	internal class VariableReplacer : IVariableReplacer
     {
-        private const string SubreferenceToken = ":";
-
         public ChelType ReplaceVariables(VariableCollection variables, ChelType input)
         {
             if(variables == null)
@@ -71,31 +69,33 @@ namespace Chel
         private ChelType ProcessVariableReference(VariableReference input, VariableCollection variables)
         {
             var variableName = input.VariableName;
-            var subreference = string.Empty;
-
-            var separatorIndex = input.VariableName.IndexOf(SubreferenceToken);
-
-            if(separatorIndex >= 0)
-            {
-                variableName = input.VariableName.Substring(0, separatorIndex);
-                subreference = input.VariableName.Substring(separatorIndex + 1);
-
-                if(string.IsNullOrWhiteSpace(variableName))
-                    throw new InvalidOperationException(Texts.VariableNameIsMissing);
-                
-                if(string.IsNullOrWhiteSpace(subreference))
-                    throw new InvalidOperationException(string.Format(Texts.VariableSubreferenceIsMissing, variableName));
-            }
+            var subreferences = new Queue<string>(input.SubReferences);
 
             var variable = variables.Get(variableName);
 
             if(variable == null)
                 throw new UnsetVariableException(input.VariableName);
 
-            if(variable.Value is List listValue)
-                return ProcessListVariableReference(listValue, variableName, subreference);
+            var value = variable.Value;
 
-            return variable.Value;
+            do
+            {
+                string subreference = null;
+                
+                if(subreferences.Count > 0)
+                    subreference = subreferences.Dequeue();
+
+                if(value is List listValue)
+                    value = ProcessListVariableReference(listValue, variableName, subreference);
+                else if(subreference != null)
+                    throw new InvalidOperationException(string.Format(Texts.VariableSubreferenceIsInvalid, variableName, subreference));
+                
+                if(subreferences.Count > 0)
+                    variableName += Symbol.SubName + subreference;
+            }
+            while(subreferences.Count > 0);
+
+            return value;
         }
 
         private ChelType ProcessListVariableReference(List listValue, string variableName, string subreference)

@@ -494,6 +494,52 @@ namespace Chel.UnitTests.Parsing
         }
 
         [Fact]
+        public void Parse_InputContainsVariableWithSubReference_ParsesVariableAndSubReference()
+        {
+            // arrange
+            var builder = new CommandInput.Builder(1, "cmd");
+            builder.AddParameter(new VariableReference("var", new[] { "1" }));
+            var expectedCommand = builder.Build();
+
+            var sut = new Parser();
+
+            // act
+            var result = sut.Parse("cmd $var:1$");
+
+            // assert
+            Assert.Equal(expectedCommand, result[0], new CommandInputEqualityComparer());
+        }
+
+        [Fact]
+        public void Parse_InputContainsVariableWithSubSubReference_ParsesVariableAndSubSubReference()
+        {
+            // arrange
+            var builder = new CommandInput.Builder(1, "cmd");
+            builder.AddParameter(new VariableReference("var", new[] { "1", "2" }));
+            var expectedCommand = builder.Build();
+
+            var sut = new Parser();
+
+            // act
+            var result = sut.Parse("cmd $var:1:2$");
+
+            // assert
+            Assert.Equal(expectedCommand, result[0], new CommandInputEqualityComparer());
+        }
+
+        [Fact]
+        public void Parse_InputContainsVariableWithMissingSubReference_ThrowsException()
+        {
+            // arrange
+            var sut = new Parser();
+            Action sutAction = () => sut.Parse("cmd $var:$");
+
+            // act, assert
+            var ex = Assert.Throws<ParseException>(sutAction);
+            Assert.Contains("Missing subreference for variable $var$", ex.Message);
+        }
+
+        [Fact]
         public void Parse_InputContainsParameterName_ParsesParameterName()
         {
             // arrange

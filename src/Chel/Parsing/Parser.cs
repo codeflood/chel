@@ -278,7 +278,6 @@ namespace Chel.Parsing
             _buffer.Clear();
 
             var isEndOfLine = false;
-            var isVariable = false;
             var locationStart = _lastTokenLocation;
             var parameters = new List<ChelType>();
             var done = false;
@@ -290,28 +289,8 @@ namespace Chel.Parsing
                     switch(specialToken.Type)
                     {
                         case SpecialTokenType.VariableMarker:
-                            var blockValue = _buffer.ToString();
-
-                            if(isVariable)
-                            {
-                                isVariable = false;
-
-                                if(!string.IsNullOrEmpty(blockValue))
-                                    parameters.Add(new VariableReference(blockValue));
-                                    else
-                                        throw new ParseException(token.Location, Texts.MissingVariableName);
-
-                                _buffer.Clear();
-                            }
-                            else
-                            {
-                                isVariable = true;
-
-                                if(!string.IsNullOrEmpty(blockValue))
-                                    parameters.Add(new Literal(blockValue));
-
-                                _buffer.Clear();
-                            }
+                            var variableReference = ParseVariableReference(token);
+                            parameters.Add(variableReference);
                             break;
 
                         case SpecialTokenType.ParameterName:
@@ -342,9 +321,6 @@ namespace Chel.Parsing
                     token = GetNextToken();
             }
 
-            if(isVariable)
-                throw new ParseException(locationStart, Texts.UnpairedVariableToken);
-
             var value = _buffer.ToString();
             if(!string.IsNullOrEmpty(value))
                 parameters.Add(new Literal(value));
@@ -356,6 +332,66 @@ namespace Chel.Parsing
                 return new ParseBlock(locationStart, parameters[0], isEndOfLine: isEndOfLine);
 
             return new ParseBlock(locationStart, new CompoundValue(parameters), isEndOfLine: isEndOfLine);
+        }
+
+        private VariableReference ParseVariableReference(Token token)
+        {
+            if(!(token is SpecialToken specialTokenGuard) || specialTokenGuard.Type != SpecialTokenType.VariableMarker)
+                throw new ParseException(_lastTokenLocation, string.Format(Texts.UnexpectedToken, token));
+
+            _buffer.Clear();
+            var locationStart = _lastTokenLocation;
+            string variableName = null;
+            var subreferences = new List<string>();
+
+            token = GetNextToken();
+
+            while(token != null)
+            {
+                var specialToken = token as SpecialToken;
+                var literalToken = token as LiteralToken;
+
+                if(
+                    (specialToken != null && specialToken.Type == SpecialTokenType.VariableMarker) ||
+                    (literalToken != null && literalToken.Value.Equals(Symbol.SubName))
+                )
+                {
+                    var name = _buffer.ToString();
+                    if(name.Length == 0)
+                    {
+                        if(variableName == null)
+                            throw new ParseException(_lastTokenLocation, Texts.MissingVariableName);
+                        else
+                            throw new ParseException(token.Location, string.Format(Texts.MissingSubreferenceForVariable, variableName));
+                    }
+
+                    if(variableName == null)
+                        variableName = name;
+                    else
+                        subreferences.Add(name);
+
+                    _buffer.Clear();
+
+                    if(specialToken != null && specialToken.Type == SpecialTokenType.VariableMarker)
+                        break;
+                }
+                else if(specialToken != null)
+                    throw new ParseException(locationStart, Texts.UnpairedVariableToken);
+                else if(literalToken != null)
+                {
+                    if(literalToken.Value == Newline || char.IsWhiteSpace(literalToken.Value))
+                        throw new ParseException(locationStart, Texts.UnpairedVariableToken);
+                    else
+                        _buffer.Append(literalToken.Value);
+                }
+
+                token = GetNextToken();
+            }
+
+            if(variableName == null)
+                throw new ParseException(locationStart, Texts.UnpairedVariableToken);
+
+            return new VariableReference(variableName, subreferences);
         }
 
         private ParseBlock ParseList(Token token)

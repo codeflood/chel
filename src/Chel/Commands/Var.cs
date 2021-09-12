@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using System.Text;
 using System.Threading;
 using Chel.Abstractions;
 using Chel.Abstractions.Results;
@@ -70,7 +70,7 @@ namespace Chel
 
         private ChelType ListVariables()
         {
-            var variables = new List<ChelType>();
+            var output = new StringBuilder();
 
             var names = _variables.Names;
             if(names.Count == 0)
@@ -79,10 +79,10 @@ namespace Chel
             foreach(var name in names)
             {
                 var variable = _variables.Get(name);
-                variables.Add(new Literal($"{name, Constants.FirstColumnWidth}{variable.Value}{Environment.NewLine}"));
+                output.Append($"{name, Constants.FirstColumnWidth}{variable.Value}{Environment.NewLine}");
             }
 
-            return new List(variables);
+            return new Literal(output.ToString());
         }
 
         private ChelType ShowVariable(string name)

@@ -48,6 +48,8 @@ namespace Chel
 
         public const string MissingRequiredNumberedParameter = "Missing required numbered parameter '{0}'";
 
+        public const string MissingSubreferenceForVariable = "Missing subreference for variable ${0}$";
+
         public const string MissingValueForNamedParameter = "Missing value for named parameter '{0}'";
 
         public const string MissingVariableName = "Missing variable name";
