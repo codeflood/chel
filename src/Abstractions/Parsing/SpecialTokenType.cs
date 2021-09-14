@@ -11,6 +11,9 @@ namespace Chel.Abstractions.Parsing
         VariableMarker = 3,
         ParameterName = 4,
         ListStart = 5,
-        ListEnd = 6
+        ListEnd = 6,
+        MapStart = 7,
+        MapEnd = 8,
+        Subcommand = 9
     }
 }

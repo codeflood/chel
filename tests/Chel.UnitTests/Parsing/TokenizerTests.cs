@@ -475,6 +475,96 @@ namespace Chel.UnitTests.Parsing
             AssertTokenStream(expected, sut);
         }
 
+        [Fact]
+        public void GetNextToken_InputContainsSeparatedSubcommand_IncludesSubcommandTokens()
+        {
+            // arrange
+            var sut = new Tokenizer("a << b");
+            
+            var expected = new Token[] {
+                new LiteralToken(new SourceLocation(1, 1), 'a'),
+                new LiteralToken(new SourceLocation(1, 2), ' '),
+                new SpecialToken(new SourceLocation(1, 3), SpecialTokenType.Subcommand),
+                new LiteralToken(new SourceLocation(1, 5), ' '),
+                new LiteralToken(new SourceLocation(1, 6), 'b')
+            };
+
+            // act, assert
+            AssertTokenStream(expected, sut);
+        }
+
+        [Fact]
+        public void GetNextToken_InputContainsJoinedSubcommand_IncludesSubcommandTokens()
+        {
+            // arrange
+            var sut = new Tokenizer("a<<b");
+            
+            var expected = new Token[] {
+                new LiteralToken(new SourceLocation(1, 1), 'a'),
+                new SpecialToken(new SourceLocation(1, 2), SpecialTokenType.Subcommand),
+                new LiteralToken(new SourceLocation(1, 4), 'b')
+            };
+
+            // act, assert
+            AssertTokenStream(expected, sut);
+        }
+
+        [Fact]
+        public void GetNextToken_InputContainsEscapedSubcommandFirstElement_IncludesSubcommandTokensAsLiterals()
+        {
+            // arrange
+            var sut = new Tokenizer(@"a \<< b");
+            
+            var expected = new Token[] {
+                new LiteralToken(new SourceLocation(1, 1), 'a'),
+                new LiteralToken(new SourceLocation(1, 2), ' '),
+                new LiteralToken(new SourceLocation(1, 4), '<'),
+                new LiteralToken(new SourceLocation(1, 5), '<'),
+                new LiteralToken(new SourceLocation(1, 6), ' '),
+                new LiteralToken(new SourceLocation(1, 7), 'b')
+            };
+
+            // act, assert
+            AssertTokenStream(expected, sut);
+        }
+
+        [Fact]
+        public void GetNextToken_InputContainsEscapedSubcommandSecondElement_IncludesSubcommandTokensAsLiterals()
+        {
+            // arrange
+            var sut = new Tokenizer(@"a <\< b");
+            
+            var expected = new Token[] {
+                new LiteralToken(new SourceLocation(1, 1), 'a'),
+                new LiteralToken(new SourceLocation(1, 2), ' '),
+                new LiteralToken(new SourceLocation(1, 3), '<'),
+                new LiteralToken(new SourceLocation(1, 5), '<'),
+                new LiteralToken(new SourceLocation(1, 6), ' '),
+                new LiteralToken(new SourceLocation(1, 7), 'b')
+            };
+
+            // act, assert
+            AssertTokenStream(expected, sut);
+        }
+
+        [Fact]
+        public void GetNextToken_InputContainsSingleLessThanCharacter_IncludesLiteralInOutput()
+        {
+            // arrange
+            var sut = new Tokenizer("a < b");
+            
+            var expected = new Token[] {
+                new LiteralToken(new SourceLocation(1, 1), 'a'),
+                new LiteralToken(new SourceLocation(1, 2), ' '),
+                new LiteralToken(new SourceLocation(1, 3), '<'),
+                new LiteralToken(new SourceLocation(1, 4), ' '),
+                new LiteralToken(new SourceLocation(1, 5), 'b')
+            };
+
+            // act, assert
+            AssertTokenStream(expected, sut);
+        }
+
         private void AssertTokenStream(IEnumerable<Token> expected, Tokenizer sut, bool expectError = false)
         {
             // act, assert

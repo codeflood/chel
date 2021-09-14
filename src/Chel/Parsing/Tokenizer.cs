@@ -83,6 +83,16 @@ namespace Chel.Parsing
 				case Symbol.ListEnd:
 					return HandleSpecial(SpecialTokenType.ListEnd);
 
+				case Symbol.SubcommandElement:
+					if(PeekNext() == Symbol.SubcommandElement)
+					{
+						var sourceLocation = CurrentLocation;
+						ReadNext();
+						return HandleSpecial(SpecialTokenType.Subcommand, sourceLocation);
+					}
+
+					return HandleLiteral((char)nextChar);
+
 				case -1:
 					HandleEndOfStream();
 					return null;
@@ -163,7 +173,8 @@ namespace Chel.Parsing
 				nextChar == Symbol.ParameterName ||
 				nextChar == Symbol.Comment ||
 				nextChar == Symbol.ListStart ||
-				nextChar == Symbol.ListEnd)
+				nextChar == Symbol.ListEnd ||
+				nextChar == Symbol.SubcommandElement)
 				return HandleLiteral((char)nextChar);
 
 			// Report the error location as the escape character
@@ -177,9 +188,9 @@ namespace Chel.Parsing
 			return new LiteralToken(CurrentLocation, nextChar);
 		}
 
-		private Token HandleSpecial(SpecialTokenType type)
+		private Token HandleSpecial(SpecialTokenType type, SourceLocation sourceLocation = null)
 		{
-			return new SpecialToken(CurrentLocation, type);
+			return new SpecialToken(sourceLocation ?? CurrentLocation, type);
 		}
 	}
 }

@@ -13,5 +13,6 @@ namespace Chel
         public const char MapStart = '{';
         public const char MapEnd = '}';
         public const char SubName = ':';
+        public const char SubcommandElement = '<';
     }
 }
