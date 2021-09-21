@@ -57,7 +57,10 @@ namespace Chel
             if(descriptor == null)
                 throw new InvalidOperationException(string.Format(Texts.DescriptorForCommandCouldNotBeResolved, input.CommandName));
 
-            var parameters = input.Parameters.ToList();
+            var parameters = input.Parameters.OfType<ChelType>().ToList();
+
+            if(parameters.Count != input.Parameters.Count)
+                throw new ArgumentException(Texts.CommandParametersMustBeChelType, nameof(input));
 
             BindFlagParameters(instance, descriptor, parameters, result);
             BindNamedParameters(instance, descriptor, parameters, result);
@@ -306,7 +309,10 @@ namespace Chel
             var values = Activator.CreateInstance(valuesType) as IList;
             foreach(var listValue in value.Values)
             {
-                var bindingValue = ReplaceVariables(listValue, result);
+                if(listValue.GetType() != typeof(ChelType))
+                    throw new InvalidOperationException(Texts.ListValuesMustBeChelType);
+
+                var bindingValue = ReplaceVariables(listValue as ChelType, result);
                 if(bindingValue == null)
                     continue;
 
@@ -325,7 +331,7 @@ namespace Chel
                 property.SetValue(instance, values);
         }
 
-        private ChelType ReplaceVariables(ChelType value, ParameterBindResult result)
+        private ICommandParameter ReplaceVariables(ICommandParameter value, ParameterBindResult result)
         {
             try
             {

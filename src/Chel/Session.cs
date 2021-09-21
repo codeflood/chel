@@ -72,6 +72,8 @@ namespace Chel
                     var command = _commandFactory.Create(commandInput);
                     if(command != null)
                     {
+                        // Execute subcommands, including those in lists and maps
+
                         var bindingResult = _parameterBinder.Bind(command, commandInput);
 
                         if(bindingResult.Success)

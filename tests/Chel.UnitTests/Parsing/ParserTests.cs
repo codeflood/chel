@@ -687,6 +687,45 @@ namespace Chel.UnitTests.Parsing
             Assert.Equal(expectedCommand, result[0], new CommandInputEqualityComparer());
         }
 
+        [Fact]
+        public void Parse_InputContainsSeparatedSubcommand_ParsesSubcommand()
+        {
+            // arrange
+            var subcommand = new CommandInput.Builder(1, "subcmd").Build();
+
+            var builder = new CommandInput.Builder(1, "cmd");
+            builder.AddParameter(subcommand);
+            var expectedCommand = builder.Build();
+
+            var sut = new Parser();
+
+            // act
+            var result = sut.Parse("cmd << subcmd");
+
+            // assert
+            Assert.Equal(expectedCommand, result[0], new CommandInputEqualityComparer());
+        }
+
+        [Fact]
+        public void Parse_InputContainsListWithSubcommands_ParsesSubcommand()
+        {
+            // arrange
+            var subcommand = new CommandInput.Builder(1, "subcmd").Build();
+
+            var builder = new CommandInput.Builder(1, "cmd");
+            builder.AddParameter(new List(new ICommandParameter[] { new Literal("1"), subcommand }));
+            builder.AddParameter(subcommand);
+            var expectedCommand = builder.Build();
+
+            var sut = new Parser();
+
+            // act
+            var result = sut.Parse("cmd [1 << subcmd]");
+
+            // assert
+            Assert.Equal(expectedCommand, result[0], new CommandInputEqualityComparer());
+        }
+
         private CommandInput CreateCommandInput(int sourceLine, string commandName)
         {
             var builder = new CommandInput.Builder(sourceLine, commandName);

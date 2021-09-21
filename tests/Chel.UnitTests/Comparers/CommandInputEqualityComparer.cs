@@ -14,7 +14,11 @@ namespace Chel.UnitTests.Comparers
 
             for(var i = 0; i < x.Parameters.Count; i++)
             {
-                parametersEqual = x.Parameters[i].Equals(y.Parameters[i]);
+                if(x.Parameters[i] is CommandInput)
+                    parametersEqual = Equals((CommandInput)x.Parameters[i], (CommandInput)y.Parameters[i]);
+                else
+                    parametersEqual = x.Parameters[i].Equals(y.Parameters[i]);
+
                 if(!parametersEqual)
                     break;
             }

@@ -559,7 +559,7 @@ namespace Chel.UnitTests
         }
 
         [Fact]
-        public void Bind_MissingRequiredNamedParameter_ThrowsException()
+        public void Bind_MissingRequiredNamedParameter_ReturnsError()
         {
             // arrange
             var sut = CreateCommandParameterBinder(typeof(RequiredNamedParameterCommand));
@@ -1429,6 +1429,54 @@ namespace Chel.UnitTests
                 new List(new ChelType[] { new Literal("lit1"), new VariableReference("ref") }),
                 new List(new ChelType[] { new Literal("lit1"), new Literal("val") })
             };
+        }
+
+        [Fact]
+        public void Bind_ParameterIsCommandLine_ThrowsException()
+        {
+            // arrange
+            var sut = CreateCommandParameterBinder(typeof(NamedParameterCommand));
+            var subcommand = CreateCommandInput(
+                "nam", 
+                new ParameterNameCommandParameter("param1"),
+                new Literal("val")
+            );
+
+            var input = new CommandInput.Builder(1, "nam");
+            input.AddParameter(new ParameterNameCommandParameter("param1"));
+            input.AddParameter(subcommand);
+
+            var command = new NamedParameterCommand();
+
+            Action sutAction = () => sut.Bind(command, input.Build());
+
+            // act, assert
+            var ex = Assert.Throws<ArgumentException>(sutAction);
+            Assert.Equal("input", ex.ParamName);
+        }
+
+        [Fact]
+        public void Bind_ListParameterContainsCommandLine_ThrowsException()
+        {
+            // arrange
+            var sut = CreateCommandParameterBinder(typeof(NamedParameterCommand));
+            var subcommand = CreateCommandInput(
+                "nam", 
+                new ParameterNameCommandParameter("param1"),
+                new Literal("val")
+            );
+
+            var input = new CommandInput.Builder(1, "nam");
+            input.AddParameter(new List(new[]{ new ParameterNameCommandParameter("param1")}));
+            input.AddParameter(subcommand);
+
+            var command = new NamedParameterCommand();
+
+            Action sutAction = () => sut.Bind(command, input.Build());
+
+            // act, assert
+            var ex = Assert.Throws<ArgumentException>(sutAction);
+            Assert.Equal("input", ex.ParamName);
         }
 
         private CommandParameterBinder CreateCommandParameterBinder(params Type[] commandTypes)

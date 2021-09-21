@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Chel.Abstractions.Parsing;
 using Chel.Abstractions.Types;
 using Chel.Abstractions.Variables;
 using Chel.Exceptions;
@@ -289,6 +290,23 @@ namespace Chel.UnitTests
             yield return new[]{ "list", "first", "val1" };
             yield return new[]{ "list", "last", "val3" };
             yield return new[]{ "list", "count", "3" };
+        }
+
+        [Fact]
+        public void ReplaceVariables_ListInputContainsCommandInput_IgnoresCommandInput()
+        {
+            // arrange
+            var sut = new VariableReplacer();
+            var variables = new VariableCollection();
+            var subcommand = new CommandInput.Builder(1, "cmd").Build();
+            var input = new List(new[] { subcommand });
+
+            // act
+            var result = sut.ReplaceVariables(variables, input);
+
+            // assert
+            var listResult = Assert.IsType<List>(result);
+            Assert.IsType<CommandInput>(listResult.Values[0]);
         }
     }
 }

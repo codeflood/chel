@@ -2,10 +2,6 @@ namespace Chel
 {
     internal static class Texts
     {
-        public const string CommandDependencyNotRegistered = "Command dependency implementing {0} has not been registered";
-
-        public const string CommandNameAlreadyUsed = "Command name '{0}' on command type {1} is already used on command type {2}";
-
         public const string CannotBindListToNonListParameter = "Cannot bind a list to a non-list parameter '{0}'";
 
         public const string CannotBindNonListToListParameter = "Cannot bind a non-list to a list parameter '{0}'";
@@ -15,6 +11,12 @@ namespace Chel
         public const string CannotRepeatFlagParameter = "Cannot repeat flag parameter '{0}'";
 
         public const string CannotRepeatNamedParameter = "Cannot repeat named parameter '{0}'";
+
+        public const string CommandDependencyNotRegistered = "Command dependency implementing {0} has not been registered";
+
+        public const string CommandNameAlreadyUsed = "Command name '{0}' on command type {1} is already used on command type {2}";
+
+        public const string CommandParametersMustBeChelType = "Command parameters must only be of type ChelType";
         
         public const string DescriptorCouldNotBeGenerated = "Descriptor for {0} could not be generated";
 
@@ -29,6 +31,8 @@ namespace Chel
         public const string InvalidParameterValueForNamedParameter = "Invalid parameter value '{0}' for named parameter '{1}'. {2}";
 
         public const string InvalidParameterValueForNumberedParameter = "Invalid parameter value '{0}' for numbered parameter '{1}'.";
+
+        public const string ListValuesMustBeChelType = "List values must only be of type ChelType";
 
         public const string MissingBlockEnd = "Missing block end )";
 

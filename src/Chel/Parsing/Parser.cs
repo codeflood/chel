@@ -137,6 +137,10 @@ namespace Chel.Parsing
             while(token != null)
             {
                 if(token is SpecialToken specialToken)
+                /*{
+                    PushNextToken(token);
+                    break;
+                }*/
                     throw new ParseException(_lastTokenLocation, string.Format(Texts.UnexpectedToken, specialToken.Type));
 
                 var literalToken = token as LiteralToken;
@@ -259,6 +263,9 @@ namespace Chel.Parsing
 
                     case SpecialTokenType.ListStart:
                         return ParseList(token);
+
+                    case SpecialTokenType.Subcommand:
+                        return ParseSubcommand();
 
                     case SpecialTokenType.BlockEnd:
                     case SpecialTokenType.ParameterName:
@@ -405,7 +412,7 @@ namespace Chel.Parsing
             token = GetNextToken();
             var startLocation = _lastTokenLocation;
 
-            var listValues = new List<ChelType>();
+            var listValues = new List<ICommandParameter>();
             var listCompleted = false;
 
             while(token != null)
@@ -418,7 +425,7 @@ namespace Chel.Parsing
 
                 var value = ParseParameterValue(token);
                 if(value?.Block != null)
-                    listValues.Add(value.Block);                
+                    listValues.Add(value.Block);
                 
                 token = GetNextToken();
             }
@@ -428,6 +435,13 @@ namespace Chel.Parsing
 
             var parameter = new List(listValues);
             return new ParseBlock(startLocation, parameter);
+        }
+
+        private ParseBlock ParseSubcommand()
+        {
+            var startLocation = _lastTokenLocation;
+            var subcommand = ParseCommandInput();
+            return new ParseBlock(startLocation, subcommand);
         }
 
         private Token GetNextToken()

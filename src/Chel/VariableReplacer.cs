@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Chel.Abstractions;
+using Chel.Abstractions.Parsing;
 using Chel.Abstractions.Types;
 using Chel.Abstractions.Variables;
 using Chel.Exceptions;
@@ -9,7 +10,7 @@ namespace Chel
 {
 	internal class VariableReplacer : IVariableReplacer
     {
-        public ChelType ReplaceVariables(VariableCollection variables, ChelType input)
+        public ICommandParameter ReplaceVariables(VariableCollection variables, ICommandParameter input)
         {
             if(variables == null)
                 throw new ArgumentNullException(nameof(variables));
@@ -20,7 +21,7 @@ namespace Chel
             return ProcessParameter(input, variables);
         }
 
-        private ChelType ProcessParameter(ChelType input, VariableCollection variables)
+        private ICommandParameter ProcessParameter(ICommandParameter input, VariableCollection variables)
         {
             switch(input)
             {
@@ -35,19 +36,22 @@ namespace Chel
 
                 case List listValue:
                     return ProcessList(listValue, variables);
+
+                default:
+                    return input;
             }
 
-            throw new InvalidOperationException(Texts.InternalErrorUnknownChelType);
+            //throw new InvalidOperationException(Texts.InternalErrorUnknownChelType);
         }
 
-        private ChelType ProcessCompoundValue(CompoundValue input, VariableCollection variables)
+        private ICommandParameter ProcessCompoundValue(CompoundValue input, VariableCollection variables)
         {
             var replacedValues = new List<ChelType>(input.Values.Count);
 
             foreach(var subvalue in input.Values)
             {
-                var replaced = ProcessParameter(subvalue, variables);
-                replacedValues.Add(replaced);
+                var replaced = ProcessParameter(subvalue as ChelType, variables);
+                replacedValues.Add(replaced as ChelType);
             }
 
             return new CompoundValue(replacedValues);
@@ -55,7 +59,7 @@ namespace Chel
 
         private ChelType ProcessList(List input, VariableCollection variables)
         {
-            var replacedValues = new List<ChelType>(input.Values.Count);
+            var replacedValues = new List<ICommandParameter>(input.Values.Count);
 
             foreach(var subvalue in input.Values)
             {
@@ -130,7 +134,7 @@ namespace Chel
             if(oneBasedIndex < 1 || oneBasedIndex > listValue.Values.Count)
                 throw new InvalidOperationException(string.Format(Texts.VariableSubreferenceIsInvalid, variableName, subreference));
 
-            return listValue.Values[oneBasedIndex - 1];
+            return listValue.Values[oneBasedIndex - 1] as ChelType;
         }
     }
 }

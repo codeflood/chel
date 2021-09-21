@@ -7,7 +7,7 @@ namespace Chel.Abstractions.Parsing
     /// <summary>
     /// A single command input to be executed.
     /// </summary>
-    public class CommandInput
+    public class CommandInput : ICommandParameter
     {
         /// <summary>
         /// Gets the line number the command was parsed from.
@@ -22,7 +22,7 @@ namespace Chel.Abstractions.Parsing
         /// <summary>
         /// Gets the parameters for the command.
         /// </summary>
-        public IReadOnlyList<ChelType> Parameters { get; private set; }
+        public IReadOnlyList<ICommandParameter> Parameters { get; private set; }
 
         private CommandInput()
         {
@@ -35,7 +35,7 @@ namespace Chel.Abstractions.Parsing
         {
             private int _sourceLine = -1;
             private string _commandName = null;
-            private List<ChelType> _parameters = null;
+            private List<ICommandParameter> _parameters = null;
 
             /// <summary>
             /// Create a new instance.
@@ -56,14 +56,14 @@ namespace Chel.Abstractions.Parsing
                 _sourceLine = sourceLine;
                 _commandName = commandName;
 
-                _parameters = new List<ChelType>();
+                _parameters = new List<ICommandParameter>();
             }
 
             /// <summary>
             /// Add a parameter to the command input.
             /// </summary>
             /// <param name="value">The parameter value to add.</param>
-            public void AddParameter(ChelType value)
+            public void AddParameter(ICommandParameter value)
             {
                 if(value == null)
                     throw new ArgumentNullException(nameof(value));
@@ -80,7 +80,7 @@ namespace Chel.Abstractions.Parsing
                 {
                     SourceLine = _sourceLine,
                     CommandName = _commandName,
-                    Parameters = new List<ChelType>(_parameters),
+                    Parameters = new List<ICommandParameter>(_parameters),
                 };
 
                 return commandInput;

@@ -12,6 +12,13 @@ Scripts and subscripts can also be used as a subcommand.
 
     command << (script -name value)
 
+Subcommands can even be used inside of lists and maps.
+
+    var list [1 2 << random]
+    var map {
+        id: << newid
+    }
+
 # Command Chaining #
 
 The value of a command can be passed along to the scope of another command using command chaining. The output of the previous command is made available by the `~` variable, but is only available to the chained command.

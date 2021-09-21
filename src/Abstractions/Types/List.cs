@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Chel.Abstractions.Parsing;
 
 namespace Chel.Abstractions.Types
 {
@@ -15,15 +16,15 @@ namespace Chel.Abstractions.Types
         /// <summary>
         /// Gets the values of the list.
         /// </summary>
-        public IReadOnlyList<ChelType> Values { get; }
+        public IReadOnlyList<ICommandParameter> Values { get; }
 
         /// <summary>
         /// Create a new instance.
         /// </summary>
         /// <param name="values">The values of the list.</param>
-        public List(IReadOnlyList<ChelType> values)
+        public List(IReadOnlyList<ICommandParameter> values)
         {
-            Values = values ?? Enumerable.Empty<ChelType>().ToList();
+            Values = values ?? Enumerable.Empty<ICommandParameter>().ToList();
         }
 
         public override bool Equals(object obj)
