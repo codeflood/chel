@@ -309,7 +309,7 @@ namespace Chel
             var values = Activator.CreateInstance(valuesType) as IList;
             foreach(var listValue in value.Values)
             {
-                if(listValue.GetType() != typeof(ChelType))
+                if(!listValue.GetType().IsSubclassOf(typeof(ChelType)))
                     throw new InvalidOperationException(Texts.ListValuesMustBeChelType);
 
                 var bindingValue = ReplaceVariables(listValue as ChelType, result);

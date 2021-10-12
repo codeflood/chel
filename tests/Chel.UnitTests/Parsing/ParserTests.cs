@@ -707,6 +707,83 @@ namespace Chel.UnitTests.Parsing
         }
 
         [Fact]
+        public void Parse_InputContainsJoinedSubcommand_ParsesSubcommand()
+        {
+            // arrange
+            var subcommand = new CommandInput.Builder(1, "subcmd").Build();
+
+            var builder = new CommandInput.Builder(1, "cmd");
+            builder.AddParameter(subcommand);
+            var expectedCommand = builder.Build();
+
+            var sut = new Parser();
+
+            // act
+            var result = sut.Parse("cmd <<subcmd");
+
+            // assert
+            Assert.Equal(expectedCommand, result[0], new CommandInputEqualityComparer());
+        }
+
+        [Fact]
+        public void Parse_InputContainsSubcommandTokenMissingSubcommand_ThrowsException()
+        {
+            // arrange
+            var sut = new Parser();
+            Action sutAction = () => sut.Parse("cmd <<");
+
+            // act, assert
+            var ex = Assert.Throws<ParseException>(sutAction);
+            Assert.Contains("Missing subcommand", ex.Message);
+        }
+
+        [Fact]
+        public void Parse_InputContainsSubcommandWithParameters_ParsesSubcommand()
+        {
+            // arrange
+            var subcommandBuilder = new CommandInput.Builder(1, "subcmd");
+            subcommandBuilder.AddParameter(new ParameterNameCommandParameter("a"));
+            subcommandBuilder.AddParameter(new Literal("name"));
+            var subcommand = subcommandBuilder.Build();
+
+            var builder = new CommandInput.Builder(1, "cmd");
+            builder.AddParameter(subcommand);
+            var expectedCommand = builder.Build();
+
+            var sut = new Parser();
+
+            // act
+            var result = sut.Parse("cmd << (subcmd -a name)");
+
+            // assert
+            Assert.Equal(expectedCommand, result[0], new CommandInputEqualityComparer());
+        }
+
+        [Fact]
+        public void Parse_InputContainsSubcommandMissingBlockEnd_ThrowException()
+        {
+            // arrange
+            var sut = new Parser();
+            Action sutAction = () => sut.Parse("cmd << (subcmd");
+
+            // act, assert
+            var ex = Assert.Throws<ParseException>(sutAction);
+            Assert.Contains("Missing block end", ex.Message);
+        }
+
+        [Fact]
+        public void Parse_InputContainsSubcommandMissingBlockStart_ThrowException()
+        {
+            // arrange
+            var sut = new Parser();
+            Action sutAction = () => sut.Parse("cmd << subcmd)");
+
+            // act, assert
+            var ex = Assert.Throws<ParseException>(sutAction);
+            Assert.Contains("Missing block start", ex.Message);
+        }
+
+        [Fact]
         public void Parse_InputContainsListWithSubcommands_ParsesSubcommand()
         {
             // arrange
@@ -714,13 +791,111 @@ namespace Chel.UnitTests.Parsing
 
             var builder = new CommandInput.Builder(1, "cmd");
             builder.AddParameter(new List(new ICommandParameter[] { new Literal("1"), subcommand }));
-            builder.AddParameter(subcommand);
             var expectedCommand = builder.Build();
 
             var sut = new Parser();
 
             // act
             var result = sut.Parse("cmd [1 << subcmd]");
+
+            // assert
+            Assert.Equal(expectedCommand, result[0]);
+        }
+
+        [Fact]
+        public void Parse_InputContainsListWithSubcommandWithParameters_ParsesSubcommand()
+        {
+            // arrange
+            var subcommandBuilder = new CommandInput.Builder(1, "subcmd");
+            subcommandBuilder.AddParameter(new Literal("foo"));
+            var subcommand = subcommandBuilder.Build();
+
+            var builder = new CommandInput.Builder(1, "cmd");
+            builder.AddParameter(new List(new ICommandParameter[] { new Literal("1"), subcommand }));
+            var expectedCommand = builder.Build();
+
+            var sut = new Parser();
+
+            // act
+            var result = sut.Parse("cmd [1 << (subcmd foo)]");
+
+            // assert
+            Assert.Equal(expectedCommand, result[0]);
+        }
+
+        [Fact]
+        public void Parse_InputContainsListWithSubcommandMissingCommand_ThrowException()
+        {
+            // arrange
+            var sut = new Parser();
+            Action sutAction = () => sut.Parse("cmd [1 << ]");
+
+            // act, assert
+            var ex = Assert.Throws<ParseException>(sutAction);
+            Assert.Contains("Missing subcommand", ex.Message);
+        }
+
+        [Fact]
+        public void Parse_InputContainsMultipleSubcommands_ParsesSubcommands()
+        {
+            // arrange
+            var subcommand = new CommandInput.Builder(1, "subcmd").Build();
+
+            var builder = new CommandInput.Builder(1, "cmd");
+            builder.AddParameter(subcommand);
+            builder.AddParameter(subcommand);
+            var expectedCommand = builder.Build();
+
+            var sut = new Parser();
+
+            // act
+            var result = sut.Parse("cmd << subcmd << subcmd");
+
+            // assert
+            Assert.Equal(expectedCommand, result[0], new CommandInputEqualityComparer());
+        }
+
+        [Fact]
+        public void Parse_InputContainsSubcommandAndBlock_ParsesSubcommandAndParameters()
+        {
+            // arrange
+            var subcommand = new CommandInput.Builder(1, "subcmd").Build();
+
+            var builder = new CommandInput.Builder(1, "cmd");
+            builder.AddParameter(subcommand);
+            builder.AddParameter(new Literal("foo bar"));
+            var expectedCommand = builder.Build();
+
+            var sut = new Parser();
+
+            // act
+            var result = sut.Parse("cmd << subcmd (foo bar)");
+
+            // assert
+            Assert.Equal(expectedCommand, result[0], new CommandInputEqualityComparer());
+        }
+
+        [Fact]
+        public void Parse_InputContainsNestedSubcommands_ParsesSubcommand()
+        {
+            // arrange
+            var subcommandBuilderInner = new CommandInput.Builder(1, "subcmdi");
+            subcommandBuilderInner.AddParameter(new Literal("foo"));
+            var subCommandInner = subcommandBuilderInner.Build();
+
+            var subcommandBuilderOuter = new CommandInput.Builder(1, "subcmdo");
+            subcommandBuilderOuter.AddParameter(new ParameterNameCommandParameter("a"));
+            subcommandBuilderOuter.AddParameter(subCommandInner);
+            var subcommandOuter = subcommandBuilderOuter.Build();
+
+            var builder = new CommandInput.Builder(1, "cmd");
+            builder.AddParameter(subcommandOuter);
+            var expectedCommand = builder.Build();
+
+            var sut = new Parser();
+
+            // act
+            var result = sut.Parse("cmd << (subcmdo -a <<(subcmdi foo))");
 
             // assert
             Assert.Equal(expectedCommand, result[0], new CommandInputEqualityComparer());

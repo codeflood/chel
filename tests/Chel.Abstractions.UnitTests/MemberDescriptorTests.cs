@@ -85,7 +85,6 @@ namespace Chel.Abstractions.UnitTests
         private MemberDescriptor.MemberDescriptorBuilder<TestMemberDescriptor> CreateMemberDescriptorBuilder()
         {
             return Substitute.ForPartsOf<MemberDescriptor.MemberDescriptorBuilder<TestMemberDescriptor>>();
-            //return new CommandDescriptor.Builder(GetType(), "blah");
         }
     }
 }

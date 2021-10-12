@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Chel.Abstractions.Types;
 
 namespace Chel.Abstractions.Parsing
 {
@@ -26,6 +25,47 @@ namespace Chel.Abstractions.Parsing
 
         private CommandInput()
         {
+        }
+
+        public override bool Equals(object obj)
+        {
+            var other = obj as CommandInput;
+
+            if(other == null)
+                return false;
+
+            var parametersEqual = true;
+
+            if(!Parameters.Count.Equals(other.Parameters.Count))
+                return false;
+
+            for(var i = 0; i < Parameters.Count; i++)
+            {
+                parametersEqual = Parameters[i].Equals(other.Parameters[i]);
+
+                if(!parametersEqual)
+                    break;
+            }
+
+            return
+                CommandName.Equals(other.CommandName) &&
+                SourceLine.Equals(other.SourceLine) &&
+                parametersEqual;
+        }
+
+        
+
+        public override int GetHashCode()
+        {
+            var hashCode = 0;
+
+            foreach(var p in Parameters)
+                hashCode += p.GetHashCode();
+
+            return
+                CommandName.GetHashCode() +
+                SourceLine.GetHashCode() +
+                hashCode;
         }
 
         /// <summary>

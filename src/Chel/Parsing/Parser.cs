@@ -33,17 +33,43 @@ namespace Chel.Parsing
 
             do
             {
-                parsedLine = ParseCommandInput();
+                parsedLine = ParseCommandInput(true);
 
                 if(parsedLine != null)
                     parsedLines.Add(parsedLine);
+
+                // Any hanging tokens means the input wasn't formed properly
+                if(_nextToken != null)
+                {
+                    var message = string.Format(Texts.UnexpectedToken, _nextToken);
+
+                    if(_nextToken is SpecialToken specialToken)
+                    {
+                        switch(specialToken.Type)
+                        {
+                            case SpecialTokenType.ListEnd:
+                                message = Texts.MissingListStart;
+                                break;
+
+                            case SpecialTokenType.BlockEnd:
+                                message = Texts.MissingBlockStart;
+                                break;
+
+                            default:
+                                message = string.Format(Texts.UnexpectedToken, specialToken.Type);
+                                break;
+                        }
+                    }
+
+                    throw new ParseException(_lastTokenLocation, message);
+                }
             }
             while(_tokenizer.HasMore);
 
             return parsedLines;
         }
 
-        private CommandInput ParseCommandInput()
+        private CommandInput ParseCommandInput(bool parseParameters)
         {
             var token = SkipWhiteSpace();
             if(token == null)
@@ -56,14 +82,17 @@ namespace Chel.Parsing
 
             var commandInputBuilder = new CommandInput.Builder(commandName.LocationStart.LineNumber, (commandName.Block as Literal).Value);
 
-            var parsedBlock = commandName;
-
-            while(!parsedBlock.IsEndOfLine)
+            if(parseParameters)
             {
-                parsedBlock = ParseParameters();
-                
-                if(parsedBlock.Block != null)
-                    commandInputBuilder.AddParameter(parsedBlock.Block);
+                var parsedBlock = commandName;
+
+                while(!parsedBlock.IsEndOfLine)
+                {
+                    parsedBlock = ParseParameters();
+                    
+                    if(parsedBlock.Block != null)
+                        commandInputBuilder.AddParameter(parsedBlock.Block);
+                }
             }
             
             return commandInputBuilder.Build();
@@ -98,10 +127,10 @@ namespace Chel.Parsing
                             return ParseParameterName(token);
 
                         case SpecialTokenType.BlockEnd:
-                            throw new ParseException(locationStart, Texts.MissingBlockStart);
-
                         case SpecialTokenType.ListEnd:
-                            throw new ParseException(locationStart, Texts.MissingListStart);
+                            PushNextToken(token);
+                            isEndOfLine = true;
+                            break;
 
                         default:
                             return ParseParameterValue(token);
@@ -137,11 +166,10 @@ namespace Chel.Parsing
             while(token != null)
             {
                 if(token is SpecialToken specialToken)
-                /*{
+                {
                     PushNextToken(token);
                     break;
-                }*/
-                    throw new ParseException(_lastTokenLocation, string.Format(Texts.UnexpectedToken, specialToken.Type));
+                }                
 
                 var literalToken = token as LiteralToken;
 
@@ -440,8 +468,31 @@ namespace Chel.Parsing
         private ParseBlock ParseSubcommand()
         {
             var startLocation = _lastTokenLocation;
-            var subcommand = ParseCommandInput();
-            return new ParseBlock(startLocation, subcommand);
+
+            var token = SkipWhiteSpace();
+            var expectBlockEnd = false;
+            if(token is SpecialToken specialToken && specialToken.Type == SpecialTokenType.BlockStart)
+                expectBlockEnd = true;
+            else
+                PushNextToken(token);
+
+            var subcommand = ParseCommandInput(expectBlockEnd);
+
+            if(subcommand == null)
+                throw new ParseException(startLocation, Texts.MissingSubcommand);
+
+            var block = new ParseBlock(startLocation, subcommand);
+
+            if(expectBlockEnd)
+            {
+                token = SkipWhiteSpace();
+                if(token is SpecialToken specialToken2 && specialToken2.Type == SpecialTokenType.BlockEnd)
+                    return block;
+                else
+                    throw new ParseException(startLocation, Texts.MissingBlockEnd);
+            }
+
+            return block;
         }
 
         private Token GetNextToken()
