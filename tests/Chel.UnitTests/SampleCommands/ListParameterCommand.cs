@@ -1,6 +1,8 @@
 using System.Collections.Generic;
+using System.Linq;
 using Chel.Abstractions;
 using Chel.Abstractions.Results;
+using Chel.Abstractions.Types;
 
 namespace Chel.UnitTests.SampleCommands
 {
@@ -33,7 +35,17 @@ namespace Chel.UnitTests.SampleCommands
 
 		public CommandResult Execute()
 		{
-			throw new System.NotImplementedException();
+			var elements = (
+                (IEnumerable<object>)Array ??
+                (IEnumerable<object>)Enumerable ??
+                (IEnumerable<object>)List ??
+                (IEnumerable<object>)IntList ??
+                (IEnumerable<object>)Collection ??
+                (IEnumerable<object>)ReadOnlyCollection ??
+                (IEnumerable<object>)ConcreteList ??
+                (IEnumerable<object>)Dictionary).Select(x => new Literal(x.ToString()));
+
+            return new ValueResult(new Chel.Abstractions.Types.List(elements.ToList()));
 		}
 	}
 }

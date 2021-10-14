@@ -40,8 +40,6 @@ namespace Chel
                 default:
                     return input;
             }
-
-            //throw new InvalidOperationException(Texts.InternalErrorUnknownChelType);
         }
 
         private ICommandParameter ProcessCompoundValue(CompoundValue input, VariableCollection variables)

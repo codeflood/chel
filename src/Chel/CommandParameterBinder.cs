@@ -57,7 +57,7 @@ namespace Chel
             if(descriptor == null)
                 throw new InvalidOperationException(string.Format(Texts.DescriptorForCommandCouldNotBeResolved, input.CommandName));
 
-            var parameters = input.Parameters.OfType<ChelType>().ToList();
+            var parameters = ExtractParameterValues(input.Parameters);
 
             if(parameters.Count != input.Parameters.Count)
                 throw new ArgumentException(Texts.CommandParametersMustBeChelType, nameof(input));
@@ -76,6 +76,33 @@ namespace Chel
             }
 
             return result;
+        }
+
+        private List<ChelType> ExtractParameterValues(IReadOnlyList<ICommandParameter> parameters)
+        {
+            var output = new List<ChelType>();
+
+            foreach(var parameter in parameters)
+            {
+                // Don't use an 'is' check because CompoundValue is also a list.
+                if(parameter.GetType() == typeof(List))
+                {
+                    var list = parameter as List;
+                    var values = ExtractParameterValues(list.Values);
+                    output.Add(new List(values));
+                }
+                else if(parameter is ChelType value)
+                    output.Add(value);
+                else if(parameter is CommandInput commandInput)
+                {
+                    if(commandInput.SubstituteValue == null)
+                        throw new InvalidOperationException(Texts.CannotBindCommandInputWithoutSubstituteValue);
+
+                    output.Add(commandInput.SubstituteValue);
+                }
+            }
+
+            return output;
         }
 
         private void BindFlagParameters(ICommand instance, CommandDescriptor descriptor, List<ChelType> parameters, ParameterBindResult result)

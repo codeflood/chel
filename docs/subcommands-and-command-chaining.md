@@ -24,3 +24,15 @@ Subcommands can even be used inside of lists and maps.
 The value of a command can be passed along to the scope of another command using command chaining. The output of the previous command is made available by the `~` variable, but is only available to the chained command.
 
     command >> othercommand $~$
+
+Another idea: to help reduce the number of esoteric symbols, what if the user specified the name of the variable in which to put the previous commands output?
+
+    command >p> othercommand $p$
+
+This is a little like a ruby pipe.
+
+    command |p| othercommand $p$
+
+    cmd << subcmd >p> outer $p$
+    
+    cmd << subcmd |p| outer $p$

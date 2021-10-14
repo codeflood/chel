@@ -165,24 +165,38 @@ namespace Chel.Parsing
 
             while(token != null)
             {
+                var character = '\0';
+
                 if(token is SpecialToken specialToken)
                 {
-                    PushNextToken(token);
-                    break;
+                    if(specialToken.Type == SpecialTokenType.ParameterName &&
+                        _buffer.Length > 0
+                    )
+                    {
+                        character = '-';
+                    }
+                    else
+                    {
+                        PushNextToken(token);
+                        break;
+                    }
                 }                
+                else
+                {
+                    var literalToken = token as LiteralToken;
+                    character = literalToken.Value;
+                }
 
-                var literalToken = token as LiteralToken;
-
-                if(literalToken.Value == Newline)
+                if(character == Newline)
                 {
                     isEndOfLine = true;
                     break;
                 }
                 
-                if(char.IsWhiteSpace(literalToken.Value))
+                if(char.IsWhiteSpace(character))
                     break;
 
-                _buffer.Append(literalToken.Value);
+                _buffer.Append(character);
 
                 token = GetNextToken();
             }
@@ -468,15 +482,23 @@ namespace Chel.Parsing
         private ParseBlock ParseSubcommand()
         {
             var startLocation = _lastTokenLocation;
-
             var token = SkipWhiteSpace();
             var expectBlockEnd = false;
+
             if(token is SpecialToken specialToken && specialToken.Type == SpecialTokenType.BlockStart)
                 expectBlockEnd = true;
             else
                 PushNextToken(token);
 
-            var subcommand = ParseCommandInput(expectBlockEnd);
+            CommandInput subcommand = null;
+            var lastLocation = token?.Location;
+
+            while(subcommand == null && _tokenizer.HasMore)
+            {
+                subcommand = ParseCommandInput(expectBlockEnd);
+                if(lastLocation == _lastTokenLocation)
+                    break;
+            }
 
             if(subcommand == null)
                 throw new ParseException(startLocation, Texts.MissingSubcommand);

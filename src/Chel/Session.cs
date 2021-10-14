@@ -4,7 +4,7 @@ using System.Linq;
 using Chel.Abstractions;
 using Chel.Abstractions.Parsing;
 using Chel.Abstractions.Results;
-using Chel.Abstractions.Variables;
+using Chel.Abstractions.Types;
 using Chel.Exceptions;
 
 namespace Chel
@@ -65,38 +65,84 @@ namespace Chel
 
             foreach(var commandInput in commandInputs)
             {
-                CommandResult commandResult = null;
-
-                try
-                {
-                    var command = _commandFactory.Create(commandInput);
-                    if(command != null)
-                    {
-                        // Execute subcommands, including those in lists and maps
-
-                        var bindingResult = _parameterBinder.Bind(command, commandInput);
-
-                        if(bindingResult.Success)
-                        {
-                            commandResult = command.Execute();
-
-                            if(commandResult is FailureResult failureResult && failureResult.SourceLine == Constants.CurrentSourceLine)
-                                commandResult = new FailureResult(commandInput.SourceLine, failureResult.Messages.ToArray());
-                        }
-                        else
-                            commandResult = new FailureResult(commandInput.SourceLine, bindingResult.Errors.ToArray());
-                    }
-                    else
-                        commandResult = new FailureResult(commandInput.SourceLine, new[] { Texts.UnknownCommand });
-                }
-                catch(Exception ex)
-                {
-                    commandResult = new FailureResult(commandInput.SourceLine, new[] { ex.Message });
-                }
-
+                var commandResult = Execute(commandInput);
                 resultHandler(commandResult);
             }
-            
+        }
+
+        private CommandResult Execute(CommandInput commandInput)
+        {
+            var result = ExecuteSubcommands(commandInput);
+            if(!result.Success)
+                return result;
+
+            CommandResult commandResult = null;
+
+            try
+            {
+                var command = _commandFactory.Create(commandInput);
+                if(command != null)
+                {    
+                    var bindingResult = _parameterBinder.Bind(command, commandInput);
+
+                    if(bindingResult.Success)
+                    {
+                        commandResult = command.Execute();
+
+                        if(commandResult is FailureResult failureResult && failureResult.SourceLine == Constants.CurrentSourceLine)
+                            commandResult = new FailureResult(commandInput.SourceLine, failureResult.Messages.ToArray());
+                    }
+                    else
+                        commandResult = new FailureResult(commandInput.SourceLine, bindingResult.Errors.ToArray());
+                }
+                else
+                    commandResult = new FailureResult(commandInput.SourceLine, new[] { string.Format(Texts.UnknownCommand, commandInput.CommandName) });
+            }
+            catch(Exception ex)
+            {
+                commandResult = new FailureResult(commandInput.SourceLine, new[] { ex.Message });
+            }
+
+            return commandResult;
+        }
+
+        private CommandResult ExecuteSubcommands(CommandInput commandInput)
+        {
+            // Execute subcommands, including those in lists and maps
+            for(var i = 0; i < commandInput.Parameters.Count; i++)
+            {
+                var parameter = commandInput.Parameters[i];
+
+                if(parameter is CommandInput subcommand)
+                {
+                    var result = Execute(subcommand);
+                    if(!result.Success)
+                        return result;
+
+                    if(result is ValueResult valueResult)
+                        subcommand.SubstituteValue = valueResult.Value;
+                    else
+                        new FailureResult(commandInput.SourceLine, new[] { Texts.SubcommandResultMustBeChelType });
+                } else if(parameter is List listParameter)
+                {
+                    foreach(var value in listParameter.Values)
+                    {
+                        if(value is CommandInput listSubcommand)
+                        {
+                            var result = Execute(listSubcommand);
+                            if(!result.Success)
+                                return result;
+
+                            if(result is ValueResult valueResult)
+                                listSubcommand.SubstituteValue = valueResult.Value;
+                            else
+                                new FailureResult(commandInput.SourceLine, new[] { Texts.SubcommandResultMustBeChelType });
+                        }
+                    }
+                }
+            }
+
+            return new SuccessResult();
         }
     }
 }

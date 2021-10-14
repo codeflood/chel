@@ -43,6 +43,20 @@ namespace Chel.UnitTests.Parsing
             Assert.Equal(expected, result, new CommandInputEqualityComparer());
         }
 
+        [Fact]
+        public void Parse_SingleCommandNameWithDash_ReturnsCommandInput()
+        {
+            // arrange
+            var sut = new Parser();
+            var expected = new[] { CreateCommandInput(1, "comm-and") };
+
+            // act
+            var result = sut.Parse("comm-and");
+
+            // assert
+            Assert.Equal(expected, result, new CommandInputEqualityComparer());
+        }
+
         [Theory]
         [InlineData("(command)")]
         [InlineData("$command$")]
@@ -202,7 +216,7 @@ namespace Chel.UnitTests.Parsing
         [Theory]
         [InlineData("command -")]
         [InlineData("command - num")]
-        public void Parse_ParameterNameTokenWithoutName_THrowsException(string input)
+        public void Parse_ParameterNameTokenWithoutName_ThrowsException(string input)
         {
             // arrange
             var sut = new Parser();
@@ -781,6 +795,25 @@ namespace Chel.UnitTests.Parsing
             // act, assert
             var ex = Assert.Throws<ParseException>(sutAction);
             Assert.Contains("Missing block start", ex.Message);
+        }
+
+        [Fact]
+        public void Parse_InputContainsSubcommandOnNewline_ParsesSubcommand()
+        {
+            // arrange
+            var subcommand = new CommandInput.Builder(2, "subcmd").Build();
+
+            var builder = new CommandInput.Builder(1, "cmd");
+            builder.AddParameter(subcommand);
+            var expectedCommand = builder.Build();
+
+            var sut = new Parser();
+
+            // act
+            var result = sut.Parse("cmd << (\nsubcmd\n)");
+
+            // assert
+            Assert.Equal(expectedCommand, result[0], new CommandInputEqualityComparer());
         }
 
         [Fact]

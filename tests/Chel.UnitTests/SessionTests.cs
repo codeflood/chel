@@ -264,6 +264,147 @@ namespace Chel.UnitTests
             Assert.Equal(1, executionResult.SourceLine);
         }
 
+        [Fact]
+        public void Execute_CommandIncludesSubcommand_ExpandsSubcommandBeforeExecution()
+        {
+            // arrange
+            var sut = CreateSession(typeof(NumberedParameterCommand));
+            ValueResult executionResult = null;
+
+            // act
+            sut.Execute("num << (num 1 2) 3", result => executionResult = result as ValueResult);
+            
+            // assert
+            Assert.Equal("1 2 3", executionResult.Value.ToString());
+        }
+
+        [Fact]
+        public void Execute_CommandIncludesManySubcommands_ExpandsSubcommandsBeforeExecution()
+        {
+            // arrange
+            var sut = CreateSession(typeof(NumberedParameterCommand));
+            ValueResult executionResult = null;
+
+            // act
+            sut.Execute("num << (num 1 2) <<(num 3 4)", result => executionResult = result as ValueResult);
+            
+            // assert
+            Assert.Equal("1 2 3 4", executionResult.Value.ToString());
+        }
+
+        [Fact]
+        public void Execute_CommandIncludesSubSubcommand_ExpandsSubcommandsBeforeExecution()
+        {
+            // arrange
+            var sut = CreateSession(typeof(NumberedParameterCommand));
+            ValueResult executionResult = null;
+
+            // act
+            sut.Execute("num << (num 1 << (num 2 3)) 4", result => executionResult = result as ValueResult);
+            
+            // assert
+            Assert.Equal("1 2 3 4", executionResult.Value.ToString());
+        }
+
+        [Fact]
+        public void Execute_CommandIncludesSubcommandInList_ExpandsSubcommandBeforeExecution()
+        {
+            // arrange
+            var sut = CreateSession(typeof(ListParameterCommand), typeof(NumberedParameterCommand));
+            ValueResult executionResult = null;
+
+            // act
+            sut.Execute("list-params -array [1 << (num 2 3) 4]", result => executionResult = result as ValueResult);
+            
+            // assert
+            Assert.Equal("[ 1 (2 3) 4 ]", executionResult.Value.ToString());
+        }
+
+        [Fact]
+        public void Execute_CommandIncludesManySubcommandsInList_ExpandsSubcommandsBeforeExecution()
+        {
+            // arrange
+            var sut = CreateSession(typeof(ListParameterCommand), typeof(NumberedParameterCommand));
+            ValueResult executionResult = null;
+
+            // act
+            sut.Execute("list-params -array [<< (num 1 2) << (num 3 4)]", result => executionResult = result as ValueResult);
+            
+            // assert
+            Assert.Equal("[ (1 2) (3 4) ]", executionResult.Value.ToString());
+        }
+
+        [Fact]
+        public void Execute_CommandIncludesSubSubcommandInList_ExpandsSubcommandsBeforeExecution()
+        {
+            // arrange
+            var sut = CreateSession(typeof(ListParameterCommand), typeof(NumberedParameterCommand));
+            ValueResult executionResult = null;
+
+            // act
+            sut.Execute("list-params -array [ << (num 1 << (num 2 3)) 4]", result => executionResult = result as ValueResult);
+            
+            // assert
+            Assert.Equal("[ (1 2 3) 4 ]", executionResult.Value.ToString());
+        }
+
+        [Fact]
+        public void Execute_SubcommandFails_FailureResultReturned()
+        {
+            // arrange
+            var sut = CreateSession(typeof(NumberedParameterCommand), typeof(FailureCommand));
+            FailureResult executionResult = null;
+
+            // act
+            sut.Execute("num << fail 2", result => executionResult = result as FailureResult);
+            
+            // assert
+            Assert.Equal(1, executionResult.SourceLine);
+        }
+
+        [Fact]
+        public void Execute_SubSubcommandFails_FailureResultReturned()
+        {
+            // arrange
+            var sut = CreateSession(typeof(NumberedParameterCommand), typeof(FailureCommand));
+            FailureResult executionResult = null;
+
+            // act
+            sut.Execute("num << (num << fail 2) 3", result => executionResult = result as FailureResult);
+            
+            // assert
+            Assert.Equal(1, executionResult.SourceLine);
+        }
+
+        [Fact]
+        public void Execute_UnknownSubcommand_FailureResultReturned()
+        {
+            // arrange
+            var sut = CreateSession(typeof(NumberedParameterCommand));
+            FailureResult executionResult = null;
+
+            // act
+            sut.Execute("num << unknown", result => executionResult = result as FailureResult);
+            
+            // assert
+            Assert.Equal(1, executionResult.SourceLine);
+            Assert.Contains("Unknown command 'unknown'", executionResult.Messages);
+        }
+
+        [Fact]
+        public void Execute_UnknownSubcommand_ReportsErrorOnLine2()
+        {
+            // arrange
+            var sut = CreateSession(typeof(NumberedParameterCommand));
+            FailureResult executionResult = null;
+
+            // act
+            sut.Execute("num << (\nunknown)", result => executionResult = result as FailureResult);
+            
+            // assert
+            Assert.Equal(2, executionResult.SourceLine);
+        }
+
         private Session CreateSession(params Type[] commandTypes)
         {
             return CreateSession(null, commandTypes);

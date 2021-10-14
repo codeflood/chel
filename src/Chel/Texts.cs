@@ -2,6 +2,8 @@ namespace Chel
 {
     internal static class Texts
     {
+        public const string CannotBindCommandInputWithoutSubstituteValue = "Cannot bind CommandInput with no SubstituteValue";
+
         public const string CannotBindListToNonListParameter = "Cannot bind a list to a non-list parameter '{0}'";
 
         public const string CannotBindNonListToListParameter = "Cannot bind a non-list to a list parameter '{0}'";
@@ -68,6 +70,8 @@ namespace Chel
         
         public const string ServiceTypeAlreadyRegistered = "The service type {0} has already been registered";
 
+        public const string SubcommandResultMustBeChelType = "Subcommand result must be of type ChelType";
+
         public const string TextForCultureAlreadyAdded = "Text for culture '{0}' has already been added";
 
         public const string TypeIsNotACommand = "{0} is not a command";
@@ -78,7 +82,7 @@ namespace Chel
 
         public const string UnexpectedToken = "Unexpected token '{0}'";
 
-        public const string UnknownCommand = "Unknown command";
+        public const string UnknownCommand = "Unknown command '{0}'";
 
         public const string UnknownEscapedCharacter = "Unknown escaped character '\\{0}'";
 

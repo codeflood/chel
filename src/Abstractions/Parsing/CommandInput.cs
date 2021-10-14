@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Chel.Abstractions.Types;
 
 namespace Chel.Abstractions.Parsing
 {
@@ -17,6 +18,11 @@ namespace Chel.Abstractions.Parsing
         /// Gets the name of the command to execute.
         /// </summary>
         public string CommandName { get; private set; }
+
+        /// <summary>
+        /// Gets or sets a value to substitute in place of this command input.
+        /// </summary>
+        public ChelType SubstituteValue { get; set; }
 
         /// <summary>
         /// Gets the parameters for the command.

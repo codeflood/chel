@@ -1432,7 +1432,7 @@ namespace Chel.UnitTests
         }
 
         [Fact]
-        public void Bind_ParameterIsCommandLine_ThrowsException()
+        public void Bind_ParameterIsCommandLineWithoutSubstituteValue_ThrowsException()
         {
             // arrange
             var sut = CreateCommandParameterBinder(typeof(NamedParameterCommand));
@@ -1451,12 +1451,11 @@ namespace Chel.UnitTests
             Action sutAction = () => sut.Bind(command, input.Build());
 
             // act, assert
-            var ex = Assert.Throws<ArgumentException>(sutAction);
-            Assert.Equal("input", ex.ParamName);
+            Assert.Throws<InvalidOperationException>(sutAction);
         }
 
         [Fact]
-        public void Bind_ListParameterContainsCommandLine_ThrowsException()
+        public void Bind_ParameterIsCommandLineWithSubstituteValue_UsesSubstituteValue()
         {
             // arrange
             var sut = CreateCommandParameterBinder(typeof(NamedParameterCommand));
@@ -1465,18 +1464,46 @@ namespace Chel.UnitTests
                 new ParameterNameCommandParameter("param1"),
                 new Literal("val")
             );
+            subcommand.SubstituteValue = new Literal("subbed");
 
             var input = new CommandInput.Builder(1, "nam");
-            input.AddParameter(new List(new[]{ new ParameterNameCommandParameter("param1")}));
+            input.AddParameter(new ParameterNameCommandParameter("param1"));
             input.AddParameter(subcommand);
 
             var command = new NamedParameterCommand();
 
-            Action sutAction = () => sut.Bind(command, input.Build());
+            // act
+            sut.Bind(command, input.Build());
 
-            // act, assert
-            var ex = Assert.Throws<ArgumentException>(sutAction);
-            Assert.Equal("input", ex.ParamName);
+            // assert
+            Assert.Equal("subbed", command.NamedParameter1);
+        }
+
+        [Fact]
+        public void Bind_ListParameterContainsCommandLine_UsesSubstituteValue()
+        {
+            // arrange
+            var sut = CreateCommandParameterBinder(typeof(NamedParameterCommand), typeof(ListParameterCommand));
+            var subcommand = CreateCommandInput(
+                "nam", 
+                new ParameterNameCommandParameter("param1"),
+                new Literal("val")
+            );
+            subcommand.SubstituteValue = new Literal("subbed");
+
+            var commandInput = CreateCommandInput(
+                "list-params",
+                new ParameterNameCommandParameter("list"),
+                new List(new[] { subcommand })
+            );
+
+            var command = new ListParameterCommand();
+
+            // act
+            sut.Bind(command, commandInput);
+
+            // assert
+            Assert.Equal("subbed", command.List[0]);
         }
 
         private CommandParameterBinder CreateCommandParameterBinder(params Type[] commandTypes)
