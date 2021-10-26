@@ -23,6 +23,15 @@ namespace Chel.Abstractions.Results
         /// <summary>
         /// Create a new instance.
         /// </sumamry>
+        /// <param name="messages">The messages describing the failure.</param>
+        public FailureResult(string[] messages)
+            : this(SourceLocation.CurrentLocation, messages)
+        {
+        }
+
+        /// <summary>
+        /// Create a new instance.
+        /// </sumamry>
         /// <param name="sourceLocation">The location where the failure occurred.</param>
         /// <param name="messages">The messages describing the failure.</param>
         public FailureResult(SourceLocation sourceLocation, string[] messages)

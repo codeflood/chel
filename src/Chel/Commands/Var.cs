@@ -50,8 +50,7 @@ namespace Chel
             ChelType output = null;
 
             if(!string.IsNullOrEmpty(Name) && !_nameValidator.IsValid(Name))
-            // todo: How to handle the line number; the command shouldn't know it
-                return new FailureResult(new SourceLocation(1, 1), new[] { string.Format(Texts.InvalidCharacterInVariableName, Name) });
+                return new FailureResult(new[] { string.Format(Texts.InvalidCharacterInVariableName, Name) });
 
             if(Value == null)
             {

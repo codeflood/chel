@@ -45,8 +45,7 @@ namespace Chel.Commands
             {
                 var successful = DetailCommand(output);
                 if(!successful)
-                    // todo: How to handle the line number; the command shouldn't know it
-                    return new FailureResult(new SourceLocation(1, 1), new[]{ string.Format(Texts.CannotDisplayHelpUnknownCommnad, CommandName) });
+                    return new FailureResult(new[]{ string.Format(Texts.CannotDisplayHelpUnknownCommnad, CommandName) });
             }
 
             return new ValueResult(new Literal(output.ToString()));

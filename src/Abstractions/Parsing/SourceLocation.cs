@@ -8,14 +8,23 @@ namespace Chel.Abstractions.Parsing
     public class SourceLocation
     {
         /// <summary>
+        /// A SourceLocation indicating the current location.
+        /// </summary>
+        public static SourceLocation CurrentLocation = new SourceLocation
+        {
+            LineNumber = -1,
+            CharacterNumber = -1
+        };
+
+        /// <summary>
         /// Gets the line number for the location.
         /// </summary>
-        public int LineNumber { get; }
+        public int LineNumber { get; private set; }
 
         /// <summary>
         /// Gets the character position for the location.
         /// </summary>
-        public int CharacterNumber { get; }
+        public int CharacterNumber { get; private set; }
 
         /// <summary>
         /// Create a new instance.
@@ -32,6 +41,10 @@ namespace Chel.Abstractions.Parsing
 
             LineNumber = lineNumber;
             CharacterNumber = characterNumber;
+        }
+
+        private SourceLocation()
+        {
         }
 
         public override bool Equals(object obj)

@@ -9,8 +9,7 @@ namespace Chel.UnitTests.SampleCommands
 	{
 		public CommandResult Execute()
 		{
-			var location = new SourceLocation(-1, -1);
-			return new FailureResult(location, new []{ "nothin'" });
+			return new FailureResult(SourceLocation.CurrentLocation, new []{ "nothin'" });
 		}
 	}
 }
