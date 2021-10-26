@@ -94,7 +94,7 @@ namespace Chel.UnitTests
             // assert
             Assert.IsType<FailureResult>(executionResult);
             var failureResult = executionResult as FailureResult;
-            Assert.Equal(1, failureResult.SourceLine);
+            Assert.Equal(new SourceLocation(1, 1), failureResult.SourceLocation);
         }
 
         [Fact]
@@ -110,7 +110,7 @@ namespace Chel.UnitTests
             // assert
             Assert.IsType<FailureResult>(executionResult);
             var failureResult = executionResult as FailureResult;
-            Assert.Equal(2, failureResult.SourceLine);
+            Assert.Equal(new SourceLocation(2, 1), failureResult.SourceLocation);
         }
 
         [Fact]
@@ -152,7 +152,7 @@ namespace Chel.UnitTests
             sut.Execute("num p1 p2 p3", result => executionResult = result as FailureResult);
             
             // assert
-            Assert.Equal("ERROR (Line 1): Unexpected numbered parameter 'p3'", executionResult.ToString());
+            Assert.Equal("ERROR (line 1, character 1): Unexpected numbered parameter 'p3'", executionResult.ToString());
         }
 
         [Fact]
@@ -173,14 +173,14 @@ namespace Chel.UnitTests
             sut.Execute("command", result => executionResult = result as FailureResult);
 
             // assert
-            Assert.Equal(1, executionResult.SourceLine);
+            Assert.Equal(new SourceLocation(1, 1), executionResult.SourceLocation);
         }
 
         [Fact]
         public void Execute_FactoryThrowsException_FailureResultReturned()
         {
             // arrange
-            var commandBuilder = new CommandInput.Builder(1, "command");
+            var commandBuilder = new CommandInput.Builder(new SourceLocation(1, 1), "command");
             var commandInput = commandBuilder.Build();
 
             var parser = Substitute.For<IParser>();
@@ -198,7 +198,7 @@ namespace Chel.UnitTests
             sut.Execute("command", result => executionResult = result as FailureResult);
 
             // assert
-            Assert.Equal(1, executionResult.SourceLine);
+            Assert.Equal(new SourceLocation(1, 1), executionResult.SourceLocation);
         }
 
         [Fact]
@@ -212,7 +212,7 @@ namespace Chel.UnitTests
             sut.Execute("ex", result => executionResult = result as FailureResult);
 
             // assert
-            Assert.Equal(1, executionResult.SourceLine);
+            Assert.Equal(new SourceLocation(1, 1), executionResult.SourceLocation);
         }
 
         [Fact]
@@ -261,7 +261,7 @@ namespace Chel.UnitTests
             sut.Execute("fail", result => executionResult = result as FailureResult);
 
             // assert
-            Assert.Equal(1, executionResult.SourceLine);
+            Assert.Equal(new SourceLocation(1, 1), executionResult.SourceLocation);
         }
 
         [Fact]
@@ -359,7 +359,7 @@ namespace Chel.UnitTests
             sut.Execute("num << fail 2", result => executionResult = result as FailureResult);
             
             // assert
-            Assert.Equal(1, executionResult.SourceLine);
+            Assert.Equal(new SourceLocation(1, 8), executionResult.SourceLocation);
         }
 
         [Fact]
@@ -373,7 +373,7 @@ namespace Chel.UnitTests
             sut.Execute("num << (num << fail 2) 3", result => executionResult = result as FailureResult);
             
             // assert
-            Assert.Equal(1, executionResult.SourceLine);
+            Assert.Equal(new SourceLocation(1, 16), executionResult.SourceLocation);
         }
 
         [Fact]
@@ -387,7 +387,7 @@ namespace Chel.UnitTests
             sut.Execute("num << unknown", result => executionResult = result as FailureResult);
             
             // assert
-            Assert.Equal(1, executionResult.SourceLine);
+            Assert.Equal(new SourceLocation(1, 8), executionResult.SourceLocation);
             Assert.Contains("Unknown command 'unknown'", executionResult.Messages);
         }
 
@@ -402,7 +402,7 @@ namespace Chel.UnitTests
             sut.Execute("num << (\nunknown)", result => executionResult = result as FailureResult);
             
             // assert
-            Assert.Equal(2, executionResult.SourceLine);
+            Assert.Equal(new SourceLocation(2, 1), executionResult.SourceLocation);
         }
 
         private Session CreateSession(params Type[] commandTypes)

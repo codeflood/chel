@@ -58,7 +58,7 @@ namespace Chel
             }
             catch(ParseException ex)
             {
-                var commandResult = new FailureResult(ex.SourceLocation.LineNumber, new[] { ex.Message });
+                var commandResult = new FailureResult(ex.SourceLocation, new[] { ex.Message });
                 resultHandler(commandResult);
                 return;
             }
@@ -89,18 +89,18 @@ namespace Chel
                     {
                         commandResult = command.Execute();
 
-                        if(commandResult is FailureResult failureResult && failureResult.SourceLine == Constants.CurrentSourceLine)
-                            commandResult = new FailureResult(commandInput.SourceLine, failureResult.Messages.ToArray());
+                        if(commandResult is FailureResult failureResult && failureResult.SourceLocation.LineNumber == Constants.CurrentSourceLine)
+                            commandResult = new FailureResult(commandInput.SourceLocation, failureResult.Messages.ToArray());
                     }
                     else
-                        commandResult = new FailureResult(commandInput.SourceLine, bindingResult.Errors.ToArray());
+                        commandResult = new FailureResult(commandInput.SourceLocation, bindingResult.Errors.ToArray());
                 }
                 else
-                    commandResult = new FailureResult(commandInput.SourceLine, new[] { string.Format(Texts.UnknownCommand, commandInput.CommandName) });
+                    commandResult = new FailureResult(commandInput.SourceLocation, new[] { string.Format(Texts.UnknownCommand, commandInput.CommandName) });
             }
             catch(Exception ex)
             {
-                commandResult = new FailureResult(commandInput.SourceLine, new[] { ex.Message });
+                commandResult = new FailureResult(commandInput.SourceLocation, new[] { ex.Message });
             }
 
             return commandResult;
@@ -116,13 +116,13 @@ namespace Chel
                 if(parameter is CommandInput subcommand)
                 {
                     var result = Execute(subcommand);
-                    if(!result.Success)
-                        return result;
+                    if(result is FailureResult failureResult)
+                        return CreateSubcommandFailureResult(subcommand, failureResult);
 
                     if(result is ValueResult valueResult)
                         subcommand.SubstituteValue = valueResult.Value;
                     else
-                        new FailureResult(commandInput.SourceLine, new[] { Texts.SubcommandResultMustBeChelType });
+                        new FailureResult(subcommand.SourceLocation, new[] { Texts.SubcommandResultMustBeChelType });
                 } else if(parameter is List listParameter)
                 {
                     foreach(var value in listParameter.Values)
@@ -130,19 +130,28 @@ namespace Chel
                         if(value is CommandInput listSubcommand)
                         {
                             var result = Execute(listSubcommand);
-                            if(!result.Success)
-                                return result;
+                            if(result is FailureResult failureResult)
+                                return CreateSubcommandFailureResult(listSubcommand, failureResult);
 
                             if(result is ValueResult valueResult)
                                 listSubcommand.SubstituteValue = valueResult.Value;
                             else
-                                new FailureResult(commandInput.SourceLine, new[] { Texts.SubcommandResultMustBeChelType });
+                                new FailureResult(listSubcommand.SourceLocation, new[] { Texts.SubcommandResultMustBeChelType });
                         }
                     }
                 }
             }
 
             return new SuccessResult();
+        }
+
+        private CommandResult CreateSubcommandFailureResult(CommandInput subcommand, FailureResult subcommandResult)
+        {
+            if(subcommandResult.SourceLocation.LineNumber > 0)
+                return subcommandResult;
+
+            var result = new FailureResult(subcommand.SourceLocation, subcommandResult.Messages.ToArray());
+            return result;
         }
     }
 }

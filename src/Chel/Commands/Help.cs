@@ -1,14 +1,14 @@
 using System;
-using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using Chel.Abstractions;
+using Chel.Abstractions.Parsing;
 using Chel.Abstractions.Results;
 using Chel.Abstractions.Types;
 
 namespace Chel.Commands
 {
-    [Command("help")]
+	[Command("help")]
     [Description("Lists available commands and displays help for commands.")]
     public class Help : ICommand
     {
@@ -46,7 +46,7 @@ namespace Chel.Commands
                 var successful = DetailCommand(output);
                 if(!successful)
                     // todo: How to handle the line number; the command shouldn't know it
-                    return new FailureResult(1, new[]{ string.Format(Texts.CannotDisplayHelpUnknownCommnad, CommandName) });
+                    return new FailureResult(new SourceLocation(1, 1), new[]{ string.Format(Texts.CannotDisplayHelpUnknownCommnad, CommandName) });
             }
 
             return new ValueResult(new Literal(output.ToString()));

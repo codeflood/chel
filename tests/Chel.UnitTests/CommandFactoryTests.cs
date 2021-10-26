@@ -210,7 +210,8 @@ namespace Chel.UnitTests
 
         private CommandInput CreateCommandInput(int sourceLine, string commandName)
         {
-            var builder = new CommandInput.Builder(sourceLine, commandName);
+            var location = new SourceLocation(sourceLine, 1);
+            var builder = new CommandInput.Builder(location, commandName);
             return builder.Build();
         }
     }

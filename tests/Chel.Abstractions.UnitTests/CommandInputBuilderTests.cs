@@ -7,25 +7,23 @@ namespace Chel.Abstractions.UnitTests
 {
     public class CommandInputBuilderTests
     {
-        [Theory]
-        [InlineData(0)]
-        [InlineData(-1)]
-        public void Ctor_SourceLineIsNonPositive_ThrowsException(int sourceLine)
+        [Fact]
+        public void Ctor_SourceLocationIsNull_ThrowsException()
         {
             // arrange
-            Action sutAction = () => new CommandInput.Builder(sourceLine, "command");
+            Action sutAction = () => new CommandInput.Builder(null, "command");
 
             // act, assert
-            var ex = Assert.Throws<ArgumentException>(sutAction);
-            Assert.Equal("sourceLine", ex.ParamName);
-            Assert.Contains("'sourceLine' must be greater than 0", ex.Message);
+            var ex = Assert.Throws<ArgumentNullException>(sutAction);
+            Assert.Equal("sourceLocation", ex.ParamName);
         }
 
         [Fact]
         public void Ctor_CommandNameIsNull_ThrowsException()
         {
             // arrange
-            Action sutAction = () => new CommandInput.Builder(1, null);
+            var location = new SourceLocation(1, 1);
+            Action sutAction = () => new CommandInput.Builder(location, null);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -36,7 +34,8 @@ namespace Chel.Abstractions.UnitTests
         public void Ctor_CommandNameIsEmpty_ThrowsException()
         {
             // arrange
-            Action sutAction = () => new CommandInput.Builder(1, "");
+            var location = new SourceLocation(1, 1);
+            Action sutAction = () => new CommandInput.Builder(location, "");
 
             // act, assert
             var ex = Assert.Throws<ArgumentException>(sutAction);
@@ -48,7 +47,8 @@ namespace Chel.Abstractions.UnitTests
         public void AddParameter_ParameterIsNull_ThrowsException()
         {
             // arrange
-            var sut = new CommandInput.Builder(1, "command");
+            var location = new SourceLocation(1, 1);
+            var sut = new CommandInput.Builder(location, "command");
             Action sutAction = () => sut.AddParameter(null);
 
             // act, assert
@@ -60,13 +60,14 @@ namespace Chel.Abstractions.UnitTests
         public void Build_WhenCalled_ReturnsCommandInput()
         {
             // arrange
-            var sut = new CommandInput.Builder(3, "command");
+            var location = new SourceLocation(2, 6);
+            var sut = new CommandInput.Builder(location, "command");
 
             // act
             var commandInput = sut.Build();
 
             // assert
-            Assert.Equal(3, commandInput.SourceLine);
+            Assert.Equal(location, commandInput.SourceLocation);
             Assert.Equal("command", commandInput.CommandName);
         }
 
@@ -74,7 +75,8 @@ namespace Chel.Abstractions.UnitTests
         public void Build_AfterAddParameterCalled_ReturnsCommandInputWithNumberedParameter()
         {
             // arrange
-            var sut = new CommandInput.Builder(3, "command");
+            var location = new SourceLocation(1, 1);
+            var sut = new CommandInput.Builder(location, "command");
             sut.AddParameter(new Literal("value1"));
             sut.AddParameter(new Literal("value2"));
 
@@ -94,7 +96,8 @@ namespace Chel.Abstractions.UnitTests
         public void Build_EmptyOrWhiteSpaceParameter_ReturnsCommandInputWithParameter(string value)
         {
             // arrange
-            var sut = new CommandInput.Builder(3, "command");
+            var location = new SourceLocation(1, 1);
+            var sut = new CommandInput.Builder(location, "command");
             sut.AddParameter(new Literal(value));
 
             // act

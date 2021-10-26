@@ -7,11 +7,13 @@ namespace Chel.Abstractions.UnitTests.Parsing
 {
     public class CommandInputTests
     {
+        private readonly SourceLocation SourceLocation = new SourceLocation(2, 42);
+
         [Fact]
         public void Equals_ObjectIsNull_ReturnsFalse()
         {
             // arrange
-            var sut = new CommandInput.Builder(2, "cmd").Build();
+            var sut = new CommandInput.Builder(SourceLocation, "cmd").Build();
 
             // act
             var result = sut.Equals(null);
@@ -24,7 +26,7 @@ namespace Chel.Abstractions.UnitTests.Parsing
         public void Equals_ObjectWrongType_ReturnsFalse()
         {
             // arrange
-            var sut = new CommandInput.Builder(2, "cmd").Build();
+            var sut = new CommandInput.Builder(SourceLocation, "cmd").Build();
 
             // act
             var result = sut.Equals("wrong");
@@ -38,9 +40,9 @@ namespace Chel.Abstractions.UnitTests.Parsing
         {
             // arrange
             Func<CommandInput> factory = () => {
-                var subcommand = new CommandInput.Builder(2, "subcmd").Build();
+                var subcommand = new CommandInput.Builder(SourceLocation, "subcmd").Build();
 
-                var builder = new CommandInput.Builder(2, "cmd");
+                var builder = new CommandInput.Builder(SourceLocation, "cmd");
                 builder.AddParameter(new Literal("val"));
                 builder.AddParameter(new List(new[]{ new Literal("lv1"), new Literal("lv2") }));
                 builder.AddParameter(subcommand);
@@ -61,11 +63,11 @@ namespace Chel.Abstractions.UnitTests.Parsing
         public void Equals_ObjectsAreDifferent_ReturnsFalse()
         {
             // arrange
-            var builder1 = new CommandInput.Builder(2, "cmd");
+            var builder1 = new CommandInput.Builder(SourceLocation, "cmd");
             builder1.AddParameter(new Literal("val"));
             var sut1 = builder1.Build();
 
-            var builder2 = new CommandInput.Builder(2, "cmd");
+            var builder2 = new CommandInput.Builder(SourceLocation, "cmd");
             var sut2 = builder2.Build();
 
             // act
@@ -79,11 +81,11 @@ namespace Chel.Abstractions.UnitTests.Parsing
         public void GetHashCode_ObjectsAreEqual_HashCodesAreEqual()
         {
             // arrange
-            var builder1 = new CommandInput.Builder(2, "cmd");
+            var builder1 = new CommandInput.Builder(SourceLocation, "cmd");
             builder1.AddParameter(new Literal("val"));
             var sut1 = builder1.Build();
 
-            var builder2 = new CommandInput.Builder(2, "cmd");
+            var builder2 = new CommandInput.Builder(SourceLocation, "cmd");
             builder2.AddParameter(new Literal("val"));
             var sut2 = builder2.Build();
 
@@ -99,11 +101,11 @@ namespace Chel.Abstractions.UnitTests.Parsing
         public void GetHashCode_ObjectsAreDifferent_HashCodesAreDifferent()
         {
             // arrange
-            var builder1 = new CommandInput.Builder(2, "cmd");
+            var builder1 = new CommandInput.Builder(SourceLocation, "cmd");
             builder1.AddParameter(new Literal("val"));
             var sut1 = builder1.Build();
 
-            var builder2 = new CommandInput.Builder(2, "cmd");
+            var builder2 = new CommandInput.Builder(SourceLocation, "cmd");
             var sut2 = builder2.Build();
 
             // act

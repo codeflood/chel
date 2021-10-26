@@ -18,7 +18,7 @@ namespace Chel.Abstractions
         
         public const string DescriptorAlreadyAdded = "Descriptor '{0}' has already been added.";
 
-        public const string ErrorOnLine = "ERROR (Line {0})";
+        public const string ErrorAtLocation = "ERROR (line {0}, character {1})";
 
         public const string FlagParametersCannotBeRequired = "Flag parameters cannot be required";
 

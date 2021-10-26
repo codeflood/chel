@@ -2,6 +2,7 @@ using System;
 using System.Text;
 using System.Threading;
 using Chel.Abstractions;
+using Chel.Abstractions.Parsing;
 using Chel.Abstractions.Results;
 using Chel.Abstractions.Types;
 using Chel.Abstractions.Variables;
@@ -49,7 +50,8 @@ namespace Chel
             ChelType output = null;
 
             if(!string.IsNullOrEmpty(Name) && !_nameValidator.IsValid(Name))
-                return new FailureResult(Constants.CurrentSourceLine, new[] { string.Format(Texts.InvalidCharacterInVariableName, Name) });
+            // todo: How to handle the line number; the command shouldn't know it
+                return new FailureResult(new SourceLocation(1, 1), new[] { string.Format(Texts.InvalidCharacterInVariableName, Name) });
 
             if(Value == null)
             {

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Chel.Abstractions.Parsing;
 
 namespace Chel.Abstractions.Results
 {
@@ -10,9 +11,9 @@ namespace Chel.Abstractions.Results
     public class FailureResult : CommandResult
     {
         /// <summary>
-        /// Gets the line on which the failure occurred.
+        /// Gets the location where the failure occurred.
         /// </summary>
-        public int SourceLine { get; }
+        public SourceLocation SourceLocation { get; }
 
         /// <summary>
         /// Gets the messages describing the failure.
@@ -22,9 +23,9 @@ namespace Chel.Abstractions.Results
         /// <summary>
         /// Create a new instance.
         /// </sumamry>
-        /// <param name="sourceLine">The line on which the failure occurred.</param>
+        /// <param name="sourceLocation">The location where the failure occurred.</param>
         /// <param name="messages">The messages describing the failure.</param>
-        public FailureResult(int sourceLine, string[] messages)
+        public FailureResult(SourceLocation sourceLocation, string[] messages)
         {
             if(messages == null)
                 throw new ArgumentNullException(nameof(messages));
@@ -33,13 +34,13 @@ namespace Chel.Abstractions.Results
                 throw new ArgumentException(string.Format(Texts.ArgumentCannotBeEmpty, nameof(messages)), nameof(messages));
 
             Success = false;
-            SourceLine = sourceLine;
+            SourceLocation = sourceLocation;
             Messages = messages;
         }
 
         public override string ToString()
         {
-            var message = string.Format(Texts.ErrorOnLine, SourceLine) + ":";
+            var message = string.Format(Texts.ErrorAtLocation, SourceLocation.LineNumber, SourceLocation.CharacterNumber) + ":";
             
             if(Messages.Count == 1)
                 message += " " + Messages.First();

@@ -10,9 +10,9 @@ namespace Chel.Abstractions.Parsing
     public class CommandInput : ICommandParameter
     {
         /// <summary>
-        /// Gets the line number the command was parsed from.
+        /// Gets the location the command was parsed from.
         /// </summary>
-        public int SourceLine { get; private set; }
+        public SourceLocation SourceLocation { get; private set; }
 
         /// <summary>
         /// Gets the name of the command to execute.
@@ -55,7 +55,7 @@ namespace Chel.Abstractions.Parsing
 
             return
                 CommandName.Equals(other.CommandName) &&
-                SourceLine.Equals(other.SourceLine) &&
+                SourceLocation.Equals(other.SourceLocation) &&
                 parametersEqual;
         }
 
@@ -70,7 +70,7 @@ namespace Chel.Abstractions.Parsing
 
             return
                 CommandName.GetHashCode() +
-                SourceLine.GetHashCode() +
+                SourceLocation.GetHashCode() +
                 hashCode;
         }
 
@@ -79,19 +79,19 @@ namespace Chel.Abstractions.Parsing
         /// </summary>
         public class Builder
         {
-            private int _sourceLine = -1;
+            private SourceLocation _sourceLocation = null;
             private string _commandName = null;
             private List<ICommandParameter> _parameters = null;
 
             /// <summary>
             /// Create a new instance.
             /// </summary>
-            /// <param name="sourceLine">The line number the command was parsed from.</param>
+            /// <param name="sourceLocation">The location the command was parsed from.</param>
             /// <param name="commandName">The name of the command to execute.</param>
-            public Builder(int sourceLine, string commandName)
+            public Builder(SourceLocation sourceLocation, string commandName)
             {
-                if(sourceLine <= 0)
-                    throw new ArgumentException(string.Format(Texts.ArgumentMustBeGreaterThanZero, nameof(sourceLine)), nameof(sourceLine));
+                if(sourceLocation == null)
+                    throw new ArgumentNullException(nameof(sourceLocation));
 
                 if(commandName == null)
                     throw new ArgumentNullException(nameof(commandName));
@@ -99,7 +99,7 @@ namespace Chel.Abstractions.Parsing
                 if(commandName.Equals(string.Empty))
                     throw new ArgumentException(string.Format(Texts.ArgumentCannotBeEmpty, nameof(commandName)), nameof(commandName));
 
-                _sourceLine = sourceLine;
+                _sourceLocation = sourceLocation;
                 _commandName = commandName;
 
                 _parameters = new List<ICommandParameter>();
@@ -124,7 +124,7 @@ namespace Chel.Abstractions.Parsing
             {
                 var commandInput = new CommandInput()
                 {
-                    SourceLine = _sourceLine,
+                    SourceLocation = _sourceLocation,
                     CommandName = _commandName,
                     Parameters = new List<ICommandParameter>(_parameters),
                 };

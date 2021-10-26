@@ -80,7 +80,7 @@ namespace Chel.Parsing
             if(commandName == null)
                 return null;
 
-            var commandInputBuilder = new CommandInput.Builder(commandName.LocationStart.LineNumber, (commandName.Block as Literal).Value);
+            var commandInputBuilder = new CommandInput.Builder(commandName.LocationStart, (commandName.Block as Literal).Value);
 
             if(parseParameters)
             {

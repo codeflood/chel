@@ -1,4 +1,5 @@
 using Chel.Abstractions;
+using Chel.Abstractions.Parsing;
 using Chel.Abstractions.Results;
 
 namespace Chel.UnitTests.SampleCommands
@@ -8,7 +9,8 @@ namespace Chel.UnitTests.SampleCommands
 	{
 		public CommandResult Execute()
 		{
-			return new FailureResult(Constants.CurrentSourceLine, new []{ "nothin'" });
+			var location = new SourceLocation(-1, -1);
+			return new FailureResult(location, new []{ "nothin'" });
 		}
 	}
 }
