@@ -7,17 +7,6 @@ namespace Chel.Abstractions.UnitTests.Parsing
     public class SpecialTokenTests
     {
         [Fact]
-        public void Ctor_LocationIsNull_ThrowsException()
-        {
-            // arrange
-            Action sutAction = () => new SpecialToken(null, SpecialTokenType.Undefined);
-
-            // act, assert
-            var ex = Assert.Throws<ArgumentNullException>(sutAction);
-            Assert.Equal("location", ex.ParamName);
-        }
-
-        [Fact]
         public void Ctor_WhenCalled_SetsProperties()
         {
             // arrange

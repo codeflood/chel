@@ -7,17 +7,6 @@ namespace Chel.Abstractions.UnitTests.Parsing
     public class LiteralTokenTests
     {
         [Fact]
-        public void Ctor_LocationIsNull_ThrowsException()
-        {
-            // arrange
-            Action sutAction = () => new LiteralToken(null, 'a');
-
-            // act, assert
-            var ex = Assert.Throws<ArgumentNullException>(sutAction);
-            Assert.Equal("location", ex.ParamName);
-        }
-
-        [Fact]
         public void Ctor_WhenCalled_SetsProperties()
         {
             // arrange

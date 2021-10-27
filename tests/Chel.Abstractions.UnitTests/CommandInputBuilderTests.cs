@@ -8,17 +8,6 @@ namespace Chel.Abstractions.UnitTests
     public class CommandInputBuilderTests
     {
         [Fact]
-        public void Ctor_SourceLocationIsNull_ThrowsException()
-        {
-            // arrange
-            Action sutAction = () => new CommandInput.Builder(null, "command");
-
-            // act, assert
-            var ex = Assert.Throws<ArgumentNullException>(sutAction);
-            Assert.Equal("sourceLocation", ex.ParamName);
-        }
-
-        [Fact]
         public void Ctor_CommandNameIsNull_ThrowsException()
         {
             // arrange

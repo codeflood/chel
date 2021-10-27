@@ -89,7 +89,7 @@ namespace Chel
                     {
                         commandResult = command.Execute();
 
-                        if(commandResult is FailureResult failureResult && failureResult.SourceLocation == SourceLocation.CurrentLocation)
+                        if(commandResult is FailureResult failureResult && failureResult.SourceLocation.Equals(SourceLocation.CurrentLocation))
                             commandResult = new FailureResult(commandInput.SourceLocation, failureResult.Messages.ToArray());
                     }
                     else
@@ -147,7 +147,7 @@ namespace Chel
 
         private CommandResult CreateSubcommandFailureResult(CommandInput subcommand, FailureResult subcommandResult)
         {
-            if(subcommandResult.SourceLocation != SourceLocation.CurrentLocation)
+            if(!subcommandResult.SourceLocation.Equals(SourceLocation.CurrentLocation))
                 return subcommandResult;
 
             var result = new FailureResult(subcommand.SourceLocation, subcommandResult.Messages.ToArray());

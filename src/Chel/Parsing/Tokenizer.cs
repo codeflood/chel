@@ -66,22 +66,22 @@ namespace Chel.Parsing
 						return GetNextToken();
 					}
 
-					return HandleSpecial(SpecialTokenType.BlockStart);
+					return HandleSpecial(SpecialTokenType.BlockStart, CurrentLocation);
 
 				case Symbol.BlockEnd:
-					return HandleSpecial(SpecialTokenType.BlockEnd);
+					return HandleSpecial(SpecialTokenType.BlockEnd, CurrentLocation);
 
 				case Symbol.Variable:
-					return HandleSpecial(SpecialTokenType.VariableMarker);
+					return HandleSpecial(SpecialTokenType.VariableMarker, CurrentLocation);
 
 				case Symbol.ParameterName:
-					return HandleSpecial(SpecialTokenType.ParameterName);
+					return HandleSpecial(SpecialTokenType.ParameterName, CurrentLocation);
 
 				case Symbol.ListStart:
-					return HandleSpecial(SpecialTokenType.ListStart);
+					return HandleSpecial(SpecialTokenType.ListStart, CurrentLocation);
 
 				case Symbol.ListEnd:
-					return HandleSpecial(SpecialTokenType.ListEnd);
+					return HandleSpecial(SpecialTokenType.ListEnd, CurrentLocation);
 
 				case Symbol.SubcommandElement:
 					if(PeekNext() == Symbol.SubcommandElement)
@@ -188,9 +188,9 @@ namespace Chel.Parsing
 			return new LiteralToken(CurrentLocation, nextChar);
 		}
 
-		private Token HandleSpecial(SpecialTokenType type, SourceLocation sourceLocation = null)
+		private Token HandleSpecial(SpecialTokenType type, SourceLocation sourceLocation)
 		{
-			return new SpecialToken(sourceLocation ?? CurrentLocation, type);
+			return new SpecialToken(sourceLocation, type);
 		}
 	}
 }

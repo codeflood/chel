@@ -15,17 +15,6 @@ namespace Chel.UnitTests.Parsing
         }
 
         [Fact]
-        public void Ctor_LocationIsNull_Throws()
-        {
-            // arrange
-            Action sutAction = () => new ParseBlock(null, new Literal("abc"));
-
-            // act, assert
-            var ex = Assert.Throws<ArgumentNullException>(sutAction);
-            Assert.Equal("locationStart", ex.ParamName);
-        }
-
-        [Fact]
         public void Ctor_BlockIsEmpty_DoesNotThrow()
         {
             var sut = new ParseBlock(new SourceLocation(1, 1), new CompoundValue(new Literal[0]));

@@ -1,6 +1,4 @@
-using System;
 using Chel.Abstractions.Parsing;
-using Chel.Abstractions.Types;
 
 namespace Chel.Parsing
 {
@@ -14,7 +12,7 @@ namespace Chel.Parsing
 
         public ParseBlock(SourceLocation locationStart, ICommandParameter block, bool isEndOfLine = false)
         {
-            LocationStart = locationStart ?? throw new ArgumentNullException(nameof(locationStart));
+            LocationStart = locationStart;
             Block = block;
             IsEndOfLine = isEndOfLine;
         }

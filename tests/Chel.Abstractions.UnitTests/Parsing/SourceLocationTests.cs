@@ -67,7 +67,7 @@ namespace Chel.Abstractions.UnitTests.Parsing
             var sut2 = new SourceLocation(4, 6);
 
             // act
-            var result = sut1 == sut2;
+            var result = sut1.Equals(sut2);
 
             // assert
             Assert.False(result);

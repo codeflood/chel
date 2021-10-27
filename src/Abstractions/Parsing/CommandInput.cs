@@ -79,7 +79,7 @@ namespace Chel.Abstractions.Parsing
         /// </summary>
         public class Builder
         {
-            private SourceLocation _sourceLocation = null;
+            private SourceLocation _sourceLocation;
             private string _commandName = null;
             private List<ICommandParameter> _parameters = null;
 
@@ -90,9 +90,6 @@ namespace Chel.Abstractions.Parsing
             /// <param name="commandName">The name of the command to execute.</param>
             public Builder(SourceLocation sourceLocation, string commandName)
             {
-                if(sourceLocation == null)
-                    throw new ArgumentNullException(nameof(sourceLocation));
-
                 if(commandName == null)
                     throw new ArgumentNullException(nameof(commandName));
 

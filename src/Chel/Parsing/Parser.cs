@@ -102,17 +102,15 @@ namespace Chel.Parsing
         {
             var block = new StringBuilder();
             var isEndOfLine = false;
-            SourceLocation locationStart = null;
 
             var token = SkipWhiteSpace();
             if(token == null)
                 return new ParseBlock(_lastTokenLocation, null, isEndOfLine: true);
 
+            var locationStart = _lastTokenLocation;
+
             while(!isEndOfLine)
-            {
-                if(locationStart == null)
-                    locationStart = token?.Location;
-                
+            {   
                 if(token == null || (token is LiteralToken lt && lt.Value == Newline))
                 {
                     isEndOfLine = true;
@@ -148,12 +146,9 @@ namespace Chel.Parsing
             }
 
             var parsedBlock = block.ToString();
+            var location = new SourceLocation(_lastTokenLocation.LineNumber, _lastTokenLocation.CharacterNumber + 1);
 
-            var location = locationStart;
-            if(location == null)
-                location = new SourceLocation(_lastTokenLocation.LineNumber, _lastTokenLocation.CharacterNumber + 1);
-
-            return new ParseBlock(location, null, isEndOfLine: isEndOfLine);
+            return new ParseBlock(locationStart, null, isEndOfLine: isEndOfLine);
         }
 
         private ParseBlock ParseName(Token token)
@@ -481,9 +476,9 @@ namespace Chel.Parsing
 
         private ParseBlock ParseSubcommand()
         {
-            var startLocation = _lastTokenLocation;
             var token = SkipWhiteSpace();
             var expectBlockEnd = false;
+            var startLocation = _lastTokenLocation;
 
             if(token is SpecialToken specialToken && specialToken.Type == SpecialTokenType.BlockStart)
                 expectBlockEnd = true;
@@ -496,7 +491,7 @@ namespace Chel.Parsing
             while(subcommand == null && _tokenizer.HasMore)
             {
                 subcommand = ParseCommandInput(expectBlockEnd);
-                if(lastLocation == _lastTokenLocation)
+                if(lastLocation.Value.Equals(_lastTokenLocation))
                     break;
             }
 

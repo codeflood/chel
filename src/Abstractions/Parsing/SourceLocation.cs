@@ -5,7 +5,7 @@ namespace Chel.Abstractions.Parsing
     /// <summary>
     /// A location in the source input.
     /// </summary>
-    public class SourceLocation
+    public struct SourceLocation
     {
         /// <summary>
         /// A SourceLocation indicating the current location.
@@ -41,10 +41,6 @@ namespace Chel.Abstractions.Parsing
 
             LineNumber = lineNumber;
             CharacterNumber = characterNumber;
-        }
-
-        private SourceLocation()
-        {
         }
 
         public override bool Equals(object obj)

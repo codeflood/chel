@@ -18,7 +18,7 @@ namespace Chel.Abstractions.Parsing
         /// <param name="location">The location in the source where the token was parsed from.</param>
         public Token(SourceLocation location)
         {
-            Location = location ?? throw new ArgumentNullException(nameof(location));
+            Location = location;
         }
     }
 }
