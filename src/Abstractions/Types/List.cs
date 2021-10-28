@@ -48,13 +48,17 @@ namespace Chel.Abstractions.Types
         
         public override int GetHashCode()
         {
-            var hasCode = 0;
-            foreach(var value in Values)
+            var hashCode = 23; // Start on a prime number
+
+            unchecked
             {
-                hasCode += value.GetHashCode();
+                foreach(var value in Values)
+                {
+                    hashCode = hashCode * 3067 + value.GetHashCode(); // multiply by prime number
+                }
             }
 
-            return hasCode;
+            return hashCode;
         }
 
         public override string ToString()

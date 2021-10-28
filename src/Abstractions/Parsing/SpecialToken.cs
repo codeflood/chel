@@ -37,9 +37,7 @@ namespace Chel.Abstractions.Parsing
         
         public override int GetHashCode()
         {
-            return
-                Location.GetHashCode() +
-                Type.GetHashCode();
+            return (Location, Type).GetHashCode();
         }
     }
 }

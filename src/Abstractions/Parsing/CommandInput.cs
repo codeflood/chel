@@ -63,15 +63,15 @@ namespace Chel.Abstractions.Parsing
 
         public override int GetHashCode()
         {
-            var hashCode = 0;
+            var hashCode = (CommandName, SourceLocation).GetHashCode();
 
-            foreach(var p in Parameters)
-                hashCode += p.GetHashCode();
+            unchecked
+            {
+                foreach(var p in Parameters)
+                    hashCode = hashCode * 3067 + p.GetHashCode(); // multiply by prime number
+            }
 
-            return
-                CommandName.GetHashCode() +
-                SourceLocation.GetHashCode() +
-                hashCode;
+            return hashCode;
         }
 
         /// <summary>

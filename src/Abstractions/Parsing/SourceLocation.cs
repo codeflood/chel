@@ -59,9 +59,7 @@ namespace Chel.Abstractions.Parsing
         
         public override int GetHashCode()
         {
-            return
-                LineNumber.GetHashCode() +
-                CharacterNumber.GetHashCode();
+            return (LineNumber, CharacterNumber).GetHashCode();
         }
 
         public override string ToString()
