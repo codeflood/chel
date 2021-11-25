@@ -90,14 +90,14 @@ namespace Chel.Abstractions.Types
                 output.Append(outputKey);
                 output.Append(": ");
 
-                var containsWhitespace = ContainsWhitespace(outputValue);
+                var mustWrap = MustWrap(outputValue);
 
-                if(containsWhitespace)
+                if(mustWrap)
                     output.Append("(");
 
                 output.Append(outputValue);
 
-                if(containsWhitespace)
+                if(mustWrap)
                     output.Append(")");
             }
 
@@ -111,8 +111,19 @@ namespace Chel.Abstractions.Types
             return output.ToString();
         }
 
-        private bool ContainsWhitespace(string value)
+        private bool MustWrap(string value)
         {
+            if(string.IsNullOrEmpty(value))
+                return false;
+
+            var startChar = value[0];
+
+            if(startChar == Symbol.BlockStart ||
+                startChar == Symbol.ListStart ||
+                startChar == Symbol.MapStart
+            )
+                return false;
+
             foreach(var c in value)
             {
                 if(char.IsWhiteSpace(c))

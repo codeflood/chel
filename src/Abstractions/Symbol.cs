@@ -1,4 +1,4 @@
-namespace Chel
+namespace Chel.Abstractions
 {
     public static class Symbol
     {

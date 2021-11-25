@@ -200,5 +200,74 @@ namespace Chel.Abstractions.UnitTests.Types
 
             Assert.Equal(expected, result);
         }
+
+        [Fact]
+        public void ToString_MapHasList_ReturnsFormattedList()
+        {
+            // arrange
+            var data = new Dictionary<string, ICommandParameter> {
+                { "a", new List(new[] { new Literal("1"), new Literal("2")})},
+                { "b", new List(new[] { new Literal("3"), new Literal("4")})}
+            };
+
+            var sut = new Map(data);
+
+            // act
+            var result = sut.ToString();
+
+            // assert
+            var expected = @"{ a: [ 1 2 ] b: [ 3 4 ] }";
+
+            Assert.Equal(expected, result);
+        }
+
+        [Fact]
+        public void ToString_MapHasListWithLongerValues_ReturnsFormattedList()
+        {
+            // arrange
+            var data = new Dictionary<string, ICommandParameter> {
+                { "key1", new List(new[] { new Literal("val1"), new Literal("val2")})},
+                { "key2", new List(new[] { new Literal("val3"), new Literal("val4")})}
+            };
+
+            var sut = new Map(data);
+
+            // act
+            var result = sut.ToString();
+
+            // assert
+            var expected = @"{
+  key1: [ val1 val2 ]
+  key2: [ val3 val4 ]
+}";
+
+            Assert.Equal(expected, result);
+        }
+
+        [Fact]
+        public void ToString_MapHasMap_ReturnsFormattedList()
+        {
+            // arrange
+            var innerMap = new Map(new Dictionary<string, ICommandParameter> {
+                { "a", new Literal("b") },
+                { "c", new Literal("d") },
+            });
+
+            var data = new Dictionary<string, ICommandParameter> {
+                { "out", innerMap }
+            };
+
+            var sut = new Map(data);
+
+            // act
+            var result = sut.ToString();
+
+            // assert
+            var expected = @"{
+  out: { a: b c: d }
+}";
+
+            Assert.Equal(expected, result);
+        }
     }
 }

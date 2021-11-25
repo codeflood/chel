@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Chel.Abstractions.Parsing;
 using Chel.Abstractions.Types;
 using Xunit;
 
@@ -206,6 +207,38 @@ namespace Chel.Abstractions.UnitTests.Types
 
             // assert
             Assert.Equal("[ (val 1) (val 2) ]", result);
+        }
+
+        [Fact]
+        public void ToString_ElementIsMList_FormatsListProperly()
+        {
+            // arrange
+            var inner = new List(new[] { new Literal("val1"), new Literal("val2") });
+            var sut = new List(new[] { inner, inner });
+
+            // act
+            var result = sut.ToString();
+
+            // assert
+            Assert.Equal("[ [ val1 val2 ] [ val1 val2 ] ]", result);
+        }
+
+        [Fact]
+        public void ToString_ElementIsMap_FormatsMapsProperly()
+        {
+            // arrange
+            var map = new Map(new Dictionary<string, ICommandParameter> {
+                { "a", new Literal("b") },
+                { "c", new Literal("d") },
+            });
+
+            var sut = new List(new[] { map, map });
+
+            // act
+            var result = sut.ToString();
+
+            // assert
+            Assert.Equal("[ { a: b c: d } { a: b c: d } ]", result);
         }
     }
 }
