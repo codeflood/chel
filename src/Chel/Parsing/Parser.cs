@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using Chel.Abstractions;
 using Chel.Abstractions.Parsing;
 using Chel.Abstractions.Types;
 using Chel.Exceptions;
@@ -16,9 +18,15 @@ namespace Chel.Parsing
         private const char Newline = '\n';
 
         private ITokenizer _tokenizer = null;
+        private INameValidator _nameValidator = null;
         private SourceLocation _lastTokenLocation = new SourceLocation(1, 1);
         private Token _nextToken = null;
         private StringBuilder _buffer = new StringBuilder();
+
+        public Parser(INameValidator nameValidator)
+        {
+            _nameValidator = nameValidator ?? throw new ArgumentNullException(nameof(nameValidator));
+        }
 
         public IList<CommandInput> Parse(string input)
         {
@@ -49,6 +57,10 @@ namespace Chel.Parsing
                         {
                             case SpecialTokenType.ListEnd:
                                 message = Texts.MissingListStart;
+                                break;
+
+                            case SpecialTokenType.MapEnd:
+                                message = Texts.MissingMapStart;
                                 break;
 
                             case SpecialTokenType.BlockEnd:
@@ -126,6 +138,7 @@ namespace Chel.Parsing
 
                         case SpecialTokenType.BlockEnd:
                         case SpecialTokenType.ListEnd:
+                        case SpecialTokenType.MapEnd:
                             PushNextToken(token);
                             isEndOfLine = true;
                             break;
@@ -151,7 +164,7 @@ namespace Chel.Parsing
             return new ParseBlock(locationStart, null, isEndOfLine: isEndOfLine);
         }
 
-        private ParseBlock ParseName(Token token)
+        private ParseBlock ParseName(Token token, params char[] additionalDelimiters)
         {
             _buffer.Clear();
 
@@ -164,6 +177,7 @@ namespace Chel.Parsing
 
                 if(token is SpecialToken specialToken)
                 {
+                    // Names cannot start with a dash as that indicates a named parameter.
                     if(specialToken.Type == SpecialTokenType.ParameterName &&
                         _buffer.Length > 0
                     )
@@ -185,6 +199,12 @@ namespace Chel.Parsing
                 if(character == Newline)
                 {
                     isEndOfLine = true;
+                    break;
+                }
+
+                if(additionalDelimiters.Contains(character))
+                {
+                    PushNextToken(token);
                     break;
                 }
                 
@@ -251,6 +271,14 @@ namespace Chel.Parsing
                             _buffer.Append("]");
                             break;
 
+                        case SpecialTokenType.MapStart:
+                            _buffer.Append("{");
+                            break;
+
+                        case SpecialTokenType.MapEnd:
+                            _buffer.Append("}");
+                            break;
+
                         default:
                             // todo: Change SpecialTokenType to be a class which we can call ToString() on to get the token.
                             // This would avoid all the cases above.
@@ -301,8 +329,14 @@ namespace Chel.Parsing
                     case SpecialTokenType.ListStart:
                         return ParseList(token);
 
+                    case SpecialTokenType.MapStart:
+                        return ParseMap(token);
+
                     case SpecialTokenType.Subcommand:
                         return ParseSubcommand();
+
+                    case SpecialTokenType.MapEnd:
+                        throw new ParseException(_lastTokenLocation, Texts.MissingMapEntryValue);
 
                     case SpecialTokenType.BlockEnd:
                     case SpecialTokenType.ParameterName:
@@ -471,6 +505,70 @@ namespace Chel.Parsing
                 throw new ParseException(startLocation, Texts.MissingListEnd);
 
             var parameter = new List(listValues);
+            return new ParseBlock(startLocation, parameter);
+        }
+
+        private ParseBlock ParseMap(Token token)
+        {
+            if(token == null)
+                return null;
+
+            if(!(token is SpecialToken specialTokenGuard) || specialTokenGuard.Type != SpecialTokenType.MapStart)
+                throw new ParseException(_lastTokenLocation, string.Format(Texts.MissingMapStart, token));
+
+            token = SkipWhiteSpace();
+            var startLocation = _lastTokenLocation;
+
+            var mapEntries = new Dictionary<string, ICommandParameter>();
+            var mapCompleted = false;
+
+            while(token != null)
+            {
+                var currentToken = token;
+
+                if(token is SpecialToken specialToken && specialToken.Type == SpecialTokenType.MapEnd)
+                {
+                    mapCompleted = true;
+                    break;
+                }
+
+                var keyBlock = ParseName(token, Symbol.SubName);
+                if(keyBlock != null)
+                {
+                    var keyLiteral = keyBlock.Block as Literal;
+                    if(keyLiteral == null)
+                        throw new ParseException(keyBlock.LocationStart, Texts.ExpectedLiteral);
+                    
+                    token = SkipWhiteSpace();
+                    if(!(token is LiteralToken literalToken && literalToken.Value == Symbol.SubName))
+                            throw new ParseException(token.Location, Texts.MissingMapEntryName);
+
+                    var key = keyLiteral.Value;  
+
+                    if(string.IsNullOrEmpty(key))
+                        throw new ParseException(token.Location, Texts.MissingMapEntryName);
+
+                    if(!_nameValidator.IsValid(key))
+                        throw new ParseException(token.Location, string.Format(Texts.InvalidCharacterInMapEntryName, key));
+
+                    token = SkipWhiteSpace();
+
+                    var valueBlock = ParseParameterValue(token);
+                    if(valueBlock == null)
+                        throw new ParseException(token.Location, Texts.MissingMapEntryValue);
+
+                    mapEntries.Add(key, valueBlock.Block);
+                }
+
+                token = SkipWhiteSpace();
+                if(token == currentToken)
+                    throw new ParseException(token.Location, Texts.MissingMapEntryName);
+            }
+
+            if(!mapCompleted)
+                throw new ParseException(startLocation, Texts.MissingMapEnd);
+
+            var parameter = new Map(mapEntries);
             return new ParseBlock(startLocation, parameter);
         }
 

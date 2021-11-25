@@ -47,8 +47,8 @@ A list value can be of any variable type, including other lists and maps. Lists 
         [innerlist1, innerlist2]
         (value with space)
         {
-            key1 : value1
-            key2 : value2
+            key1: value1
+            key2: value2
         }
     ]
 
@@ -61,15 +61,15 @@ A map is like a list, but all values have a name. The map is surrounded with cur
 Maps can be entered over multiple lines to make them easier to read.
 
     var mymap {
-        key1 : value1
-        key2 : (value with space)
+        key1: value1
+        key2: (value with space)
     }
 
 A map value can be any variable type, including a list or another map.
 
     var mymap {
-        key : (simple value)
-        akey : [a bb cc]
+        key: (simple value)
+        akey: [a bb cc]
         bkey: {
             key:value
         }

@@ -414,8 +414,8 @@ namespace Chel.UnitTests
             Action<ScopedObjectRegistry> sessionObjectsConfigurator = null,
             params Type[] commandTypes)
         {
-            var parser = new Parser();
             var nameValidator = new NameValidator();
+            var parser = new Parser(nameValidator);
             var descriptorGenerator = new CommandAttributeInspector();
             var registry = new CommandRegistry(nameValidator, descriptorGenerator);
 

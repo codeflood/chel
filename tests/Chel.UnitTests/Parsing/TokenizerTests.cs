@@ -476,6 +476,43 @@ namespace Chel.UnitTests.Parsing
         }
 
         [Fact]
+        public void GetNextToken_MapInInput_IncludesMapTokens()
+        {
+            // arrange
+            var sut = new Tokenizer("{a: b}");
+            
+            var expected = new Token[] {
+                new SpecialToken(new SourceLocation(1, 1), SpecialTokenType.MapStart),
+                new LiteralToken(new SourceLocation(1, 2), 'a'),
+                new LiteralToken(new SourceLocation(1, 3), ':'),
+                new LiteralToken(new SourceLocation(1, 4), ' '),
+                new LiteralToken(new SourceLocation(1, 5), 'b'),
+                new SpecialToken(new SourceLocation(1, 6), SpecialTokenType.MapEnd)
+            };
+
+            // act, assert
+            AssertTokenStream(expected, sut);
+        }
+
+        [Fact]
+        public void GetNextToken_EscapedMapSymbolsInInput_IncludesMapTokensAsLiterals()
+        {
+            // arrange
+            var sut = new Tokenizer(@"\{a:b\}");
+            
+            var expected = new Token[] {
+                new LiteralToken(new SourceLocation(1, 2), '{'),
+                new LiteralToken(new SourceLocation(1, 3), 'a'),
+                new LiteralToken(new SourceLocation(1, 4), ':'),
+                new LiteralToken(new SourceLocation(1, 5), 'b'),
+                new LiteralToken(new SourceLocation(1, 7), '}')
+            };
+
+            // act, assert
+            AssertTokenStream(expected, sut);
+        }
+
+        [Fact]
         public void GetNextToken_InputContainsSeparatedSubcommand_IncludesSubcommandTokens()
         {
             // arrange

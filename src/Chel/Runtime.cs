@@ -28,7 +28,7 @@ namespace Chel
             _commandRegistry = new CommandRegistry(nameValidator, commandDescriptorGenerator);
 
             _commandServices = new CommandServices();
-            _parser = new Parser();
+            _parser = new Parser(nameValidator);
             _variableReplacer = new VariableReplacer();
             
             _sessionObjectTypes = new ScopedObjectRegistry();

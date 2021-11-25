@@ -24,9 +24,13 @@ namespace Chel
 
         public const string DescriptorForCommandCouldNotBeResolved = "Descriptor for command '{0}' could not be resolved";
 
+        public const string ExpectedLiteral = "Expected a literal";
+
         public const string FlagParametersCannotBeRequired = "Flag parameters cannot be marked as required ({0})";
 
         public const string InternalErrorUnknownChelType = "Internal error: Unknown ChelType.";
+
+        public const string InvalidCharacterInMapEntryName = "Invalid character in map entry name '{0}'.";
 
         public const string InvalidCharacterInVariableName = "Invalid character in variable name '{0}'.";
 
@@ -47,6 +51,14 @@ namespace Chel
         public const string MissingListEnd = "Missing list end ]";
 
         public const string MissingListStart = "Missing list start [";
+
+        public const string MissingMapEnd = "Missing map end {";
+
+        public const string MissingMapEntryName = "Missing map entry name";
+
+        public const string MissingMapEntryValue = "Missing map entry value";
+
+        public const string MissingMapStart = "Missing map start {";
 
         public const string MissingParameterName = "Missing parameter name after -";
 

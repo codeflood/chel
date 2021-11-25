@@ -7,7 +7,7 @@ namespace Chel.Abstractions.UnitTests.Types
     public class ListTests
     {
         [Fact]
-        public void Ctor_ParametersIsNull_SetsPropertyToEmptyCollection()
+        public void Ctor_ValuesIsNull_SetsPropertyToEmptyCollection()
         {
             // arrange, act
             var sut = new List(null);

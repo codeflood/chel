@@ -83,6 +83,12 @@ namespace Chel.Parsing
 				case Symbol.ListEnd:
 					return HandleSpecial(SpecialTokenType.ListEnd, CurrentLocation);
 
+				case Symbol.MapStart:
+					return HandleSpecial(SpecialTokenType.MapStart, CurrentLocation);
+
+				case Symbol.MapEnd:
+					return HandleSpecial(SpecialTokenType.MapEnd, CurrentLocation);
+
 				case Symbol.SubcommandElement:
 					if(PeekNext() == Symbol.SubcommandElement)
 					{
@@ -174,6 +180,8 @@ namespace Chel.Parsing
 				nextChar == Symbol.Comment ||
 				nextChar == Symbol.ListStart ||
 				nextChar == Symbol.ListEnd ||
+				nextChar == Symbol.MapStart ||
+				nextChar == Symbol.MapEnd ||
 				nextChar == Symbol.SubcommandElement)
 				return HandleLiteral((char)nextChar);
 

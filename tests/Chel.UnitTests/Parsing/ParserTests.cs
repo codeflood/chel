@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using Chel.Abstractions;
 using Chel.Abstractions.Parsing;
 using Chel.Abstractions.Types;
 using Chel.Exceptions;
@@ -9,6 +11,19 @@ namespace Chel.UnitTests.Parsing
 {
 	public class ParserTests
     {
+        private INameValidator _nameValidator = new NameValidator();
+
+        [Fact]
+        public void Ctor_NameValidatorIsNull_ThrowsException()
+        {
+            // arrange
+            Action sutAction = () => new Parser(null);
+
+            // act, assert
+            var ex = Assert.Throws<ArgumentNullException>(sutAction);
+            Assert.Equal("nameValidator", ex.ParamName);
+        }
+
         [Theory]
         [InlineData(null)]
         [InlineData("")]
@@ -19,7 +34,7 @@ namespace Chel.UnitTests.Parsing
         public void Parse_EmptyInput_ReturnsEmptyCommandInputList(string input)
         {
             // arrange
-            var sut = new Parser();
+            var sut = CreateParser();
 
             // act
             var result = sut.Parse(input);
@@ -32,7 +47,7 @@ namespace Chel.UnitTests.Parsing
         public void Parse_SingleCommand_ReturnsCommandInput()
         {
             // arrange
-            var sut = new Parser();
+            var sut = CreateParser();
             var expected = new[] { CreateCommandInput(1, 1, "command") };
 
             // act
@@ -46,7 +61,7 @@ namespace Chel.UnitTests.Parsing
         public void Parse_SingleCommandNameWithDash_ReturnsCommandInput()
         {
             // arrange
-            var sut = new Parser();
+            var sut = CreateParser();
             var expected = new[] { CreateCommandInput(1, 1, "comm-and") };
 
             // act
@@ -63,7 +78,7 @@ namespace Chel.UnitTests.Parsing
         public void Parse_SpecialTokenInCommandName_ThrowsException(string input)
         {
             // arrange
-            var sut = new Parser();
+            var sut = CreateParser();
             Action sutAction = () => sut.Parse(input);
 
             // act, assert
@@ -78,7 +93,7 @@ namespace Chel.UnitTests.Parsing
         public void Parse_MultipleCommands_ReturnsCommandInputs(string input, int sourceLine1, int sourceCharacter1, int sourceLine2, int sourceCharacter2)
         {
             // arrange
-            var sut = new Parser();
+            var sut = CreateParser();
             var expected = new[] { CreateCommandInput(sourceLine1, sourceCharacter1, "command"), CreateCommandInput(sourceLine2, sourceCharacter2, "command") };
 
             // act
@@ -96,7 +111,7 @@ namespace Chel.UnitTests.Parsing
         public void Parse_InputContainsComments_CommentsAreIgnored(string input, int sourceLine, int sourceCharacter)
         {
             // arrange
-            var sut = new Parser();
+            var sut = CreateParser();
             var expected = new[] { CreateCommandInput(sourceLine, sourceCharacter, "command") };
 
             // act
@@ -114,7 +129,7 @@ namespace Chel.UnitTests.Parsing
         public void Parse_SingleParameter_ParameterParsed(string input)
         {
             // arrange
-            var sut = new Parser();
+            var sut = CreateParser();
             var location = new SourceLocation(1, 1);
             var builder = new CommandInput.Builder(location, "command");
             builder.AddParameter(new Literal("param"));
@@ -134,7 +149,7 @@ namespace Chel.UnitTests.Parsing
         public void Parse_TwoParameters_ParametersParsed(string input)
         {
             // arrange
-            var sut = new Parser();
+            var sut = CreateParser();
             var location = new SourceLocation(1, 1);
             var builder = new CommandInput.Builder(location, "command");
             builder.AddParameter(new Literal("param1"));
@@ -155,7 +170,7 @@ namespace Chel.UnitTests.Parsing
         public void Parse_TwoCommandsTwoParameters_ParsedCommandsWithParameters(string input)
         {
             // arrange
-            var sut = new Parser();
+            var sut = CreateParser();
             
             var location1 = new SourceLocation(1, 1);
             var builder1 = new CommandInput.Builder(location1, "command");
@@ -182,7 +197,7 @@ namespace Chel.UnitTests.Parsing
         public void Parse_NamedParameters_ParameterParsed(string input)
         {
             // arrange
-            var sut = new Parser();
+            var sut = CreateParser();
             var location = new SourceLocation(1, 1);
             var builder = new CommandInput.Builder(location, "command");
             builder.AddParameter(new ParameterNameCommandParameter("name"));
@@ -202,7 +217,7 @@ namespace Chel.UnitTests.Parsing
         public void Parse_MultipleNamedParameters_ParameterParsed(string input)
         {
             // arrange
-            var sut = new Parser();
+            var sut = CreateParser();
             var location = new SourceLocation(1, 1);
             var builder = new CommandInput.Builder(location, "command");
             builder.AddParameter(new ParameterNameCommandParameter("name"));
@@ -224,7 +239,7 @@ namespace Chel.UnitTests.Parsing
         public void Parse_ParameterNameTokenWithoutName_ThrowsException(string input)
         {
             // arrange
-            var sut = new Parser();
+            var sut = CreateParser();
             Action sutAction = () => sut.Parse(input);
 
             // act, assert
@@ -235,7 +250,7 @@ namespace Chel.UnitTests.Parsing
         public void Parse_BracketedParameterIncludesSpaces_SpacesIncludedInParameter()
         {
             // arrange
-            var sut = new Parser();
+            var sut = CreateParser();
             var location = new SourceLocation(1, 1);
             var builder = new CommandInput.Builder(location, "command");
             builder.AddParameter(new Literal("pa ram"));
@@ -252,7 +267,7 @@ namespace Chel.UnitTests.Parsing
         public void Parse_ParameterIsOnlyNewlines_NewlinesIncludedInParameter()
         {
             // arrange
-            var sut = new Parser();
+            var sut = CreateParser();
             var location = new SourceLocation(1, 1);
             var builder = new CommandInput.Builder(location, "command");
             builder.AddParameter(new Literal("\n\n"));
@@ -269,7 +284,7 @@ namespace Chel.UnitTests.Parsing
         public void Parse_EscapedBrackets_BracketsIncludedInParameter()
         {
             // arrange
-            var sut = new Parser();
+            var sut = CreateParser();
             var location = new SourceLocation(1, 1);
             var builder = new CommandInput.Builder(location, "command");
             builder.AddParameter(new Literal("(param)"));
@@ -286,7 +301,7 @@ namespace Chel.UnitTests.Parsing
         public void Parse_ParameterIncludesSlash_ParameterParsed()
         {
             // arrange
-            var sut = new Parser();
+            var sut = CreateParser();
             var location = new SourceLocation(1, 1);
             var builder = new CommandInput.Builder(location, "command");
             builder.AddParameter(new Literal(@"\"));
@@ -303,7 +318,7 @@ namespace Chel.UnitTests.Parsing
         public void Parse_EscapedCommentSymbol_CommentSymbolIncludedInParameter()
         {
             // arrange
-            var sut = new Parser();
+            var sut = CreateParser();
             var location = new SourceLocation(1, 1);
             var builder = new CommandInput.Builder(location, "command");
             builder.AddParameter(new Literal("#"));
@@ -321,7 +336,7 @@ namespace Chel.UnitTests.Parsing
         public void Parse_SomeParametersBracketed_ParametersParsedProperly()
         {
             // arrange
-            var sut = new Parser();
+            var sut = CreateParser();
             var location = new SourceLocation(1, 1);
             var builder = new CommandInput.Builder(location, "command");
             builder.AddParameter(new Literal(" param  param "));
@@ -339,7 +354,7 @@ namespace Chel.UnitTests.Parsing
         public void Parse_NewlineInsideBracketedParameter_ParameterIncludesNewline()
         {
             // arrange
-            var sut = new Parser();
+            var sut = CreateParser();
             var location = new SourceLocation(1, 1);
             var builder = new CommandInput.Builder(location, "command");
             builder.AddParameter(new Literal("param\nparam"));
@@ -356,7 +371,7 @@ namespace Chel.UnitTests.Parsing
         public void Parse_EscapedBracketsInParameters_ParameterIncludesBrackets()
         {
             // arrange
-            var sut = new Parser();
+            var sut = CreateParser();
             var location = new SourceLocation(1, 1);
             var builder = new CommandInput.Builder(location, "command");
             builder.AddParameter(new Literal("(param)"));
@@ -373,7 +388,7 @@ namespace Chel.UnitTests.Parsing
         public void Parse_NestedBracketsInParameters_ParameterIncludesBrackets()
         {
             // arrange
-            var sut = new Parser();
+            var sut = CreateParser();
             var location = new SourceLocation(1, 1);
             var builder = new CommandInput.Builder(location, "command");
             builder.AddParameter(new Literal("\nic  (pa ram)\nic (pa ram)"));
@@ -390,7 +405,7 @@ namespace Chel.UnitTests.Parsing
         public void Parse_MultipleBracketedParameters_ParametersParsedProperly()
         {
             // arrange
-            var sut = new Parser();
+            var sut = CreateParser();
             var location = new SourceLocation(1, 1);
             var builder = new CommandInput.Builder(location, "command");
             builder.AddParameter(new Literal("pa ram"));
@@ -408,7 +423,7 @@ namespace Chel.UnitTests.Parsing
         public void Parse_ErrorOnLineTwo_ReportsCorrectLineNumberInError()
         {
             // arrange
-            var sut = new Parser();
+            var sut = CreateParser();
             Action sutAction = () => sut.Parse("command (\npa ram");
 
             // act, assert
@@ -420,7 +435,7 @@ namespace Chel.UnitTests.Parsing
         public void Parse_ErrorOnLineThree_ReportsCorrectLineNumberInError()
         {
             // arrange
-            var sut = new Parser();
+            var sut = CreateParser();
             Action sutAction = () => sut.Parse("command (\npa ram\nram");
 
             // act, assert
@@ -432,7 +447,7 @@ namespace Chel.UnitTests.Parsing
         public void Parse_MissingClosingBracket_ThrowsException()
         {
             // arrange
-            var sut = new Parser();
+            var sut = CreateParser();
             Action sutAction = () => sut.Parse("command (param");
 
             // act, assert
@@ -444,7 +459,7 @@ namespace Chel.UnitTests.Parsing
         public void Parse_MissingOpeningBracket_ThrowsException()
         {
             // arrange
-            var sut = new Parser();
+            var sut = CreateParser();
             Action sutAction = () => sut.Parse("command param )");
 
             // act, assert
@@ -456,7 +471,7 @@ namespace Chel.UnitTests.Parsing
         public void Parse_UnbalancedBracketOnSecondLine_SourceLineOfExceptionIsCorrect()
         {
             // arrange
-            var sut = new Parser();
+            var sut = CreateParser();
             Action sutAction = () => sut.Parse("command\ncommand (param");
 
             // act, assert
@@ -473,7 +488,7 @@ namespace Chel.UnitTests.Parsing
             builder.AddParameter(new VariableReference("var"));
             var expectedCommand = builder.Build();
 
-            var sut = new Parser();
+            var sut = CreateParser();
 
             // act
             var result = sut.Parse("cmd $var$");
@@ -486,7 +501,7 @@ namespace Chel.UnitTests.Parsing
         public void Parse_InputContainsUnpairedVariableSymbol_ThrowsException()
         {
             // arrange
-            var sut = new Parser();
+            var sut = CreateParser();
             Action sutAction = () => sut.Parse("cmd $var");
 
             // act, assert
@@ -503,7 +518,7 @@ namespace Chel.UnitTests.Parsing
             builder.AddParameter(new Literal("$var$"));
             var expectedCommand = builder.Build();
 
-            var sut = new Parser();
+            var sut = CreateParser();
 
             // act
             var result = sut.Parse(@"cmd \$var\$");
@@ -516,7 +531,7 @@ namespace Chel.UnitTests.Parsing
         public void Parse_InputContainsVariableWithNoName_ThrowsException()
         {
             // arrange
-            var sut = new Parser();
+            var sut = CreateParser();
             Action sutAction = () => sut.Parse("cmd $$");
 
             // act, assert
@@ -533,7 +548,7 @@ namespace Chel.UnitTests.Parsing
             builder.AddParameter(new VariableReference("var", new[] { "1" }));
             var expectedCommand = builder.Build();
 
-            var sut = new Parser();
+            var sut = CreateParser();
 
             // act
             var result = sut.Parse("cmd $var:1$");
@@ -551,7 +566,7 @@ namespace Chel.UnitTests.Parsing
             builder.AddParameter(new VariableReference("var", new[] { "1", "2" }));
             var expectedCommand = builder.Build();
 
-            var sut = new Parser();
+            var sut = CreateParser();
 
             // act
             var result = sut.Parse("cmd $var:1:2$");
@@ -564,7 +579,7 @@ namespace Chel.UnitTests.Parsing
         public void Parse_InputContainsVariableWithMissingSubReference_ThrowsException()
         {
             // arrange
-            var sut = new Parser();
+            var sut = CreateParser();
             Action sutAction = () => sut.Parse("cmd $var:$");
 
             // act, assert
@@ -581,7 +596,7 @@ namespace Chel.UnitTests.Parsing
             builder.AddParameter(new ParameterNameCommandParameter("par"));
             var expectedCommand = builder.Build();
 
-            var sut = new Parser();
+            var sut = CreateParser();
 
             // act
             var result = sut.Parse("cmd -par");
@@ -599,7 +614,7 @@ namespace Chel.UnitTests.Parsing
             builder.AddParameter(new Literal("-par"));
             var expectedCommand = builder.Build();
 
-            var sut = new Parser();
+            var sut = CreateParser();
 
             // act
             var result = sut.Parse(@"cmd \-par");
@@ -617,7 +632,7 @@ namespace Chel.UnitTests.Parsing
             builder.AddParameter(new Literal("p-ar"));
             var expectedCommand = builder.Build();
 
-            var sut = new Parser();
+            var sut = CreateParser();
 
             // act
             var result = sut.Parse("cmd p-ar");
@@ -635,7 +650,7 @@ namespace Chel.UnitTests.Parsing
             builder.AddParameter(new Literal("p -ar"));
             var expectedCommand = builder.Build();
 
-            var sut = new Parser();
+            var sut = CreateParser();
 
             // act
             var result = sut.Parse("cmd (p -ar)");
@@ -658,7 +673,7 @@ namespace Chel.UnitTests.Parsing
             builder.AddParameter(expectedList);
             var expectedCommand = builder.Build();
 
-            var sut = new Parser();
+            var sut = CreateParser();
 
             // act
             var result = sut.Parse("cmd [a $b$]");
@@ -671,7 +686,7 @@ namespace Chel.UnitTests.Parsing
         public void Parse_InputMissingListEnd_ThrowsException()
         {
             // arrange
-            var sut = new Parser();
+            var sut = CreateParser();
             Action sutAction = () => sut.Parse("cmd [a ");
 
             // act, assert
@@ -683,7 +698,7 @@ namespace Chel.UnitTests.Parsing
         public void Parse_InputMissingListStart_ThrowsException()
         {
             // arrange
-            var sut = new Parser();
+            var sut = CreateParser();
             Action sutAction = () => sut.Parse("cmd a]");
 
             // act, assert
@@ -700,7 +715,7 @@ namespace Chel.UnitTests.Parsing
             builder.AddParameter(new Literal("[a]"));
             var expectedCommand = builder.Build();
 
-            var sut = new Parser();
+            var sut = CreateParser();
 
             // act
             var result = sut.Parse(@"cmd \[a\]");
@@ -710,7 +725,7 @@ namespace Chel.UnitTests.Parsing
         }
 
         [Fact]
-        public void Parse_InputContainsListParameterInbrackets_ParsesAsLiteral()
+        public void Parse_InputContainsListParameterInBrackets_ParsesAsLiteral()
         {
             // arrange
             var location = new SourceLocation(1, 1);
@@ -718,13 +733,359 @@ namespace Chel.UnitTests.Parsing
             builder.AddParameter(new Literal("[a b]"));
             var expectedCommand = builder.Build();
 
-            var sut = new Parser();
+            var sut = CreateParser();
 
             // act
             var result = sut.Parse(@"cmd ([a b])");
 
             // assert
             Assert.Equal(expectedCommand, result[0]);
+        }
+
+        [Fact]
+        public void Parse_InputContainsListWithMap_ParsesAsLiteral()
+        {
+            // arrange
+            var location = new SourceLocation(1, 1);
+            var builder = new CommandInput.Builder(location, "cmd");
+
+            var map1Entries = new Dictionary<string, ICommandParameter> { { "a", new Literal("b") }};
+            var map2Entries = new Dictionary<string, ICommandParameter> { { "c", new Literal("d") }};
+
+            builder.AddParameter(new List(new[]{ new Map(map1Entries), new Map(map2Entries) }));
+            var expectedCommand = builder.Build();
+
+            var sut = CreateParser();
+
+            // act
+            var result = sut.Parse(@"cmd [{a:b}   { c : d } ]");
+
+            // assert
+            Assert.Equal(expectedCommand, result[0]);
+        }
+
+        [Theory]
+        [MemberData(nameof(Parse_InputContainsMapParameter_ParsesMap_DataSource))]
+        public void Parse_InputContainsMapParameter_ParsesMap(string input)
+        {
+            // arrange
+            var expectedMap = new Map(new Dictionary<string, ICommandParameter>
+            {
+                { "a", new Literal("b")}
+            });
+
+            var location = new SourceLocation(1, 1);
+            var builder = new CommandInput.Builder(location, "cmd");
+            builder.AddParameter(expectedMap);
+            var expectedCommand = builder.Build();
+
+            var sut = CreateParser();
+
+            // act
+            var result = sut.Parse(input);
+
+            // assert
+            Assert.Equal(expectedCommand, result[0]);
+        }
+
+        public static IEnumerable<object[]> Parse_InputContainsMapParameter_ParsesMap_DataSource()
+        {
+            yield return new[] { "cmd {a: b}" };
+            yield return new[] { "cmd { a: b }" };
+            yield return new[] { "cmd {a:b}" };
+            yield return new[] { "cmd {     a        :      b        }" };
+            yield return new[] { "cmd {\n  a:  b  \n}" };
+        }
+
+        [Theory]
+        [MemberData(nameof(Parse_InputContainsMapParameterWithVariableReference_ParsesMap_DataSource))]
+        public void Parse_InputContainsMapParameterWithVariableReference_ParsesMap(string input)
+        {
+            // arrange
+            var expectedMap = new Map(new Dictionary<string, ICommandParameter>
+            {
+                { "a", new VariableReference("b")}
+            });
+
+            var location = new SourceLocation(1, 1);
+            var builder = new CommandInput.Builder(location, "cmd");
+            builder.AddParameter(expectedMap);
+            var expectedCommand = builder.Build();
+
+            var sut = CreateParser();
+
+            // act
+            var result = sut.Parse(input);
+
+            // assert
+            Assert.Equal(expectedCommand, result[0]);
+        }
+
+        public static IEnumerable<object[]> Parse_InputContainsMapParameterWithVariableReference_ParsesMap_DataSource()
+        {
+            yield return new[] { "cmd {a: $b$}" };
+            yield return new[] { "cmd {a:$b$}" };
+            yield return new[] { "cmd {     a        :      $b$        }" };
+            yield return new[] { "cmd {\n  a:  $b$  \n}" };
+        }
+
+        [Fact]
+        public void Parse_InputContainsMapParameterWithManyEntries_ParsesMap()
+        {
+            // arrange
+            var expectedMap = new Map(new Dictionary<string, ICommandParameter>
+            {
+                { "foo", new Literal("bar")},
+                { "num", new Literal("12")}
+            });
+
+            var location = new SourceLocation(1, 1);
+            var builder = new CommandInput.Builder(location, "cmd");
+            builder.AddParameter(expectedMap);
+            var expectedCommand = builder.Build();
+
+            var sut = CreateParser();
+
+            // act
+            var result = sut.Parse("cmd {foo: bar num : 12}");
+
+            // assert
+            Assert.Equal(expectedCommand, result[0]);
+        }
+
+        [Fact]
+        public void Parse_InputContainsMapParameterWithManyEntriesSpacesInValues_ParsesMap()
+        {
+            // arrange
+            var expectedMap = new Map(new Dictionary<string, ICommandParameter>
+            {
+                { "foo", new Literal("bar baz")},
+                { "num", new Literal("12")}
+            });
+
+            var location = new SourceLocation(1, 1);
+            var builder = new CommandInput.Builder(location, "cmd");
+            builder.AddParameter(expectedMap);
+            var expectedCommand = builder.Build();
+
+            var sut = CreateParser();
+
+            // act
+            var result = sut.Parse("cmd {foo: (bar baz) num : 12}");
+
+            // assert
+            Assert.Equal(expectedCommand, result[0]);
+        }
+
+        [Fact]
+        public void Parse_InputContainsMapParameterWithManyEntriesMultiLine_ParsesMap()
+        {
+            // arrange
+            var expectedMap = new Map(new Dictionary<string, ICommandParameter>
+            {
+                { "foo", new Literal("bar baz")},
+                { "num", new Literal("12")}
+            });
+
+            var location = new SourceLocation(1, 1);
+            var builder = new CommandInput.Builder(location, "cmd");
+            builder.AddParameter(expectedMap);
+            var expectedCommand = builder.Build();
+
+            var sut = CreateParser();
+
+            // act
+            var result = sut.Parse(@"cmd {
+                foo: (bar baz)
+                num : 12
+}");
+
+            // assert
+            Assert.Equal(expectedCommand, result[0]);
+        }
+
+        [Fact]
+        public void Parse_InputContainsMapWithDashInName_ParsesMap()
+        {
+            // arrange
+            var expectedMap = new Map(new Dictionary<string, ICommandParameter>
+            {
+                { "the-key", new Literal("the-value")}
+            });
+
+            var location = new SourceLocation(1, 1);
+            var builder = new CommandInput.Builder(location, "cmd");
+            builder.AddParameter(expectedMap);
+            var expectedCommand = builder.Build();
+
+            var sut = CreateParser();
+
+            // act
+            var result = sut.Parse("cmd { the-key: the-value }");
+
+            // assert
+            Assert.Equal(expectedCommand, result[0]);
+        }
+
+        [Fact]
+        public void Parse_InputMissingMapEnd_ThrowsException()
+        {
+            // arrange
+            var sut = CreateParser();
+            Action sutAction = () => sut.Parse("cmd {a: b");
+
+            // act, assert
+            var exception = Assert.Throws<ParseException>(sutAction);
+            Assert.Equal(Texts.MissingMapEnd, exception.Message);
+        }
+
+        [Fact]
+        public void Parse_InputMissingMapStart_ThrowsException()
+        {
+            // arrange
+            var sut = CreateParser();
+            Action sutAction = () => sut.Parse("cmd a:b}");
+
+            // act, assert
+            var exception = Assert.Throws<ParseException>(sutAction);
+            Assert.Equal(Texts.MissingMapStart, exception.Message);
+        }
+
+        [Fact]
+        public void Parse_InputContainsEscapedMapParameter_ParsesAsLiteral()
+        {
+            // arrange
+            var location = new SourceLocation(1, 1);
+            var builder = new CommandInput.Builder(location, "cmd");
+            builder.AddParameter(new Literal("{a:b}"));
+            var expectedCommand = builder.Build();
+
+            var sut = CreateParser();
+
+            // act
+            var result = sut.Parse(@"cmd \{a:b\}");
+
+            // assert
+            Assert.Equal(expectedCommand, result[0]);
+        }
+
+        [Fact]
+        public void Parse_InputContainsMapParameterInBrackets_ParsesAsLiteral()
+        {
+            // arrange
+            var location = new SourceLocation(1, 1);
+            var builder = new CommandInput.Builder(location, "cmd");
+            builder.AddParameter(new Literal("{a: b}"));
+            var expectedCommand = builder.Build();
+
+            var sut = CreateParser();
+
+            // act
+            var result = sut.Parse(@"cmd ({a: b})");
+
+            // assert
+            Assert.Equal(expectedCommand, result[0]);
+        }
+
+        [Fact]
+        public void Parse_InputContainsMapWithList_ParsesAsLiteral()
+        {
+            // arrange
+            var location = new SourceLocation(1, 1);
+            var builder = new CommandInput.Builder(location, "cmd");
+
+            var expectedMap1 = new Map(new Dictionary<string, ICommandParameter>
+            {
+                { "a", new List(new[]{ new Literal("1"), new Literal("2") })},
+                { "b", new List(new[]{ new Literal("3"), new Literal("4") })}
+            });
+
+            builder.AddParameter(expectedMap1);
+            var expectedCommand = builder.Build();
+
+            var sut = CreateParser();
+
+            // act
+            var result = sut.Parse(@"cmd {a: [1 2]  b : [ 3 4 ]}");
+
+            // assert
+            Assert.Equal(expectedCommand, result[0]);
+        }
+
+        [Theory]
+        [MemberData(nameof(Parse_MapWithInvalidEntryName_ThrowsException_DataSource))]
+        public void Parse_MapWithInvalidEntryName_ThrowsException(string input)
+        {
+            // arrange
+            var sut = CreateParser();
+            Action sutAction = () => sut.Parse(input);
+
+            // act, assert
+            var exception = Assert.Throws<ParseException>(sutAction);
+            Assert.Contains("Invalid character in map entry name", exception.Message);
+        }
+
+        public static IEnumerable<object[]> Parse_MapWithInvalidEntryName_ThrowsException_DataSource()
+        {
+            yield return new[]{ "cmd { a\\\\a: b }" };
+            yield return new[]{ "cmd { a\\(a: b }" };
+        }
+
+        [Theory]
+        [MemberData(nameof(Parse_MapWithSpecialSymbolsInEntryName_ThrowsException_DataSource))]
+        public void Parse_MapWithSpecialSymbolsInEntryName_ThrowsException(string input)
+        {
+            // arrange
+            var sut = CreateParser();
+            Action sutAction = () => sut.Parse(input);
+
+            // act, assert
+            var exception = Assert.Throws<ParseException>(sutAction);
+            Assert.Contains("Missing map entry name", exception.Message);
+        }
+
+        public static IEnumerable<object[]> Parse_MapWithSpecialSymbolsInEntryName_ThrowsException_DataSource()
+        {
+            yield return new[]{ "cmd { -a: b }" };
+            yield return new[]{ "cmd { (a b): b }" };
+            yield return new[]{ "cmd { $a: b }" };
+            yield return new[]{ "cmd { a$: b }" };
+        }
+
+        [Fact]
+        public void Parse_MapMissingName_ThrowsException()
+        {
+            // arrange
+            var sut = CreateParser();
+            Action sutAction = () => sut.Parse("cmd { : b }");
+
+            // act, assert
+            var exception = Assert.Throws<ParseException>(sutAction);
+            Assert.Equal(Texts.MissingMapEntryName, exception.Message);
+        }
+
+        [Fact]
+        public void Parse_MapMissingNameDelimiter_ThrowsException()
+        {
+            // arrange
+            var sut = CreateParser();
+            Action sutAction = () => sut.Parse("cmd { a b }");
+
+            // act, assert
+            var exception = Assert.Throws<ParseException>(sutAction);
+            Assert.Equal(Texts.MissingMapEntryName, exception.Message);
+        }
+
+        [Fact]
+        public void Parse_MapMissingValue_ThrowsException()
+        {
+            // arrange
+            var sut = CreateParser();
+            Action sutAction = () => sut.Parse("cmd { a: }");
+
+            // act, assert
+            var exception = Assert.Throws<ParseException>(sutAction);
+            Assert.Equal(Texts.MissingMapEntryValue, exception.Message);
         }
 
         [Fact]
@@ -739,7 +1100,7 @@ namespace Chel.UnitTests.Parsing
             builder.AddParameter(subcommand);
             var expectedCommand = builder.Build();
 
-            var sut = new Parser();
+            var sut = CreateParser();
 
             // act
             var result = sut.Parse("cmd << subcmd");
@@ -760,7 +1121,7 @@ namespace Chel.UnitTests.Parsing
             builder.AddParameter(subcommand);
             var expectedCommand = builder.Build();
 
-            var sut = new Parser();
+            var sut = CreateParser();
 
             // act
             var result = sut.Parse("cmd <<subcmd");
@@ -773,7 +1134,7 @@ namespace Chel.UnitTests.Parsing
         public void Parse_InputContainsSubcommandTokenMissingSubcommand_ThrowsException()
         {
             // arrange
-            var sut = new Parser();
+            var sut = CreateParser();
             Action sutAction = () => sut.Parse("cmd <<");
 
             // act, assert
@@ -796,7 +1157,7 @@ namespace Chel.UnitTests.Parsing
             builder.AddParameter(subcommand);
             var expectedCommand = builder.Build();
 
-            var sut = new Parser();
+            var sut = CreateParser();
 
             // act
             var result = sut.Parse("cmd << (subcmd -a name)");
@@ -809,7 +1170,7 @@ namespace Chel.UnitTests.Parsing
         public void Parse_InputContainsSubcommandMissingBlockEnd_ThrowException()
         {
             // arrange
-            var sut = new Parser();
+            var sut = CreateParser();
             Action sutAction = () => sut.Parse("cmd << (subcmd");
 
             // act, assert
@@ -821,7 +1182,7 @@ namespace Chel.UnitTests.Parsing
         public void Parse_InputContainsSubcommandMissingBlockStart_ThrowException()
         {
             // arrange
-            var sut = new Parser();
+            var sut = CreateParser();
             Action sutAction = () => sut.Parse("cmd << subcmd)");
 
             // act, assert
@@ -841,7 +1202,7 @@ namespace Chel.UnitTests.Parsing
             builder.AddParameter(subcommand);
             var expectedCommand = builder.Build();
 
-            var sut = new Parser();
+            var sut = CreateParser();
 
             // act
             var result = sut.Parse("cmd << (\nsubcmd\n)");
@@ -862,7 +1223,7 @@ namespace Chel.UnitTests.Parsing
             builder.AddParameter(new List(new ICommandParameter[] { new Literal("1"), subcommand }));
             var expectedCommand = builder.Build();
 
-            var sut = new Parser();
+            var sut = CreateParser();
 
             // act
             var result = sut.Parse("cmd [1 << subcmd]");
@@ -885,7 +1246,7 @@ namespace Chel.UnitTests.Parsing
             builder.AddParameter(new List(new ICommandParameter[] { new Literal("1"), subcommand }));
             var expectedCommand = builder.Build();
 
-            var sut = new Parser();
+            var sut = CreateParser();
 
             // act
             var result = sut.Parse("cmd [1 << (subcmd foo)]");
@@ -898,7 +1259,7 @@ namespace Chel.UnitTests.Parsing
         public void Parse_InputContainsListWithSubcommandMissingCommand_ThrowException()
         {
             // arrange
-            var sut = new Parser();
+            var sut = CreateParser();
             Action sutAction = () => sut.Parse("cmd [1 << ]");
 
             // act, assert
@@ -922,7 +1283,7 @@ namespace Chel.UnitTests.Parsing
             builder.AddParameter(subcommand2);
             var expectedCommand = builder.Build();
 
-            var sut = new Parser();
+            var sut = CreateParser();
 
             // act
             var result = sut.Parse("cmd << subcmd << subcmd");
@@ -944,7 +1305,7 @@ namespace Chel.UnitTests.Parsing
             builder.AddParameter(new Literal("foo bar"));
             var expectedCommand = builder.Build();
 
-            var sut = new Parser();
+            var sut = CreateParser();
 
             // act
             var result = sut.Parse("cmd << subcmd (foo bar)");
@@ -973,13 +1334,18 @@ namespace Chel.UnitTests.Parsing
             builder.AddParameter(subcommandOuter);
             var expectedCommand = builder.Build();
 
-            var sut = new Parser();
+            var sut = CreateParser();
 
             // act
             var result = sut.Parse("cmd << (subcmdo -a <<(subcmdi foo))");
 
             // assert
             Assert.Equal(expectedCommand, result[0]);
+        }
+
+        private Parser CreateParser()
+        {
+            return new Parser(_nameValidator);
         }
 
         private CommandInput CreateCommandInput(int sourceLine, int sourceCharacter, string commandName)
