@@ -159,6 +159,22 @@ namespace Chel.UnitTests
         }
 
         [Fact]
+        public void ReplaceVariables_InputIsMapWithNoVariables_ReturnsMapUnaltered()
+        {
+            // arrange
+            var sut = new VariableReplacer();
+            var variables = new VariableCollection();
+            var input = new Map(new Dictionary<string, ICommandParameter> { { "foo", new Literal("bar") } });
+
+            // act
+            var result = sut.ReplaceVariables(variables, input);
+
+            // assert
+            var mapResult = Assert.IsType<Map>(result);
+            Assert.Equal(input, mapResult);
+        }
+
+        [Fact]
         public void ReplaceVariables_InputIsListWithVariables_ReturnsListWithVariablesReplaced()
         {
             // arrange
@@ -187,6 +203,35 @@ namespace Chel.UnitTests
         }
 
         [Fact]
+        public void ReplaceVariables_InputIsMapWithVariables_ReturnsMapWithVariablesReplaced()
+        {
+            // arrange
+            var sut = new VariableReplacer();
+            var variables = new VariableCollection();
+            variables.Set(new Variable("foo1", new Literal("bar1")));
+            variables.Set(new Variable("foo2", new Literal("bar2")));
+
+            var input = new Map(new Dictionary<string, ICommandParameter>
+            {
+                { "a", new VariableReference("foo1") },
+                { "b", new Literal("val") },
+                { "c", new VariableReference("foo2") }
+            });
+
+            // act
+            var result = sut.ReplaceVariables(variables, input);
+
+            // assert
+            var mapResult = Assert.IsType<Map>(result);
+            Assert.Equal(new Dictionary<string, ICommandParameter>
+            {
+                { "a", new Literal("bar1") },
+                { "b" , new Literal("val") },
+                { "c", new Literal("bar2") }
+            }, mapResult.Entries);
+        }
+
+        [Fact]
         public void ReplaceVariables_VariableReferenceWithOutOfBoundsSubReference_ThrowsException()
         {
             // arrange
@@ -206,7 +251,7 @@ namespace Chel.UnitTests
         }
 
         [Fact]
-        public void ReplaceVariables_VariableReferenceWithInvalidSubReference_ThrowsException()
+        public void ReplaceVariables_VariableReferenceWithInvalidListSubReference_ThrowsException()
         {
             // arrange
             var sut = new VariableReplacer();
@@ -222,6 +267,25 @@ namespace Chel.UnitTests
             // act, assert
             var ex = Assert.Throws<InvalidOperationException>(sutAction);
             Assert.Equal("Variable $list$ subreference 'abc' is invalid", ex.Message);
+        }
+
+        [Fact]
+        public void ReplaceVariables_VariableReferenceWithInvalidMapSubReference_ThrowsException()
+        {
+            // arrange
+            var sut = new VariableReplacer();
+            var variables = new VariableCollection();
+            variables.Set(new Variable("map", new Map(new Dictionary<string, ICommandParameter> {
+                { "a", new Literal("val1") },
+                { "b", new Literal("val2") }
+            })));
+
+            var input = new VariableReference("map", new [] { "abc" });
+            Action sutAction = () => sut.ReplaceVariables(variables, input);
+
+            // act, assert
+            var ex = Assert.Throws<InvalidOperationException>(sutAction);
+            Assert.Equal("Variable $map$ subreference 'abc' is invalid", ex.Message);
         }
 
         [Fact]
@@ -262,8 +326,8 @@ namespace Chel.UnitTests
         }
         
         [Theory]
-        [MemberData(nameof(ReplaceVariables_VariableReferenceWithValidSubReference_ReturnsListElement_DataSource))]
-        public void ReplaceVariables_VariableReferenceWithValidSubReference_ReturnsListElement(string variableName, string subreference, string expected)
+        [MemberData(nameof(ReplaceVariables_VariableReferenceWithValidListSubReference_ReturnsListElement_DataSource))]
+        public void ReplaceVariables_VariableReferenceWithValidListSubReference_ReturnsListElement(string variableName, string subreference, string expected)
         {
             // arrange
             var sut = new VariableReplacer();
@@ -284,12 +348,44 @@ namespace Chel.UnitTests
             Assert.Equal(expected, literalResult.Value);
         }
 
-        public static IEnumerable<object[]> ReplaceVariables_VariableReferenceWithValidSubReference_ReturnsListElement_DataSource()
+        public static IEnumerable<object[]> ReplaceVariables_VariableReferenceWithValidListSubReference_ReturnsListElement_DataSource()
         {
             yield return new[]{ "list", "2", "val2" };
             yield return new[]{ "list", "first", "val1" };
             yield return new[]{ "list", "last", "val3" };
             yield return new[]{ "list", "count", "3" };
+        }
+
+        [Theory]
+        [MemberData(nameof(ReplaceVariables_VariableReferenceWithValidMapSubReference_ReturnsMapElement_DataSource))]
+        public void ReplaceVariables_VariableReferenceWithValidMapSubReference_ReturnsMapElement(string variableName, string subreference, string expected)
+        {
+            // arrange
+            var sut = new VariableReplacer();
+            var variables = new VariableCollection();
+            variables.Set(new Variable("map", new Map(new Dictionary<string, ICommandParameter> {
+                { "aaa", new Literal("val1") },
+                { "bbb", new Literal("val2") },
+                { "ccc", new Literal("val3") }
+            })));
+
+            var input = new VariableReference(variableName, new [] { subreference });
+
+            // act
+            var result = sut.ReplaceVariables(variables, input);
+
+            // assert
+            var literalResult = Assert.IsType<Literal>(result);
+            Assert.Equal(expected, literalResult.Value);
+        }
+
+        public static IEnumerable<object[]> ReplaceVariables_VariableReferenceWithValidMapSubReference_ReturnsMapElement_DataSource()
+        {
+            yield return new[]{ "map", "aaa", "val1" };
+            yield return new[]{ "map", "AAA", "val1" };
+            yield return new[]{ "map", "aAa", "val1" };
+            yield return new[]{ "map", "bbb", "val2" };
+            yield return new[]{ "map", "ccc", "val3" };
         }
 
         [Fact]

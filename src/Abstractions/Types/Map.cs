@@ -21,9 +21,12 @@ namespace Chel.Abstractions.Types
         /// Create a new instance.
         /// </summary>
         /// <param name="entries">The entries of the map.</param>
-        public Map(IReadOnlyDictionary<string, ICommandParameter> entries)
+        public Map(IDictionary<string, ICommandParameter> entries)
         {
-            Entries = entries ?? new Dictionary<string, ICommandParameter>();
+            if(entries != null)
+                Entries = new Dictionary<string, ICommandParameter>(entries, StringComparer.OrdinalIgnoreCase);
+            else
+                Entries = new Dictionary<string, ICommandParameter>(StringComparer.OrdinalIgnoreCase);
         }
 
         public override bool Equals(object obj)

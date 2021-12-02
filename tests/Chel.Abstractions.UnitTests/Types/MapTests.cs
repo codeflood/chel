@@ -269,5 +269,20 @@ namespace Chel.Abstractions.UnitTests.Types
 
             Assert.Equal(expected, result);
         }
+
+        [Fact]
+        public void Entries_UseWrongCaseForKey_ValueIsReturned()
+        {
+            // arrange
+            var map = new Map(new Dictionary<string, ICommandParameter> {
+                { "a", new Literal("b") }
+            });
+
+            // act
+            var result = map.Entries["A"];
+
+            // assert
+            Assert.Equal("b", ((Literal)result).Value);
+        }
     }
 }

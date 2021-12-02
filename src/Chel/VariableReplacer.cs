@@ -37,6 +37,9 @@ namespace Chel
                 case List listValue:
                     return ProcessList(listValue, variables);
 
+                case Map mapValue:
+                    return ProcessMap(mapValue, variables);
+
                 default:
                     return input;
             }
@@ -68,6 +71,19 @@ namespace Chel
             return new List(replacedValues);
         }
 
+        private ChelType ProcessMap(Map input, VariableCollection variables)
+        {
+            var replacedValues = new Dictionary<string, ICommandParameter>(input.Entries.Count);
+
+            foreach(var entry in input.Entries)
+            {
+                var replaced = ProcessParameter(entry.Value, variables);
+                replacedValues.Add(entry.Key, replaced);
+            }
+
+            return new Map(replacedValues);
+        }
+
         private ChelType ProcessVariableReference(VariableReference input, VariableCollection variables)
         {
             var variableName = input.VariableName;
@@ -89,6 +105,8 @@ namespace Chel
 
                 if(value is List listValue)
                     value = ProcessListVariableReference(listValue, variableName, subreference);
+                else if(value is Map mapValue)
+                    value = ProcessMapVariableReference(mapValue, variableName, subreference);
                 else if(subreference != null)
                     throw new InvalidOperationException(string.Format(Texts.VariableSubreferenceIsInvalid, variableName, subreference));
                 
@@ -133,6 +151,17 @@ namespace Chel
                 throw new InvalidOperationException(string.Format(Texts.VariableSubreferenceIsInvalid, variableName, subreference));
 
             return listValue.Values[oneBasedIndex - 1] as ChelType;
+        }
+
+        private ChelType ProcessMapVariableReference(Map mapValue, string variableName, string subreference)
+        {
+            if(string.IsNullOrWhiteSpace(subreference))
+                return mapValue;
+            
+            if(!mapValue.Entries.ContainsKey(subreference))
+                throw new InvalidOperationException(string.Format(Texts.VariableSubreferenceIsInvalid, variableName, subreference));
+
+            return mapValue.Entries[subreference] as ChelType;
         }
     }
 }
