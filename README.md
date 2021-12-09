@@ -14,18 +14,23 @@ Chel in a nutshell:
 	command << subcommand
 	command >> chained-command $~$
 
+	(#
+		block comment
+		block comment
+	#)
 	sub rigel (
 		command -flag
 		command -param value
-	) (# block comment #)
+	)
 
 	var list [1 2 3 4]
 	var params {
-		key : value
+		key1 : value1
+		key2 : value2
 	}
 	var moreParams {
 		foo : $list$
 		bar : $params$
 	}
-	command @moreparams -flag -param $list:2$
+	command $*moreparams$ -flag -param $list:2$
 	rigel

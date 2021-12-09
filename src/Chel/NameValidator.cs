@@ -29,7 +29,7 @@ namespace Chel
             if(string.IsNullOrWhiteSpace(name))
                 return false;
 
-            if(name[0] == Symbol.ParameterName)
+            if(name[0] == Symbol.ParameterName || name[0] == Symbol.Expansion)
                 return false;
 
             if(name.IndexOfAny(s_invalidCharacters) >= 0)

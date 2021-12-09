@@ -32,6 +32,7 @@ namespace Chel.UnitTests
         [InlineData("na$me")]
         [InlineData(":")]
         [InlineData("na:me")]
+        [InlineData("*name")]
         public void IsValid_NameIsInvalid_ReturnsFalse(string name)
         {
             // arrange
@@ -52,6 +53,7 @@ namespace Chel.UnitTests
         [InlineData("cØmÆnd")]
         [InlineData("±⇸")]
         [InlineData("👏")]
+        [InlineData("comm*and")]
         public void IsValid_NameIsValid_ReturnsTrue(string name)
         {
             // arrange

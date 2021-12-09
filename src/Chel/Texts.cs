@@ -104,6 +104,8 @@ namespace Chel
 
         public const string UnpairedVariableToken = "Unpaired variable token $";
 
+        public const string VariableIsNotMap = "Variable '{0}' is not a map and cannot be expanded";
+
         public const string VariableIsUnset = "Variable ${0}$ is not set";
 
         public const string VariableNameIsMissing = "Variable name is missing";

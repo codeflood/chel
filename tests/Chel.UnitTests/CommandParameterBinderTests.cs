@@ -1052,7 +1052,7 @@ namespace Chel.UnitTests
             var input = CreateCommandInput(
                 "command",
                 new ParameterNameCommandParameter("complex"),
-                new Literal($"name:42")
+                new Literal("name:42")
             );
 
             // act
@@ -1506,6 +1506,117 @@ namespace Chel.UnitTests
 
             // assert
             Assert.Equal("subbed", command.List[0]);
+        }
+
+        [Fact]
+        public void Bind_ExpandNonMapParameter_ErrorsIncludedInResult()
+        {
+            // arrange
+            var variables = new VariableCollection();
+            variables.Set(new Variable("foo", new Literal("bar")));
+
+            var sut = CreateCommandParameterBinder(variables, typeof(NamedParameterCommand));
+            var command = new NamedParameterCommand();
+
+            var commandInput = CreateCommandInput(
+                "nam",
+                new VariableReference("*foo")
+            );
+
+            // act
+            var result = sut.Bind(command, commandInput);
+
+            // assert
+            Assert.False(result.Success);
+            Assert.Equal(new[]{ "Variable 'foo' is not a map and cannot be expanded" }, result.Errors);
+        }
+
+        [Fact]
+        public void Bind_ExpandMapParameter_ParametersSet()
+        {
+            // arrange
+            var map = new Map(new MapEntries
+            {
+                { "param1", new Literal("val1") },
+                { "param2", new Literal("val2") }
+            });
+            var variables = new VariableCollection();
+            variables.Set(new Variable("map", map));
+
+            var sut = CreateCommandParameterBinder(variables, typeof(NamedParameterCommand));
+            var command = new NamedParameterCommand();
+
+            var commandInput = CreateCommandInput(
+                "nam",
+                new VariableReference("*map")
+            );
+
+            // act
+            var result = sut.Bind(command, commandInput);
+
+            // assert
+            Assert.True(result.Success);
+            Assert.Equal("val1", command.NamedParameter1);
+            Assert.Equal("val2", command.NamedParameter2);
+        }
+
+        [Fact]
+        public void Bind_ExpandMapParameterFromSubreference_ParametersSet()
+        {
+            // arrange
+            var map = new Map(new MapEntries
+            {
+                { "param1", new Literal("val1") },
+                { "param2", new Literal("val2") }
+            });
+            var list = new List(new ICommandParameter[] { new Literal("lit"), map });
+            var variables = new VariableCollection();
+            variables.Set(new Variable("list", list));
+
+            var sut = CreateCommandParameterBinder(variables, typeof(NamedParameterCommand));
+            var command = new NamedParameterCommand();
+
+            var commandInput = CreateCommandInput(
+                "nam",
+                new VariableReference("*list", new[] { "2" })
+            );
+
+            // act
+            var result = sut.Bind(command, commandInput);
+
+            // assert
+            Assert.True(result.Success);
+            Assert.Equal("val1", command.NamedParameter1);
+            Assert.Equal("val2", command.NamedParameter2);
+        }
+
+        [Fact]
+        public void Bind_ExpandMapParameterUnknownNames_ErrorsIncludedInResult()
+        {
+            // arrange
+            var map = new Map(new MapEntries
+            {
+                { "invalid", new Literal("something") },
+                { "param1", new Literal("good") },
+                { "invalid2", new Literal("something") }
+            });
+            var variables = new VariableCollection();
+            variables.Set(new Variable("map", map));
+
+            var sut = CreateCommandParameterBinder(variables, typeof(NamedParameterCommand));
+            var command = new NamedParameterCommand();
+
+            var commandInput = CreateCommandInput(
+                "nam",
+                new VariableReference("*map")
+            );
+
+            // act
+            var result = sut.Bind(command, commandInput);
+
+            // assert
+            Assert.False(result.Success);
+            Assert.Equal(new[]{ "Unknown named parameter 'invalid2'", "Unknown named parameter 'invalid'" }, result.Errors);
         }
 
         private CommandParameterBinder CreateCommandParameterBinder(params Type[] commandTypes)

@@ -57,10 +57,10 @@ namespace Chel
             if(descriptor == null)
                 throw new InvalidOperationException(string.Format(Texts.DescriptorForCommandCouldNotBeResolved, input.CommandName));
 
-            var parameters = ExtractParameterValues(input.Parameters);
+            var parameters = ExtractParameterValues(input.Parameters, result);
 
-            if(parameters.Count != input.Parameters.Count)
-                throw new ArgumentException(Texts.CommandParametersMustBeChelType, nameof(input));
+            if(!result.Success)
+                return result;
 
             BindFlagParameters(instance, descriptor, parameters, result);
             BindNamedParameters(instance, descriptor, parameters, result);
@@ -78,7 +78,7 @@ namespace Chel
             return result;
         }
 
-        private List<ChelType> ExtractParameterValues(IReadOnlyList<ICommandParameter> parameters)
+        private List<ChelType> ExtractParameterValues(IReadOnlyList<ICommandParameter> parameters, ParameterBindResult result)
         {
             var output = new List<ChelType>();
 
@@ -88,8 +88,30 @@ namespace Chel
                 if(parameter.GetType() == typeof(List))
                 {
                     var list = parameter as List;
-                    var values = ExtractParameterValues(list.Values);
+                    var values = ExtractParameterValues(list.Values, result);
                     output.Add(new List(values));
+                }
+                else if(parameter is VariableReference variableReference && variableReference.VariableName[0] == Symbol.Expansion)
+                {
+                    var variableName = variableReference.VariableName.Substring(1);
+                    var updatedVariableReference = new VariableReference(variableName, variableReference.SubReferences);
+
+                    var extractedVariable = _variableReplacer.ReplaceVariables(_variables, updatedVariableReference);
+
+                    if(extractedVariable is Map extractedMap)
+                    {
+                        foreach(var entry in extractedMap.Entries)
+                        {
+                            output.Add(new ParameterNameCommandParameter(entry.Key));
+                            
+                            var values = ExtractParameterValues(new[] { entry.Value }, result);
+                            output.AddRange(values);
+                        }
+                    }
+                    else
+                    {
+                        result.AddError(string.Format(Texts.VariableIsNotMap, variableName));
+                    }
                 }
                 else if(parameter is ChelType value)
                     output.Add(value);

@@ -29,7 +29,7 @@ A flag parameter is like a named parameter, but no value is passed. It is a bool
 
     command -flag1 -flag2
 
-## Map Splatting ##
+## Map Expansion ##
 
 Multiple parameters can be added to a map and passed all at once.
 
@@ -40,10 +40,10 @@ Multiple parameters can be added to a map and passed all at once.
         flagparam : true
     )
 
-    command @p
+    command $*p$
 
-The keys will be mapped to the named parameters of the target. Keys that are only numbers will be passed as numbered parameters. Numbered parameters must start at 1 and be seqential.
+The star character `*` preceding the map variable name indicates that the map will be expanded when applied to the command. The keys will be mapped to the named parameters of the target.
 
 Additional parameters can be passed in addition to the map.
 
-    command @p -named value
+    command $*p$ -named value
