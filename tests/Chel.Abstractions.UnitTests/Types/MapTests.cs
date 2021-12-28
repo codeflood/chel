@@ -198,7 +198,7 @@ namespace Chel.Abstractions.UnitTests.Types
   key2: (value 2 with spaces)
 }";
 
-            Assert.Equal(expected, result);
+            Assert.Equal(expected, result, ignoreLineEndingDifferences: true);
         }
 
         [Fact]
@@ -241,7 +241,7 @@ namespace Chel.Abstractions.UnitTests.Types
   key2: [ val3 val4 ]
 }";
 
-            Assert.Equal(expected, result);
+            Assert.Equal(expected, result, ignoreLineEndingDifferences: true);
         }
 
         [Fact]
@@ -267,7 +267,7 @@ namespace Chel.Abstractions.UnitTests.Types
   out: { a: b c: d }
 }";
 
-            Assert.Equal(expected, result);
+            Assert.Equal(expected, result, ignoreLineEndingDifferences: true);
         }
 
         [Fact]

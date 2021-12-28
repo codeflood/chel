@@ -190,7 +190,7 @@ namespace Chel.Abstractions.UnitTests.Types
   12345678901234567890
   12345678901234567890
 ]";
-            Assert.Equal(expected, result);
+            Assert.Equal(expected, result, ignoreLineEndingDifferences: true);
         }
 
         [Fact]
