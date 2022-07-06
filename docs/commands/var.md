@@ -11,7 +11,7 @@ If executed with no parameters, all variables in the current scope are listed wi
         a : b
     }
 
-To retrieve the value of a single variable, pass the name of the variable as the first numebred parameter.
+To retrieve the value of a single variable, pass the name of the variable as the first numbered parameter.
 
     var name
 
@@ -19,9 +19,9 @@ To set a variable value, pass the variable name as the first numbered parameter 
 
     var name value
 
-To clear a variable, use the `-c` flag parameter.
+To clear a variable, use the `-clear` flag parameter.
 
-    var -c name
+    var -clear name
 
 Variables can be made globally accessible by using the `-g` flag parameter.
 

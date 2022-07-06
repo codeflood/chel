@@ -118,11 +118,15 @@ namespace Chel
 
             public const string AvailableCommands = "AVAILABLE COMMANDS";
 
+            public const string MissingVariableName = "MISSING VARIABLE NAME";
+
             public const string NoVariablesSet = "NO VARIABLES SET";
 
             public const string Required = "REQUIRED";
 
             public const string Usage = "USAGE";
+
+            public const string VariableHasBeenCleared = "VARIABLE HAS BEEN CLEARED";
 
             public const string VariableNotSet = "VARIABLE NOT SET";
         }

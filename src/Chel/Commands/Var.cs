@@ -2,14 +2,13 @@ using System;
 using System.Text;
 using System.Threading;
 using Chel.Abstractions;
-using Chel.Abstractions.Parsing;
 using Chel.Abstractions.Results;
 using Chel.Abstractions.Types;
 using Chel.Abstractions.Variables;
 
 namespace Chel
 {
-    [Command("var")]
+	[Command("var")]
     [Description("Manage variables.")]
     internal class Var : ICommand
     {
@@ -26,6 +25,10 @@ namespace Chel
         [NumberedParameter(2, "value")]
         [Description("The value for the variable.")]
         public ChelType Value { get; set; }
+
+        [FlagParameter("clear")]
+        [Description("Clear the variable.")]
+        public bool Clear { get; set; }
 
         public Var(VariableCollection variables, IPhraseDictionary phraseDictionary, INameValidator nameValidator)
         {
@@ -52,12 +55,15 @@ namespace Chel
             if(!string.IsNullOrEmpty(Name) && !_nameValidator.IsValid(Name))
                 return new FailureResult(new[] { string.Format(Texts.InvalidCharacterInVariableName, Name) });
 
+            if(Clear && string.IsNullOrEmpty(Name))
+                return new FailureResult(new[] { _phraseDictionary.GetPhrase(Texts.PhraseKeys.MissingVariableName, _executionCultureName) });
+
             if(Value == null)
             {
                 if(string.IsNullOrEmpty(Name))
                     output = ListVariables();
                 else
-                    output = ShowVariable(Name);
+                    output = ShowOrClearVariable();
             }
             else
             {
@@ -86,13 +92,19 @@ namespace Chel
             return new Literal(output.ToString());
         }
 
-        private ChelType ShowVariable(string name)
+        private ChelType ShowOrClearVariable()
         {
-            var variable = _variables.Get(name);
+            var variable = _variables.Get(Name);
             if(variable == null)
             {
                 var template = _phraseDictionary.GetPhrase(Texts.PhraseKeys.VariableNotSet, _executionCultureName);
-                return new Literal(string.Format(template, name));
+                return new Literal(string.Format(template, Name));
+            }
+
+            if(Clear)
+            {
+                _variables.Remove(Name);
+                return new Literal(string.Format(_phraseDictionary.GetPhrase(Texts.PhraseKeys.VariableHasBeenCleared, _executionCultureName), Name));
             }
 
             return variable.Value;

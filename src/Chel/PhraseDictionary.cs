@@ -14,6 +14,10 @@ namespace Chel
             availableCommandsPhrases.AddText("Available commands", null);
             _phrases.Add(Texts.PhraseKeys.AvailableCommands, availableCommandsPhrases);
 
+            var missingVariableNamePhrases = new LocalisedTexts();
+            missingVariableNamePhrases.AddText("Missing variable name.", null);
+            _phrases.Add(Texts.PhraseKeys.MissingVariableName, missingVariableNamePhrases);
+
             var noVariablesSetPhrases = new LocalisedTexts();
             noVariablesSetPhrases.AddText("No variables set.", null);
             _phrases.Add(Texts.PhraseKeys.NoVariablesSet, noVariablesSetPhrases);
@@ -25,6 +29,10 @@ namespace Chel
             var usagePhrases = new LocalisedTexts();
             usagePhrases.AddText("usage", null);
             _phrases.Add(Texts.PhraseKeys.Usage, usagePhrases);
+
+            var variableHasBeenClearedPhrases = new LocalisedTexts();
+            variableHasBeenClearedPhrases.AddText("Variable '{0}' has been cleared.", null);
+            _phrases.Add(Texts.PhraseKeys.VariableHasBeenCleared, variableHasBeenClearedPhrases);
 
             var variableNotSetPhrases = new LocalisedTexts();
             variableNotSetPhrases.AddText("Variable '{0}' is not set.", null);

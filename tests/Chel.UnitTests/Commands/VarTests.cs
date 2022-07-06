@@ -180,6 +180,57 @@ namespace Chel.UnitTests.Commands
             Assert.Equal(new[]{ "val1", "val2" }, values);
         }
 
+        [Fact]
+        public void Execute_ClearVariableNameNotProvided_ReturnsError()
+        {
+            // arrange
+            var sut = CreateVarCommand();
+            sut.Clear = true;
+
+            // act
+            var result = sut.Execute();
+
+            // assert
+            var failureResult = Assert.IsType<FailureResult>(result);
+            Assert.Contains("Missing variable name.", failureResult.Messages);
+        }
+
+        [Fact]
+        public void Execute_ClearVariableNotSet_ReturnsNotSetMessage()
+        {
+            // arrange
+            var sut = CreateVarCommand();
+            sut.Name = "name";
+            sut.Clear = true;
+
+            // act
+            var result = sut.Execute() as ValueResult;
+
+            // assert
+            Assert.Equal("Variable 'name' is not set.", result.Value.ToString());
+        }
+
+        [Fact]
+        public void Execute_ClearVariableIsSet_RemovesVariable()
+        {
+            // arrange
+            VariableCollection variables = null;
+            var sut = CreateVarCommand(x => {
+                variables = x;
+                x.Set(new Variable("name", new Literal("value")));
+            });
+            sut.Name = "name";
+            sut.Clear = true;
+
+            // act
+            var result = sut.Execute() as ValueResult;
+
+            // assert
+            Assert.Equal("Variable 'name' has been cleared.", result.Value.ToString());
+            var found = variables.Get("name");
+            Assert.Null(found);
+        }
+
         private Var CreateVarCommand(Action<VariableCollection> variableConfigurator = null)
         {
             var variables = new VariableCollection();
