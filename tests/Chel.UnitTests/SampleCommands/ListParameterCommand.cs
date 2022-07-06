@@ -30,8 +30,8 @@ namespace Chel.UnitTests.SampleCommands
         [NamedParameter("concretelist", "concretelist")]
         public List<string> ConcreteList { get; set; }
 
-        [NamedParameter("dictionary", "dictionary")]
-        public Dictionary<string, string> Dictionary { get; set; }
+        [NamedParameter("maplist", "maplist")]
+        public List<Map> MapList { get; set; }
 
 		public CommandResult Execute()
 		{
@@ -42,10 +42,10 @@ namespace Chel.UnitTests.SampleCommands
                 (IEnumerable<object>)IntList ??
                 (IEnumerable<object>)Collection ??
                 (IEnumerable<object>)ReadOnlyCollection ??
-                (IEnumerable<object>)ConcreteList ??
-                (IEnumerable<object>)Dictionary).Select(x => new Literal(x.ToString()));
+                (IEnumerable<object>)ConcreteList
+            );
 
-            return new ValueResult(new Chel.Abstractions.Types.List(elements.ToList()));
+            return new ValueResult(new Chel.Abstractions.Types.List(elements.Select(x => new Literal(x.ToString())).ToList()));
 		}
 	}
 }

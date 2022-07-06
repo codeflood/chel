@@ -297,16 +297,26 @@ namespace Chel
                 return;
             }
 
-            var listElementType = GetPropertyListType(property);
+            var valueType = GetPropertyGenericValueType(property);
 
             if(bindingValue is List list)
             {
-                BindListProperty(instance, property, listElementType, parameterIdentifier, list, result);
+                BindListProperty(instance, property, valueType, parameterIdentifier, list, result);
                 return;
             }
-            else if(listElementType != null)
+            else if(bindingValue is Map map)
             {
-                result.AddError(string.Format(Texts.CannotBindNonListToListParameter, parameterIdentifier));
+                var keyType = GetPropertyGenericKeyType(property);
+                BindDictionaryProperty(instance, property, keyType, valueType, parameterIdentifier, map, result);
+                return;
+            }
+            else if(valueType != null)
+            {
+                if(IsPropertyDictionary(property))
+                    result.AddError(string.Format(Texts.CannotBindNonMapToMapParameter, parameterIdentifier));
+                else
+                    result.AddError(string.Format(Texts.CannotBindNonListToListParameter, parameterIdentifier));
+
                 return;
             }
 
@@ -317,7 +327,32 @@ namespace Chel
             property.SetValue(instance, convertedValue);
         }
 
-        private Type GetPropertyListType(PropertyInfo property)
+        private bool IsPropertyDictionary(PropertyInfo property)
+        {
+            if(property.PropertyType.IsGenericType)
+            {
+                var genericTypeDefinition = property.PropertyType.GetGenericTypeDefinition();
+
+                if(genericTypeDefinition == typeof(IDictionary<,>))
+                    return true;
+                else
+                {
+                    var interfaces = property.PropertyType.GetInterfaces();
+                    foreach(var inf in interfaces)
+                    {
+                        if(!inf.IsGenericType)
+                            continue;
+
+                        if(typeof(IDictionary<,>) == inf.GetGenericTypeDefinition())
+                            return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private Type GetPropertyGenericValueType(PropertyInfo property)
         {
             if(property.PropertyType.IsGenericType)
             {
@@ -325,6 +360,8 @@ namespace Chel
 
                 if(genericTypeDefinition == typeof(IEnumerable<>))
                     return property.PropertyType.GetGenericArguments()[0];
+                else if(genericTypeDefinition == typeof(IDictionary<,>))
+                    return property.PropertyType.GetGenericArguments()[1];
                 else
                 {
                     var interfaces = property.PropertyType.GetInterfaces();
@@ -337,11 +374,43 @@ namespace Chel
                         {
                             return inf.GetGenericArguments()[0];
                         }
+
+                        if(typeof(IDictionary<,>) == inf.GetGenericTypeDefinition())
+                        {
+                            return inf.GetGenericArguments()[1];
+                        }
                     }
                 }
             }
             else if(property.PropertyType.HasElementType)
                 return property.PropertyType.GetElementType();
+
+            return null;
+        }
+
+        private Type GetPropertyGenericKeyType(PropertyInfo property)
+        {
+            if(property.PropertyType.IsGenericType)
+            {
+                var genericTypeDefinition = property.PropertyType.GetGenericTypeDefinition();
+
+                if(genericTypeDefinition == typeof(IDictionary<,>))
+                    return property.PropertyType.GetGenericArguments()[0];
+                else
+                {
+                    var interfaces = property.PropertyType.GetInterfaces();
+                    foreach(var inf in interfaces)
+                    {
+                        if(!inf.IsGenericType)
+                            continue;
+
+                        if(typeof(IDictionary<,>) == inf.GetGenericTypeDefinition())
+                        {
+                            return inf.GetGenericArguments()[0];
+                        }
+                    }
+                }
+            }
 
             return null;
         }
@@ -378,6 +447,39 @@ namespace Chel
             }
             else
                 property.SetValue(instance, values);
+        }
+
+        private void BindDictionaryProperty(ICommand instance, PropertyInfo property, Type keyType, Type valueType, string parameterIdentifier, Map value, ParameterBindResult result)
+        {
+            if(keyType == null || valueType == null)
+            {
+                result.AddError(string.Format(Texts.CannotBindMapToNonMapParameter, parameterIdentifier));
+                return;
+            }
+
+            if(keyType != typeof(string))
+            {
+                result.AddError(string.Format(Texts.KeyTypeMustBeString, property.DeclaringType.FullName + "." + property.Name));
+                return;
+            }
+
+            var elementType = typeof(Dictionary<,>).MakeGenericType(keyType, valueType);
+            var elements = Activator.CreateInstance(elementType) as IDictionary;
+            foreach(var entry in value.Entries)
+            {
+                if(!entry.Value.GetType().IsSubclassOf(typeof(ChelType)))
+                    throw new InvalidOperationException(Texts.ListValuesMustBeChelType);
+
+                var bindingValue = ReplaceVariables(entry.Value as ChelType, result);
+                if(bindingValue == null)
+                    continue;
+
+                var convertedValue = ConvertPropertyValue(bindingValue, valueType, property);
+                
+                elements.Add(entry.Key, convertedValue);
+            }
+
+            property.SetValue(instance, elements);
         }
 
         private ICommandParameter ReplaceVariables(ICommandParameter value, ParameterBindResult result)

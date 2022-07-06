@@ -6,7 +6,11 @@ namespace Chel
 
         public const string CannotBindListToNonListParameter = "Cannot bind a list to a non-list parameter '{0}'";
 
+        public const string CannotBindMapToNonMapParameter = "Cannot bind a map to a non-map parameter '{0}'";
+
         public const string CannotBindNonListToListParameter = "Cannot bind a non-list to a list parameter '{0}'";
+
+        public const string CannotBindNonMapToMapParameter = "Cannot bind a non-map to a map parameter '{0}'";
 
         public const string CannotDisplayHelpUnknownCommnad = "Cannot display help for unknown command '{0}'";
 
@@ -37,6 +41,8 @@ namespace Chel
         public const string InvalidParameterValueForNamedParameter = "Invalid parameter value '{0}' for named parameter '{1}'. {2}";
 
         public const string InvalidParameterValueForNumberedParameter = "Invalid parameter value '{0}' for numbered parameter '{1}'.";
+
+        public const string KeyTypeMustBeString = "Key type of property '{0}' must be 'string'.";
 
         public const string ListValuesMustBeChelType = "List values must only be of type ChelType";
 

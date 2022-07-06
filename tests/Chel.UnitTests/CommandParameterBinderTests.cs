@@ -1276,7 +1276,7 @@ namespace Chel.UnitTests
         }
 
         [Fact]
-        public void Bind_SetSingleValueOnList_ErrorIncludedInResult()
+        public void Bind_SetLiteralOnList_ErrorIncludedInResult()
         {
             // arrange
             var sut = CreateCommandParameterBinder(typeof(ListParameterCommand));
@@ -1509,6 +1509,42 @@ namespace Chel.UnitTests
         }
 
         [Fact]
+        public void Bind_ListParameterContainsMap_BindsToDictionary()
+        {
+            // arrange
+            var sut = CreateCommandParameterBinder(typeof(ListParameterCommand));
+            var command = new ListParameterCommand();
+            var input = CreateCommandInput(
+                "list-params",
+                new ParameterNameCommandParameter("maplist"),
+                new List(new[]
+                {
+                    new Map(new MapEntries
+                    {
+                        { "key1", new Literal("value1") },
+                        { "key2", new Literal("value2") }
+                    }),
+                    new Map(new MapEntries
+                    {
+                        { "key3", new Literal("value3") },
+                        { "key4", new Literal("value4") }
+                    })
+                })
+            );
+
+            // act
+            var result = sut.Bind(command, input);
+
+            // assert
+            Assert.True(result.Success);
+            Assert.Equal(2, command.MapList.Count);
+            Assert.Equal("value1", ((Literal)command.MapList[0].Entries["key1"]).Value);
+            Assert.Equal("value2", ((Literal)command.MapList[0].Entries["key2"]).Value);
+            Assert.Equal("value3", ((Literal)command.MapList[1].Entries["key3"]).Value);
+            Assert.Equal("value4", ((Literal)command.MapList[1].Entries["key4"]).Value);
+        }
+
+        [Fact]
         public void Bind_ExpandNonMapParameter_ErrorsIncludedInResult()
         {
             // arrange
@@ -1617,6 +1653,197 @@ namespace Chel.UnitTests
             // assert
             Assert.False(result.Success);
             Assert.Equal(new[]{ "Unknown named parameter 'invalid2'", "Unknown named parameter 'invalid'" }, result.Errors);
+        }
+
+        [Fact]
+        public void Bind_MapToDictionaryProperty_BindsProperty()
+        {
+            // arrange
+            var sut = CreateCommandParameterBinder(typeof(DictionaryParameterCommand));
+            var command = new DictionaryParameterCommand();
+
+            var map = new Map(new MapEntries
+            {
+                { "key1", new Literal("value1") },
+                { "key2", new Literal("value2") }
+            });
+
+            var commandInput = CreateCommandInput(
+                "map-params",
+                new ParameterNameCommandParameter("dictionary"),
+                map
+            );
+
+            // act
+            var result = sut.Bind(command, commandInput);
+
+            // assert
+            Assert.True(result.Success);
+            Assert.Equal(2, command.Dictionary.Count);
+            Assert.Equal("value1", command.Dictionary["key1"]);
+            Assert.Equal("value2", command.Dictionary["key2"]);
+        }
+
+        [Fact]
+        public void Bind_MapToAbstractDictionaryProperty_BindsProperty()
+        {
+            // arrange
+            var sut = CreateCommandParameterBinder(typeof(DictionaryParameterCommand));
+            var command = new DictionaryParameterCommand();
+
+            var map = new Map(new MapEntries
+            {
+                { "key1", new Literal("value1") },
+                { "key2", new Literal("value2") }
+            });
+
+            var commandInput = CreateCommandInput(
+                "map-params",
+                new ParameterNameCommandParameter("abstract-dictionary"),
+                map
+            );
+
+            // act
+            var result = sut.Bind(command, commandInput);
+
+            // assert
+            Assert.True(result.Success);
+            Assert.Equal(2, command.AbstractDictionary.Count);
+            Assert.Equal("value1", command.AbstractDictionary["key1"]);
+            Assert.Equal("value2", command.AbstractDictionary["key2"]);
+        }
+
+        [Fact]
+        public void Bind_MapToIntValueDictionaryProperty_BindsProperty()
+        {
+            // arrange
+            var sut = CreateCommandParameterBinder(typeof(DictionaryParameterCommand));
+            var command = new DictionaryParameterCommand();
+
+            var map = new Map(new MapEntries
+            {
+                { "key1", new Literal("42") },
+                { "key2", new Literal("43") }
+            });
+
+            var commandInput = CreateCommandInput(
+                "map-params",
+                new ParameterNameCommandParameter("intdictionary"),
+                map
+            );
+
+            // act
+            var result = sut.Bind(command, commandInput);
+
+            // assert
+            Assert.True(result.Success);
+            Assert.Equal(2, command.IntDictionary.Count);
+            Assert.Equal(42, command.IntDictionary["key1"]);
+            Assert.Equal(43, command.IntDictionary["key2"]);
+        }
+
+        [Fact]
+        public void Bind_MapToListValueDictionaryProperty_BindsProperty()
+        {
+            // arrange
+            var sut = CreateCommandParameterBinder(typeof(DictionaryParameterCommand));
+            var command = new DictionaryParameterCommand();
+
+            var values1 = new[]{ new Literal("val1.1"), new Literal("val1.2") };
+            var values2 = new[]{ new Literal("val2.1"), new Literal("val2.2") };
+
+            var map = new Map(new MapEntries
+            {
+                { "key1", new Chel.Abstractions.Types.List(values1) },
+                { "key2", new Chel.Abstractions.Types.List(values2) }
+            });
+
+            var commandInput = CreateCommandInput(
+                "map-params",
+                new ParameterNameCommandParameter("list-dictionary"),
+                map
+            );
+
+            // act
+            var result = sut.Bind(command, commandInput);
+
+            // assert
+            Assert.True(result.Success);
+            Assert.Equal(2, command.ListDictionary.Count);
+            Assert.Equal(values1, command.ListDictionary["key1"].Values);
+            Assert.Equal(values2, command.ListDictionary["key2"].Values);
+        }
+
+        [Fact]
+        public void Bind_MapKeyIncorrectType_ErrorsIncludedInResult()
+        {
+            // arrange
+            var sut = CreateCommandParameterBinder(typeof(DictionaryParameterCommand));
+            var command = new DictionaryParameterCommand();
+
+            var map = new Map(new MapEntries
+            {
+                { "key1", new Literal("value1") }
+            });
+
+            var commandInput = CreateCommandInput(
+                "map-params",
+                new ParameterNameCommandParameter("invalidkeytype"),
+                map
+            );
+
+            // act
+            var result = sut.Bind(command, commandInput);
+
+            // assert
+            Assert.False(result.Success);
+            Assert.Equal(new[]{ "Key type of property 'Chel.UnitTests.SampleCommands.DictionaryParameterCommand.InvalidKeyTypeParam' must be 'string'." }, result.Errors);
+        }
+
+        [Fact]
+        public void Bind_SetLiteralOnMap_ErrorIncludedInResult()
+        {
+            // arrange
+            var sut = CreateCommandParameterBinder(typeof(DictionaryParameterCommand));
+            var command = new DictionaryParameterCommand();
+            var input = CreateCommandInput(
+                "map-params",
+                new ParameterNameCommandParameter("dictionary"),
+                new Literal("a")
+            );
+
+            // act
+            var result = sut.Bind(command, input);
+
+            // assert
+            Assert.False(result.Success);
+            Assert.StartsWith("Cannot bind a non-map to a map parameter 'dictionary'", result.Errors[0]);
+        }
+
+        [Fact]
+        public void Bind_SetMapOnLiteralProperty_ErrorIncludedInResult()
+        {
+            // arrange
+            var sut = CreateCommandParameterBinder(typeof(ParameterTypesCommand));
+            var command = new ParameterTypesCommand();
+
+            var map = new Map(new MapEntries
+            {
+                { "key1", new Literal("value1") }
+            });
+
+            var input = CreateCommandInput(
+                "command",
+                new ParameterNameCommandParameter("string"),
+                map
+            );
+
+            // act
+            var result = sut.Bind(command, input);
+
+            // assert
+            Assert.False(result.Success);
+            Assert.StartsWith("Cannot bind a map to a non-map parameter 'string'", result.Errors[0]);
         }
 
         private CommandParameterBinder CreateCommandParameterBinder(params Type[] commandTypes)
