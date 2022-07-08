@@ -83,7 +83,7 @@ namespace Chel.Abstractions.UnitTests
             // assert
             Assert.Equal("name", sut.Name);
             Assert.Equal("value", sut.ValuePlaceholderText);
-            Assert.Equal(property, sut.Property);
+            Assert.Equal(property, sut.Property.Property);
             Assert.True(sut.Required);
         }
 

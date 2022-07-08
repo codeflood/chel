@@ -45,7 +45,7 @@ namespace Chel.Abstractions.UnitTests
             var sut = Substitute.ForPartsOf<ParameterDescriptor>(property, textResolver, true);
 
             // assert
-            Assert.Equal(property, sut.Property);
+            Assert.Equal(property, sut.Property.Property);
             Assert.True(sut.Required);
         }
 

@@ -4,7 +4,7 @@ using Chel.Abstractions;
 using Chel.Abstractions.Results;
 using Chel.Abstractions.Types;
 
-namespace Chel.UnitTests.SampleCommands
+namespace Chel.Abstractions.UnitTests.SampleCommands
 {
     [Command("list-params")]
 	public class ListParameterCommand : ICommand

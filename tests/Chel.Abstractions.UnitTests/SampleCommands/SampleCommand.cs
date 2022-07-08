@@ -1,4 +1,3 @@
-using Chel.Abstractions;
 using Chel.Abstractions.Results;
 
 namespace Chel.Abstractions.UnitTests.SampleCommands
@@ -8,7 +7,7 @@ namespace Chel.Abstractions.UnitTests.SampleCommands
     [Description("das description", "de")]
     public class SampleCommand : ICommand
     {
-        [NumberedParameter(0, "param")]
+        [NumberedParameter(1, "param")]
         public string Parameter { get; set; }
 
         public CommandResult Execute()

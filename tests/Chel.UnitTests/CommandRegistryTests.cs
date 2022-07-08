@@ -1,5 +1,6 @@
 using System;
 using Chel.Abstractions;
+using Chel.Abstractions.UnitTests.SampleCommands;
 using Chel.Exceptions;
 using Chel.UnitTests.Comparers;
 using Chel.UnitTests.SampleCommands;
@@ -70,7 +71,7 @@ namespace Chel.UnitTests
 
             // act, assert
             var ex = Assert.Throws<InvalidOperationException>(sutAction);
-            Assert.Contains("Descriptor for Chel.UnitTests.SampleCommands.SampleCommand could not be generated", ex.Message);
+            Assert.Contains("Descriptor for Chel.Abstractions.UnitTests.SampleCommands.SampleCommand could not be generated", ex.Message);
         }
 
         [Fact]

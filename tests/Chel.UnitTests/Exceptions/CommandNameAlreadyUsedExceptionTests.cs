@@ -1,4 +1,5 @@
 using System;
+using Chel.Abstractions.UnitTests.SampleCommands;
 using Chel.UnitTests.SampleCommands;
 using Xunit;
 
@@ -65,7 +66,7 @@ namespace Chel.UnitTests.Exceptions
             var result = sut.ToString();
 
             // assert
-            Assert.Equal("Chel.CommandNameAlreadyUsedException: Command name 'sample' on command type Chel.UnitTests.SampleCommands.DuplicateSampleCommand is already used on command type Chel.UnitTests.SampleCommands.SampleCommand", result);
+            Assert.Equal("Chel.CommandNameAlreadyUsedException: Command name 'sample' on command type Chel.UnitTests.SampleCommands.DuplicateSampleCommand is already used on command type Chel.Abstractions.UnitTests.SampleCommands.SampleCommand", result);
         }
     }
 }

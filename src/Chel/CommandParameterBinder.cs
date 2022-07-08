@@ -281,138 +281,42 @@ namespace Chel
 
         private void AssertWritableProperty(ParameterDescriptor descriptor, object instance)
         {
-            if(!descriptor.Property.CanWrite)
-                throw new InvalidOperationException(string.Format(Texts.PropertyMissingSetter, descriptor.Property.Name, instance.GetType().FullName));
+            if(!descriptor.Property.Property.CanWrite)
+                throw new InvalidOperationException(string.Format(Texts.PropertyMissingSetter, descriptor.Property.Property.Name, instance.GetType().FullName));
         }
 
-        private void BindProperty(ICommand instance, PropertyInfo property, string parameterIdentifier, ChelType value, ParameterBindResult result)
+        private void BindProperty(ICommand instance, Abstractions.PropertyDescriptor propertyDescriptor, string parameterIdentifier, ChelType value, ParameterBindResult result)
         {
             var bindingValue = ReplaceVariables(value, result);
             if(bindingValue == null)
                 return;
 
-            if(property.PropertyType == typeof(ChelType))
+            if(propertyDescriptor.Property.PropertyType == typeof(ChelType))
             {
-                property.SetValue(instance, bindingValue);
+                propertyDescriptor.Property.SetValue(instance, bindingValue);
                 return;
             }
 
-            var valueType = GetPropertyGenericValueType(property);
-
             if(bindingValue is List list)
             {
-                BindListProperty(instance, property, valueType, parameterIdentifier, list, result);
+                BindListProperty(instance, propertyDescriptor.Property, propertyDescriptor.GenericValueType, parameterIdentifier, list, result);
                 return;
             }
             else if(bindingValue is Map map)
             {
-                var keyType = GetPropertyGenericKeyType(property);
-                BindDictionaryProperty(instance, property, keyType, valueType, parameterIdentifier, map, result);
+                BindDictionaryProperty(instance, propertyDescriptor.Property, propertyDescriptor.GenericKeyType, propertyDescriptor.GenericValueType, parameterIdentifier, map, result);
                 return;
             }
-            else if(valueType != null)
-            {
-                if(IsPropertyDictionary(property))
-                    result.AddError(string.Format(Texts.CannotBindNonMapToMapParameter, parameterIdentifier));
-                else
-                    result.AddError(string.Format(Texts.CannotBindNonListToListParameter, parameterIdentifier));
+            else if(propertyDescriptor.IsTypeListCompatible)
+                result.AddError(string.Format(Texts.CannotBindNonListToListParameter, parameterIdentifier));
+            else if(propertyDescriptor.IsTypeMapCompatible)
+                result.AddError(string.Format(Texts.CannotBindNonMapToMapParameter, parameterIdentifier));
 
-                return;
-            }
-
-            var convertedValue = ConvertPropertyValue(bindingValue, property.PropertyType, property);
+            var convertedValue = ConvertPropertyValue(bindingValue, propertyDescriptor.Property.PropertyType, propertyDescriptor.Property);
             if(convertedValue == null)
                 return;
 
-            property.SetValue(instance, convertedValue);
-        }
-
-        private bool IsPropertyDictionary(PropertyInfo property)
-        {
-            if(property.PropertyType.IsGenericType)
-            {
-                var genericTypeDefinition = property.PropertyType.GetGenericTypeDefinition();
-
-                if(genericTypeDefinition == typeof(IDictionary<,>))
-                    return true;
-                else
-                {
-                    var interfaces = property.PropertyType.GetInterfaces();
-                    foreach(var inf in interfaces)
-                    {
-                        if(!inf.IsGenericType)
-                            continue;
-
-                        if(typeof(IDictionary<,>) == inf.GetGenericTypeDefinition())
-                            return true;
-                    }
-                }
-            }
-
-            return false;
-        }
-
-        private Type GetPropertyGenericValueType(PropertyInfo property)
-        {
-            if(property.PropertyType.IsGenericType)
-            {
-                var genericTypeDefinition = property.PropertyType.GetGenericTypeDefinition();
-
-                if(genericTypeDefinition == typeof(IEnumerable<>))
-                    return property.PropertyType.GetGenericArguments()[0];
-                else if(genericTypeDefinition == typeof(IDictionary<,>))
-                    return property.PropertyType.GetGenericArguments()[1];
-                else
-                {
-                    var interfaces = property.PropertyType.GetInterfaces();
-                    foreach(var inf in interfaces)
-                    {
-                        if(!inf.IsGenericType)
-                            continue;
-
-                        if(typeof(IEnumerable<>) == inf.GetGenericTypeDefinition())
-                        {
-                            return inf.GetGenericArguments()[0];
-                        }
-
-                        if(typeof(IDictionary<,>) == inf.GetGenericTypeDefinition())
-                        {
-                            return inf.GetGenericArguments()[1];
-                        }
-                    }
-                }
-            }
-            else if(property.PropertyType.HasElementType)
-                return property.PropertyType.GetElementType();
-
-            return null;
-        }
-
-        private Type GetPropertyGenericKeyType(PropertyInfo property)
-        {
-            if(property.PropertyType.IsGenericType)
-            {
-                var genericTypeDefinition = property.PropertyType.GetGenericTypeDefinition();
-
-                if(genericTypeDefinition == typeof(IDictionary<,>))
-                    return property.PropertyType.GetGenericArguments()[0];
-                else
-                {
-                    var interfaces = property.PropertyType.GetInterfaces();
-                    foreach(var inf in interfaces)
-                    {
-                        if(!inf.IsGenericType)
-                            continue;
-
-                        if(typeof(IDictionary<,>) == inf.GetGenericTypeDefinition())
-                        {
-                            return inf.GetGenericArguments()[0];
-                        }
-                    }
-                }
-            }
-
-            return null;
+            propertyDescriptor.Property.SetValue(instance, convertedValue);
         }
 
         private void BindListProperty(ICommand instance, PropertyInfo property, Type listElementType, string parameterIdentifier, List value, ParameterBindResult result)

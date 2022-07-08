@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Chel.Abstractions.Parsing;
 using Chel.Abstractions.Types;
+using Chel.Abstractions.UnitTests.SampleCommands;
 using Chel.Abstractions.Variables;
 using Chel.UnitTests.SampleCommands;
 using Xunit;
@@ -1659,8 +1660,8 @@ namespace Chel.UnitTests
         public void Bind_MapToDictionaryProperty_BindsProperty()
         {
             // arrange
-            var sut = CreateCommandParameterBinder(typeof(DictionaryParameterCommand));
-            var command = new DictionaryParameterCommand();
+            var sut = CreateCommandParameterBinder(typeof(MapParameterCommand));
+            var command = new MapParameterCommand();
 
             var map = new Map(new MapEntries
             {
@@ -1688,8 +1689,8 @@ namespace Chel.UnitTests
         public void Bind_MapToAbstractDictionaryProperty_BindsProperty()
         {
             // arrange
-            var sut = CreateCommandParameterBinder(typeof(DictionaryParameterCommand));
-            var command = new DictionaryParameterCommand();
+            var sut = CreateCommandParameterBinder(typeof(MapParameterCommand));
+            var command = new MapParameterCommand();
 
             var map = new Map(new MapEntries
             {
@@ -1717,8 +1718,8 @@ namespace Chel.UnitTests
         public void Bind_MapToIntValueDictionaryProperty_BindsProperty()
         {
             // arrange
-            var sut = CreateCommandParameterBinder(typeof(DictionaryParameterCommand));
-            var command = new DictionaryParameterCommand();
+            var sut = CreateCommandParameterBinder(typeof(MapParameterCommand));
+            var command = new MapParameterCommand();
 
             var map = new Map(new MapEntries
             {
@@ -1746,8 +1747,8 @@ namespace Chel.UnitTests
         public void Bind_MapToListValueDictionaryProperty_BindsProperty()
         {
             // arrange
-            var sut = CreateCommandParameterBinder(typeof(DictionaryParameterCommand));
-            var command = new DictionaryParameterCommand();
+            var sut = CreateCommandParameterBinder(typeof(MapParameterCommand));
+            var command = new MapParameterCommand();
 
             var values1 = new[]{ new Literal("val1.1"), new Literal("val1.2") };
             var values2 = new[]{ new Literal("val2.1"), new Literal("val2.2") };
@@ -1778,8 +1779,8 @@ namespace Chel.UnitTests
         public void Bind_MapKeyIncorrectType_ErrorsIncludedInResult()
         {
             // arrange
-            var sut = CreateCommandParameterBinder(typeof(DictionaryParameterCommand));
-            var command = new DictionaryParameterCommand();
+            var sut = CreateCommandParameterBinder(typeof(MapParameterCommand));
+            var command = new MapParameterCommand();
 
             var map = new Map(new MapEntries
             {
@@ -1797,15 +1798,15 @@ namespace Chel.UnitTests
 
             // assert
             Assert.False(result.Success);
-            Assert.Equal(new[]{ "Key type of property 'Chel.UnitTests.SampleCommands.DictionaryParameterCommand.InvalidKeyTypeParam' must be 'string'." }, result.Errors);
+            Assert.Equal(new[]{ "Key type of property 'Chel.Abstractions.UnitTests.SampleCommands.MapParameterCommand.InvalidKeyTypeParam' must be 'string'." }, result.Errors);
         }
 
         [Fact]
         public void Bind_SetLiteralOnMap_ErrorIncludedInResult()
         {
             // arrange
-            var sut = CreateCommandParameterBinder(typeof(DictionaryParameterCommand));
-            var command = new DictionaryParameterCommand();
+            var sut = CreateCommandParameterBinder(typeof(MapParameterCommand));
+            var command = new MapParameterCommand();
             var input = CreateCommandInput(
                 "map-params",
                 new ParameterNameCommandParameter("dictionary"),

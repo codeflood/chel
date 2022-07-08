@@ -3,6 +3,7 @@ using Chel.Abstractions;
 using Chel.Abstractions.Parsing;
 using Chel.Abstractions.Results;
 using Chel.Abstractions.Types;
+using Chel.Abstractions.UnitTests.SampleCommands;
 using Chel.Abstractions.Variables;
 using Chel.Exceptions;
 using Chel.Parsing;

@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using Chel.Abstractions.UnitTests.SampleCommands;
 using Chel.Exceptions;
 using Chel.UnitTests.SampleCommands;
 using Xunit;
@@ -89,13 +90,13 @@ namespace Chel.UnitTests
             var numberedParameterDescriptor1 = descriptor.NumberedParameters[0];
             Assert.Equal(1, numberedParameterDescriptor1.Number);
             Assert.Equal("param1", numberedParameterDescriptor1.PlaceholderText);
-            Assert.Equal(typeof(NumberedParameterCommand).GetProperty("NumberedParameter1"), numberedParameterDescriptor1.Property);
+            Assert.Equal(typeof(NumberedParameterCommand).GetProperty("NumberedParameter1"), numberedParameterDescriptor1.Property.Property);
             Assert.Equal("The first parameter", numberedParameterDescriptor1.GetDescription(""));
 
             var numberedParameterDescriptor2 = descriptor.NumberedParameters[1];
             Assert.Equal(2, numberedParameterDescriptor2.Number);
             Assert.Equal("param2", numberedParameterDescriptor2.PlaceholderText);
-            Assert.Equal(typeof(NumberedParameterCommand).GetProperty("NumberedParameter2"), numberedParameterDescriptor2.Property);
+            Assert.Equal(typeof(NumberedParameterCommand).GetProperty("NumberedParameter2"), numberedParameterDescriptor2.Property.Property);
             Assert.Equal("The second parameter", numberedParameterDescriptor2.GetDescription(""));
         }
 
@@ -115,13 +116,13 @@ namespace Chel.UnitTests
             var namedParameterDescriptor1 = descriptor.NamedParameters["param1"];
             Assert.Equal("param1", namedParameterDescriptor1.Name);
             Assert.Equal("value1", namedParameterDescriptor1.ValuePlaceholderText);
-            Assert.Equal(typeof(NamedParameterCommand).GetProperty("NamedParameter1"), namedParameterDescriptor1.Property);
+            Assert.Equal(typeof(NamedParameterCommand).GetProperty("NamedParameter1"), namedParameterDescriptor1.Property.Property);
             Assert.Equal("The param1 parameter.", namedParameterDescriptor1.GetDescription(""));
 
             var namedParameterDescriptor2 = descriptor.NamedParameters["param2"];
             Assert.Equal("param2", namedParameterDescriptor2.Name);
             Assert.Equal("value2", namedParameterDescriptor2.ValuePlaceholderText);
-            Assert.Equal(typeof(NamedParameterCommand).GetProperty("NamedParameter2"), namedParameterDescriptor2.Property);
+            Assert.Equal(typeof(NamedParameterCommand).GetProperty("NamedParameter2"), namedParameterDescriptor2.Property.Property);
             Assert.Equal("The param2 parameter.", namedParameterDescriptor2.GetDescription(""));
         }
         
@@ -166,11 +167,11 @@ namespace Chel.UnitTests
 
             var flagParameterDescriptor1 = descriptor.FlagParameters[0];
             Assert.Equal("p1", flagParameterDescriptor1.Name);
-            Assert.Equal(typeof(FlagParameterCommand).GetProperty("Param1"), flagParameterDescriptor1.Property);
+            Assert.Equal(typeof(FlagParameterCommand).GetProperty("Param1"), flagParameterDescriptor1.Property.Property);
 
             var flagParameterDescriptor2 = descriptor.FlagParameters[1];
             Assert.Equal("p2", flagParameterDescriptor2.Name);
-            Assert.Equal(typeof(FlagParameterCommand).GetProperty("Param2"), flagParameterDescriptor2.Property);
+            Assert.Equal(typeof(FlagParameterCommand).GetProperty("Param2"), flagParameterDescriptor2.Property.Property);
         }
 
         [Fact]

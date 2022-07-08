@@ -1,13 +1,12 @@
 using System.Collections.Generic;
 using System.Linq;
-using Chel.Abstractions;
 using Chel.Abstractions.Results;
 using Chel.Abstractions.Types;
 
-namespace Chel.UnitTests.SampleCommands
+namespace Chel.Abstractions.UnitTests.SampleCommands
 {
     [Command("map-params")]
-    public class DictionaryParameterCommand : ICommand
+    public class MapParameterCommand : ICommand
     {
         [NamedParameter("dictionary", "dictionary")]
         public Dictionary<string, string> Dictionary { get; set; }

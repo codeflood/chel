@@ -13,7 +13,7 @@ namespace Chel.Abstractions
         /// <summary>
         /// Gets the property the parameter will be bound to.
         /// </summary>
-        public PropertyInfo Property { get; }
+        public PropertyDescriptor Property { get; }
 
         /// <summary>
         /// Gets whether the parameter is required or not.
@@ -34,7 +34,7 @@ namespace Chel.Abstractions
             if(descriptions == null)
                 throw new ArgumentNullException(nameof(descriptions));
 
-            Property = property;
+            Property = new PropertyDescriptor(property);
             _descriptions = descriptions;
             Required = required;
         }
