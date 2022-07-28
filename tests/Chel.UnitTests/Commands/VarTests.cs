@@ -58,7 +58,7 @@ namespace Chel.UnitTests.Commands
         }
 
         [Fact]
-        public void Execute_NoParametersVariablesSet_ReturnsVariablesNamesAndValues()
+        public void Execute_NoParametersVariablesSet_ReturnsVariablesAsMap()
         {
             // arrange
             var sut = CreateVarCommand(variables => {
@@ -70,8 +70,10 @@ namespace Chel.UnitTests.Commands
             var result = sut.Execute() as ValueResult;
 
             // assert
-            Assert.Matches(@"name1\s+value1", result.Value.ToString());
-            Assert.Matches(@"name2\s+value2", result.Value.ToString());
+            var vars = Assert.IsType<Map>(result.Value);
+            Assert.Equal(2, vars.Entries.Count);
+            Assert.Equal("value1", (vars.Entries["name1"] as Literal).Value);
+            Assert.Equal("value2", (vars.Entries["name2"] as Literal).Value);
         }
 
         [Fact]

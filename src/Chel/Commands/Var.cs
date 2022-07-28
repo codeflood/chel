@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using Chel.Abstractions;
+using Chel.Abstractions.Parsing;
 using Chel.Abstractions.Results;
 using Chel.Abstractions.Types;
 using Chel.Abstractions.Variables;
@@ -77,19 +79,22 @@ namespace Chel
 
         private ChelType ListVariables()
         {
-            var output = new StringBuilder();
+            //var output = new StringBuilder();
 
             var names = _variables.Names;
             if(names.Count == 0)
                 return new Literal(_phraseDictionary.GetPhrase(Texts.PhraseKeys.NoVariablesSet, _executionCultureName));
 
+            var output = new Dictionary<string, ICommandParameter>();
+
             foreach(var name in names)
             {
                 var variable = _variables.Get(name);
-                output.Append($"{name, Constants.FirstColumnWidth}{variable.Value}{Environment.NewLine}");
+                //output.Append($"{name, Constants.FirstColumnWidth}{variable.Value}{Environment.NewLine}");
+                output.Add(variable.Name, variable.Value);
             }
 
-            return new Literal(output.ToString());
+            return new Map(output);
         }
 
         private ChelType ShowOrClearVariable()
