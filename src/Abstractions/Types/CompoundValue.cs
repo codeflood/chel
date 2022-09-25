@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Chel.Abstractions.Parsing;
 
 namespace Chel.Abstractions.Types
 {
@@ -9,17 +10,7 @@ namespace Chel.Abstractions.Types
 	/// </summary>
 	public class CompoundValue : List
     {
-        public CompoundValue(Literal value)
-            : base(value == null ? null : new List<ChelType> { value })
-        {
-        }
-
-        public CompoundValue(VariableReference value)
-            : base(value == null ? null : new List<ChelType> { value })
-        {
-        }
-
-        public CompoundValue(IReadOnlyList<ChelType> values)
+        public CompoundValue(IReadOnlyList<ICommandParameter> values)
             : base(values)
         {
             foreach(var value in values)

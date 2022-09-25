@@ -1,17 +1,10 @@
-using System;
-
 namespace Chel.Abstractions.Parsing
 {
     /// <summary>
     /// A command parameter which has been parsed from source.
     /// </summary>
-    public class SourceCommandParameter
+    public abstract class SourceCommandParameter
     {
-        /// <summary>
-        /// Gets the value of the command parameter.
-        /// </summary>
-        public ICommandParameter Value { get; }
-
         /// <summary>
         /// Gets the location the value was parsed from.
         /// </summary>
@@ -20,31 +13,28 @@ namespace Chel.Abstractions.Parsing
         /// <summary>
         /// Create a new instance.
         /// </summary>
-        /// <param name="value">The value of the command parameter.</param>
-        /// <param name="value">The location the value was parsed from.</param>
-        public SourceCommandParameter(ICommandParameter value, SourceLocation sourceLocation)
+        /// <param name="sourceLocation">The location the value was parsed from.</param>
+        public SourceCommandParameter(SourceLocation sourceLocation)
         {
-            Value = value ?? throw new ArgumentNullException(nameof(value));
             SourceLocation = sourceLocation;
         }
 
         public override bool Equals(object obj)
         {
-            if (obj == null || obj.GetType() != typeof(SourceCommandParameter))
-            {
+            if(obj == null)
                 return false;
-            }
-
-            var other = (SourceCommandParameter)obj;
             
-            return
-                Value.Equals(other.Value) &&
-                SourceLocation.Equals(other.SourceLocation);
+            var other = obj as SourceCommandParameter;
+
+            if (other == null)
+                return false;
+            
+            return SourceLocation.Equals(other.SourceLocation);
         }
         
         public override int GetHashCode()
         {
-            return (Value, SourceLocation).GetHashCode();
+            return SourceLocation.GetHashCode();
         }
     }
 }

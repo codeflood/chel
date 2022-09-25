@@ -7,13 +7,8 @@ namespace Chel.Abstractions.Parsing
     /// <summary>
     /// A single command input to be executed.
     /// </summary>
-    public class CommandInput : ICommandParameter
+    public class CommandInput : SourceCommandParameter
     {
-        /// <summary>
-        /// Gets the location the command was parsed from.
-        /// </summary>
-        public SourceLocation SourceLocation { get; private set; }
-
         /// <summary>
         /// Gets the name of the command to execute.
         /// </summary>
@@ -27,9 +22,10 @@ namespace Chel.Abstractions.Parsing
         /// <summary>
         /// Gets the parameters for the command.
         /// </summary>
-        public IReadOnlyList<ICommandParameter> Parameters { get; private set; }
+        public IReadOnlyList<SourceCommandParameter> Parameters { get; private set; }
 
-        private CommandInput()
+        private CommandInput(SourceLocation sourceLocation)
+            : base(sourceLocation)
         {
         }
 
@@ -81,7 +77,7 @@ namespace Chel.Abstractions.Parsing
         {
             private SourceLocation _sourceLocation;
             private string _commandName = null;
-            private List<ICommandParameter> _parameters = null;
+            private List<SourceCommandParameter> _parameters = null;
 
             /// <summary>
             /// Create a new instance.
@@ -99,14 +95,14 @@ namespace Chel.Abstractions.Parsing
                 _sourceLocation = sourceLocation;
                 _commandName = commandName;
 
-                _parameters = new List<ICommandParameter>();
+                _parameters = new List<SourceCommandParameter>();
             }
 
             /// <summary>
             /// Add a parameter to the command input.
             /// </summary>
             /// <param name="value">The parameter value to add.</param>
-            public void AddParameter(ICommandParameter value)
+            public void AddParameter(SourceCommandParameter value)
             {
                 if(value == null)
                     throw new ArgumentNullException(nameof(value));
@@ -119,11 +115,10 @@ namespace Chel.Abstractions.Parsing
             /// </summary>
             public CommandInput Build()
             {
-                var commandInput = new CommandInput()
+                var commandInput = new CommandInput(_sourceLocation)
                 {
-                    SourceLocation = _sourceLocation,
                     CommandName = _commandName,
-                    Parameters = new List<ICommandParameter>(_parameters),
+                    Parameters = new List<SourceCommandParameter>(_parameters),
                 };
 
                 return commandInput;

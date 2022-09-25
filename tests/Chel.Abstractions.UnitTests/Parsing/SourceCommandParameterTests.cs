@@ -1,7 +1,6 @@
-using System;
 using System.Collections.Generic;
 using Chel.Abstractions.Parsing;
-using Chel.Abstractions.Types;
+using NSubstitute;
 using Xunit;
 
 namespace Chel.Abstractions.UnitTests.Parsing
@@ -9,28 +8,15 @@ namespace Chel.Abstractions.UnitTests.Parsing
     public class SourceCommandParameterTests
     {
         [Fact]
-        public void Ctor_ValueIsNull_ThrowsException()
-        {
-            // arrange
-            Action sutAction = () => new SourceCommandParameter(null, new SourceLocation(1, 2));
-
-            // act, assert
-            var ex = Assert.Throws<ArgumentNullException>(sutAction);
-            Assert.Equal("value", ex.ParamName);
-        }
-
-        [Fact]
         public void Ctor_WhenCalled_SetsProperties()
         {
             // arrange
-            var value = new VariableReference("something");
             var location = new SourceLocation(2, 1);
 
             // act
-            var sut = new SourceCommandParameter(value, location);
+            var sut = Substitute.ForPartsOf<SourceCommandParameter>(location);
 
             // assert
-            Assert.Equal(value, sut.Value);
             Assert.Equal(location, sut.SourceLocation);
         }
 
@@ -38,13 +24,11 @@ namespace Chel.Abstractions.UnitTests.Parsing
         public void Equals_InstancesEqual_ReturnsTrue()
         {
             // arrange
-            var value1 = new Literal("lit1");
             var location1 = new SourceLocation(30, 1);
-            var instance1 = new SourceCommandParameter(value1, location1);
+            var instance1 = Substitute.ForPartsOf<SourceCommandParameter>(location1);
 
-            var value2 = new Literal("lit1");
             var location2 = new SourceLocation(30, 1);
-            var instance2 = new SourceCommandParameter(value2, location2);
+            var instance2 = Substitute.ForPartsOf<SourceCommandParameter>(location2);
 
             // act
             var result = instance1.Equals(instance2);
@@ -68,13 +52,11 @@ namespace Chel.Abstractions.UnitTests.Parsing
         public void GetHashCode_InstancesEqual_ReturnsSameCode()
         {
             // arrange
-            var value1 = new Literal("lit1");
             var location1 = new SourceLocation(30, 1);
-            var instance1 = new SourceCommandParameter(value1, location1);
+            var instance1 = Substitute.ForPartsOf<SourceCommandParameter>(location1);
 
-            var value2 = new Literal("lit1");
             var location2 = new SourceLocation(30, 1);
-            var instance2 = new SourceCommandParameter(value2, location2);
+            var instance2 = Substitute.ForPartsOf<SourceCommandParameter>(location2);
 
             // act
             var result1 = instance1.GetHashCode();
@@ -99,13 +81,13 @@ namespace Chel.Abstractions.UnitTests.Parsing
         public static IEnumerable<object[]> InstancesNotEqualDataSource()
         {
             yield return new[] {
-                new SourceCommandParameter(new Literal("lit1"), new SourceLocation(30, 1)),
-                new SourceCommandParameter(new Literal("lit2"), new SourceLocation(30, 1))
+                Substitute.ForPartsOf<SourceCommandParameter>(new SourceLocation(30, 1)),
+                Substitute.ForPartsOf<SourceCommandParameter>(new SourceLocation(30, 1))
             };
 
             yield return new[] {
-                new SourceCommandParameter(new Literal("lit1"), new SourceLocation(30, 1)),
-                new SourceCommandParameter(new Literal("lit1"), new SourceLocation(31, 1))
+                Substitute.ForPartsOf<SourceCommandParameter>(new SourceLocation(30, 1)),
+                Substitute.ForPartsOf<SourceCommandParameter>(new SourceLocation(31, 1))
             };
         }
     }
