@@ -1,6 +1,6 @@
 using System;
 
-namespace Chel.Abstractions.Parsing
+namespace Chel.Abstractions
 {
     /// <summary>
     /// A location in the source input.

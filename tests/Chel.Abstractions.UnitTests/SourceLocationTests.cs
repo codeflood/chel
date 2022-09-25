@@ -2,7 +2,7 @@ using System;
 using Chel.Abstractions.Parsing;
 using Xunit;
 
-namespace Chel.Abstractions.UnitTests.Parsing
+namespace Chel.Abstractions.UnitTests
 {
     public class SourceLocationTests
     {

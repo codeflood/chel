@@ -1,5 +1,5 @@
 using System;
-using Chel.Abstractions.Parsing;
+using Chel.Abstractions;
 
 namespace Chel.Exceptions
 {
