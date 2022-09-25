@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 using Chel.Abstractions;
 using Chel.Abstractions.Parsing;
@@ -79,8 +78,6 @@ namespace Chel
 
         private ChelType ListVariables()
         {
-            //var output = new StringBuilder();
-
             var names = _variables.Names;
             if(names.Count == 0)
                 return new Literal(_phraseDictionary.GetPhrase(Texts.PhraseKeys.NoVariablesSet, _executionCultureName));
@@ -90,7 +87,6 @@ namespace Chel
             foreach(var name in names)
             {
                 var variable = _variables.Get(name);
-                //output.Append($"{name, Constants.FirstColumnWidth}{variable.Value}{Environment.NewLine}");
                 output.Add(variable.Name, variable.Value);
             }
 
