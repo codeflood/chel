@@ -28,18 +28,30 @@ namespace Chel.Abstractions.Parsing
         }
 
         public override bool Equals(object obj)
-        {   
+        {
+            if(!base.Equals(obj))
+                return false;
+
             if (obj == null || obj.GetType() != typeof(ParameterNameCommandParameter))
                 return false;
             
             var other = (ParameterNameCommandParameter)obj;
             
-            return ParameterName.Equals(other.ParameterName);
+            return
+                // SourceLocation is handled in the base class.
+                ParameterName.Equals(other.ParameterName);
         }
         
         public override int GetHashCode()
         {
-            return ParameterName.GetHashCode();
+            var code = 29;
+            unchecked
+            {
+                code += base.GetHashCode();
+                code += ParameterName.GetHashCode();
+            }
+
+            return code;
         }
 
         public override string ToString()

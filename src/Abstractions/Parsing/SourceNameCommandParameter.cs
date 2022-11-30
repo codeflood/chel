@@ -35,9 +35,7 @@ namespace Chel.Abstractions.Parsing
                 return false;
 
             if (obj == null || obj.GetType() != typeof(SourceNameCommandParameter))
-            {
                 return false;
-            }
 
             var other = (SourceNameCommandParameter)obj;
             

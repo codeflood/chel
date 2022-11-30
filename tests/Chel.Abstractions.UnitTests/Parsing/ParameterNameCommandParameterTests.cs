@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Chel.Abstractions.Parsing;
 using Xunit;
 
@@ -41,7 +42,7 @@ namespace Chel.Abstractions.UnitTests.Parsing
         }
 
         [Fact]
-        public void Equals_ParameterNamesAreEqual_ReturnsTrue()
+        public void Equals_InstancesAreEqual_ReturnsTrue()
         {
             // arrange
             var sut1 = new ParameterNameCommandParameter(new SourceLocation(1, 1), "par");
@@ -54,24 +55,19 @@ namespace Chel.Abstractions.UnitTests.Parsing
             Assert.True(result);
         }
 
-        //todo: source locations are different
-
-        [Fact]
-        public void Equals_ParameterNamesAreDifferent_ReturnsFalse()
+        [Theory]
+        [MemberData(nameof(InstancesNotEqualDataSource))]
+        public void Equals_InstancesAreDifferent_ReturnsFalse(ParameterNameCommandParameter instance1, ParameterNameCommandParameter instance2)
         {
-            // arrange
-            var sut1 = new ParameterNameCommandParameter(new SourceLocation(1, 1), "par1");
-            var sut2 = new ParameterNameCommandParameter(new SourceLocation(1, 4), "par2");
-
             // act
-            var result = sut1.Equals(sut2);
+            var result = instance1.Equals(instance2);
 
             // assert
             Assert.False(result);
         }
 
         [Fact]
-        public void GetHashCode_ParameterNamesAreEqual_ReturnsSameHashCode()
+        public void GetHashCode_InstancesAreEqual_ReturnsSameHashCode()
         {
             // arrange
             var sut1 = new ParameterNameCommandParameter(new SourceLocation(1, 1), "par");
@@ -85,18 +81,13 @@ namespace Chel.Abstractions.UnitTests.Parsing
             Assert.Equal(hashCode1, hashCode2);
         }
 
-        //todo: source locations are different
-
-        [Fact]
-        public void GetHashCode_ParameterNamesAreNotEqual_ReturnsDifferentHashCodes()
+        [Theory]
+        [MemberData(nameof(InstancesNotEqualDataSource))]
+        public void GetHashCode_InstancesAreNotEqual_ReturnsDifferentHashCodes(ParameterNameCommandParameter instance1, ParameterNameCommandParameter instance2)
         {
-            // arrange
-            var sut1 = new ParameterNameCommandParameter(new SourceLocation(1, 1), "par1");
-            var sut2 = new ParameterNameCommandParameter(new SourceLocation(1, 1), "par2");
-
             // act
-            var hashCode1 = sut1.GetHashCode();
-            var hashCode2 = sut2.GetHashCode();
+            var hashCode1 = instance1.GetHashCode();
+            var hashCode2 = instance2.GetHashCode();
 
             // act, assert
             Assert.NotEqual(hashCode1, hashCode2);
@@ -113,6 +104,19 @@ namespace Chel.Abstractions.UnitTests.Parsing
 
             // assert
             Assert.Equal("-par", result);
+        }
+
+        public static IEnumerable<object[]> InstancesNotEqualDataSource()
+        {
+            yield return new[] {
+                new ParameterNameCommandParameter(new SourceLocation(1, 1), "par1"),
+                new ParameterNameCommandParameter(new SourceLocation(1, 1), "par2")
+            };
+
+            yield return new[] {
+                new ParameterNameCommandParameter(new SourceLocation(1, 1), "par1"),
+                new ParameterNameCommandParameter(new SourceLocation(2, 1), "par1")
+            };
         }
     }
 }
