@@ -3,7 +3,7 @@ namespace Chel.Abstractions.Parsing
     /// <summary>
     /// A command parameter which has been parsed from source.
     /// </summary>
-    public abstract class SourceCommandParameter
+    public abstract class SourceCommandParameter : ICommandParameter
     {
         /// <summary>
         /// Gets the location the value was parsed from.

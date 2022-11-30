@@ -1,14 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Chel.Abstractions.Parsing;
 
 namespace Chel.Abstractions.Types
 {
     /// <summary>
     /// A reference to a variable.
     /// </summary>
-    public class VariableReference : ICommandParameter
+    public class VariableReference : ChelType
     {
         /// <summary>
         /// Gets the name of the variable being referenced.

@@ -122,17 +122,43 @@ namespace Chel.UnitTests.Parsing
         }
 
         [Theory]
-        [InlineData("command param")]
-        [InlineData("command   param  ")]
-        [InlineData("command\tparam")]
-        [InlineData("command \t param \t")]
-        public void Parse_SingleParameter_ParameterParsed(string input)
+        [MemberData(nameof(Parse_SingleParameter_ParameterParsed_DataSource))]
+        public void Parse_SingleParameter_ParameterParsed(string input, SourceLocation parameterLocation)
         {
             // arrange
             var sut = CreateParser();
             var location = new SourceLocation(1, 1);
             var builder = new CommandInput.Builder(location, "command");
-            builder.AddParameter(new Literal("param"));
+            builder.AddParameter(new SourceValueCommandParameter(parameterLocation, new Literal("param")));
+            var expectedCommand = builder.Build();
+
+            // act
+            var result = sut.Parse(input);
+
+            // assert
+            Assert.Equal(expectedCommand, result[0]);
+        }
+
+        public static IEnumerable<object[]> Parse_SingleParameter_ParameterParsed_DataSource()
+        {
+            yield return new object[] { "command param", new SourceLocation(1, 9) };
+            yield return new object[] { "command   param  ", new SourceLocation(1, 11) };
+            yield return new object[] { "command\tparam", new SourceLocation(1, 9) };
+            yield return new object[] { "command \t param \t", new SourceLocation(1, 11) };
+        }
+
+        [Theory]
+        [InlineData("command param1 param2", 9, 16)]
+        [InlineData("command\tparam1\tparam2  ", 9, 16)]
+        [InlineData("command  \t  param1  \t  param2  \t", 13, 24)]
+        public void Parse_TwoParameters_ParametersParsed(string input, int p1char, int p2char)
+        {
+            // arrange
+            var sut = CreateParser();
+            var location = new SourceLocation(1, 1);
+            var builder = new CommandInput.Builder(location, "command");
+            builder.AddParameter(new SourceValueCommandParameter(new SourceLocation(1, p1char), new Literal("param1")));
+            builder.AddParameter(new SourceValueCommandParameter(new SourceLocation(1, p2char), new Literal("param2")));
             var expectedCommand = builder.Build();
 
             // act
@@ -143,65 +169,44 @@ namespace Chel.UnitTests.Parsing
         }
 
         [Theory]
-        [InlineData("command param1 param2")]
-        [InlineData("command\tparam1\tparam2  ")]
-        [InlineData("command  \t  param1  \t  param2  \t")]
-        public void Parse_TwoParameters_ParametersParsed(string input)
-        {
-            // arrange
-            var sut = CreateParser();
-            var location = new SourceLocation(1, 1);
-            var builder = new CommandInput.Builder(location, "command");
-            builder.AddParameter(new Literal("param1"));
-            builder.AddParameter(new Literal("param2"));
-            var expectedCommand = builder.Build();
-
-            // act
-            var result = sut.Parse(input);
-
-            // assert
-            Assert.Equal(expectedCommand, result[0]);
-        }
-
-        [Theory]
-        [InlineData("command param1 param2\ncommand param1 param2")]
-        [InlineData("command\tparam1\tparam2  \ncommand\tparam1\tparam2  ")]
-        [InlineData("command  \t  param1  \t  param2  \t\ncommand  \t  param1  \t  param2  \t")]
-        public void Parse_TwoCommandsTwoParameters_ParsedCommandsWithParameters(string input)
+        [InlineData("command param1 param2\ncommand param1 param2", 9, 16, 9, 16)]
+        [InlineData("command\tparam1\tparam2  \ncommand\tparam1\tparam2  ", 9, 16, 9, 16)]
+        [InlineData("command  \t  param1  \t  param2  \t\ncommand  \t  param1  \t  param2  \t", 13, 24, 13, 24)]
+        public void Parse_TwoCommandsTwoParameters_ParsedCommandsWithParameters(string input, int c1p1char, int c1p2char, int c2p1char, int c2p2char)
         {
             // arrange
             var sut = CreateParser();
             
             var location1 = new SourceLocation(1, 1);
             var builder1 = new CommandInput.Builder(location1, "command");
-            builder1.AddParameter(new Literal("param1"));
-            builder1.AddParameter(new Literal("param2"));
+            builder1.AddParameter(new SourceValueCommandParameter(new SourceLocation(1, c1p1char), new Literal("param1")));
+            builder1.AddParameter(new SourceValueCommandParameter(new SourceLocation(1, c1p2char), new Literal("param2")));
             var expectedCommand1 = builder1.Build();
 
             var location2 = new SourceLocation(2, 1);
             var builder2 = new CommandInput.Builder(location2, "command");
-            builder2.AddParameter(new Literal("param1"));
-            builder2.AddParameter(new Literal("param2"));
+            builder2.AddParameter(new SourceValueCommandParameter(new SourceLocation(2, c2p1char), new Literal("param1")));
+            builder2.AddParameter(new SourceValueCommandParameter(new SourceLocation(2, c2p2char), new Literal("param2")));
             var expectedCommand2 = builder2.Build();
 
             // act
             var result = sut.Parse(input);
 
             // assert
-            Assert.Equal(new[] { expectedCommand1, expectedCommand2 }, result);
+            Assert.Equal(new List<CommandInput>(new[] { expectedCommand1, expectedCommand2 }), result);
         }
 
         [Theory]
-        [InlineData("command -name value")]
-        [InlineData("command  -name\tvalue")]
-        public void Parse_NamedParameters_ParameterParsed(string input)
+        [InlineData("command -name value", 9, 15)]
+        [InlineData("command  -name\tvalue", 10, 16)]
+        public void Parse_NamedParameters_ParameterParsed(string input, int p1char, int p2char)
         {
             // arrange
             var sut = CreateParser();
             var location = new SourceLocation(1, 1);
             var builder = new CommandInput.Builder(location, "command");
-            builder.AddParameter(new ParameterNameCommandParameter("name"));
-            builder.AddParameter(new Literal("value"));
+            builder.AddParameter(new ParameterNameCommandParameter(new SourceLocation(1, p1char), "name"));
+            builder.AddParameter(new SourceValueCommandParameter(new SourceLocation(1, p2char), new Literal("value")));
             var expectedCommand = builder.Build();
 
             // act
@@ -212,18 +217,18 @@ namespace Chel.UnitTests.Parsing
         }
 
         [Theory]
-        [InlineData("command -name value -name2 value2")]
-        [InlineData("command  -name\tvalue   -name2\tvalue2")]
-        public void Parse_MultipleNamedParameters_ParameterParsed(string input)
+        [InlineData("command -name value -name2 value2", 9, 15, 21, 28)]
+        [InlineData("command  -name\tvalue   -name2\tvalue2", 10, 16, 24, 31)]
+        public void Parse_MultipleNamedParameters_ParameterParsed(string input, int p1char, int p2char, int p3char, int p4char)
         {
             // arrange
             var sut = CreateParser();
             var location = new SourceLocation(1, 1);
             var builder = new CommandInput.Builder(location, "command");
-            builder.AddParameter(new ParameterNameCommandParameter("name"));
-            builder.AddParameter(new Literal("value"));
-            builder.AddParameter(new ParameterNameCommandParameter("name2"));
-            builder.AddParameter(new Literal("value2"));
+            builder.AddParameter(new ParameterNameCommandParameter(new SourceLocation(1, p1char), "name"));
+            builder.AddParameter(new SourceValueCommandParameter(new SourceLocation(1, p2char), new Literal("value")));
+            builder.AddParameter(new ParameterNameCommandParameter(new SourceLocation(1, p3char), "name2"));
+            builder.AddParameter(new SourceValueCommandParameter(new SourceLocation(1, p4char), new Literal("value2")));
             var expectedCommand = builder.Build();
 
             // act
@@ -253,7 +258,7 @@ namespace Chel.UnitTests.Parsing
             var sut = CreateParser();
             var location = new SourceLocation(1, 1);
             var builder = new CommandInput.Builder(location, "command");
-            builder.AddParameter(new Literal("pa ram"));
+            builder.AddParameter(new SourceValueCommandParameter(new SourceLocation(1, 9), new Literal("pa ram")));
             var expectedCommand = builder.Build();
 
             // act
@@ -270,7 +275,7 @@ namespace Chel.UnitTests.Parsing
             var sut = CreateParser();
             var location = new SourceLocation(1, 1);
             var builder = new CommandInput.Builder(location, "command");
-            builder.AddParameter(new Literal("\n\n"));
+            builder.AddParameter(new SourceValueCommandParameter(new SourceLocation(1, 9), new Literal("\n\n")));
             var expectedCommand = builder.Build();
 
             // act
@@ -287,7 +292,7 @@ namespace Chel.UnitTests.Parsing
             var sut = CreateParser();
             var location = new SourceLocation(1, 1);
             var builder = new CommandInput.Builder(location, "command");
-            builder.AddParameter(new Literal("(param)"));
+            builder.AddParameter(new SourceValueCommandParameter(new SourceLocation(1, 10), new Literal("(param)")));
             var expectedCommand = builder.Build();
 
             // act
@@ -304,7 +309,7 @@ namespace Chel.UnitTests.Parsing
             var sut = CreateParser();
             var location = new SourceLocation(1, 1);
             var builder = new CommandInput.Builder(location, "command");
-            builder.AddParameter(new Literal(@"\"));
+            builder.AddParameter(new SourceValueCommandParameter(new SourceLocation(1, 10), new Literal(@"\")));
             var expectedCommand = builder.Build();
 
             // act
@@ -321,8 +326,8 @@ namespace Chel.UnitTests.Parsing
             var sut = CreateParser();
             var location = new SourceLocation(1, 1);
             var builder = new CommandInput.Builder(location, "command");
-            builder.AddParameter(new Literal("#"));
-            builder.AddParameter(new Literal("param"));
+            builder.AddParameter(new SourceValueCommandParameter(new SourceLocation(1, 10), new Literal("#")));
+            builder.AddParameter(new SourceValueCommandParameter(new SourceLocation(1, 12), new Literal("param")));
             var expectedCommand = builder.Build();
 
             // act
@@ -339,8 +344,8 @@ namespace Chel.UnitTests.Parsing
             var sut = CreateParser();
             var location = new SourceLocation(1, 1);
             var builder = new CommandInput.Builder(location, "command");
-            builder.AddParameter(new Literal(" param  param "));
-            builder.AddParameter(new Literal("param"));
+            builder.AddParameter(new SourceValueCommandParameter(new SourceLocation(1, 9), new Literal(" param  param ")));
+            builder.AddParameter(new SourceValueCommandParameter(new SourceLocation(1, 27), new Literal("param")));
             var expectedCommand = builder.Build();
 
             // act
@@ -357,7 +362,7 @@ namespace Chel.UnitTests.Parsing
             var sut = CreateParser();
             var location = new SourceLocation(1, 1);
             var builder = new CommandInput.Builder(location, "command");
-            builder.AddParameter(new Literal("param\nparam"));
+            builder.AddParameter(new SourceValueCommandParameter(new SourceLocation(1, 9), new Literal("param\nparam")));
             var expectedCommand = builder.Build();
 
             // act
@@ -374,7 +379,7 @@ namespace Chel.UnitTests.Parsing
             var sut = CreateParser();
             var location = new SourceLocation(1, 1);
             var builder = new CommandInput.Builder(location, "command");
-            builder.AddParameter(new Literal("(param)"));
+            builder.AddParameter(new SourceValueCommandParameter(new SourceLocation(1, 9), new Literal("(param)")));
             var expectedCommand = builder.Build();
 
             // act
@@ -391,7 +396,7 @@ namespace Chel.UnitTests.Parsing
             var sut = CreateParser();
             var location = new SourceLocation(1, 1);
             var builder = new CommandInput.Builder(location, "command");
-            builder.AddParameter(new Literal("\nic  (pa ram)\nic (pa ram)"));
+            builder.AddParameter(new SourceValueCommandParameter(new SourceLocation(1, 9), new Literal("\nic  (pa ram)\nic (pa ram)")));
             var expectedCommand = builder.Build();
 
             // act
@@ -408,8 +413,8 @@ namespace Chel.UnitTests.Parsing
             var sut = CreateParser();
             var location = new SourceLocation(1, 1);
             var builder = new CommandInput.Builder(location, "command");
-            builder.AddParameter(new Literal("pa ram"));
-            builder.AddParameter(new Literal("pa ram"));
+            builder.AddParameter(new SourceValueCommandParameter(new SourceLocation(1, 9), new Literal("pa ram")));
+            builder.AddParameter(new SourceValueCommandParameter(new SourceLocation(1, 18), new Literal("pa ram")));
             var expectedCommand = builder.Build();
 
             // act
@@ -485,7 +490,7 @@ namespace Chel.UnitTests.Parsing
             // arrange
             var location = new SourceLocation(1, 1);
             var builder = new CommandInput.Builder(location, "cmd");
-            builder.AddParameter(new VariableReference("var"));
+            builder.AddParameter(new SourceValueCommandParameter(new SourceLocation(1, 5), new VariableReference("var")));
             var expectedCommand = builder.Build();
 
             var sut = CreateParser();
@@ -515,7 +520,7 @@ namespace Chel.UnitTests.Parsing
             // arrange
             var location = new SourceLocation(1, 1);
             var builder = new CommandInput.Builder(location, "cmd");
-            builder.AddParameter(new Literal("$var$"));
+            builder.AddParameter(new SourceValueCommandParameter(new SourceLocation(1, 6), new Literal("$var$")));
             var expectedCommand = builder.Build();
 
             var sut = CreateParser();
@@ -545,7 +550,7 @@ namespace Chel.UnitTests.Parsing
             // arrange
             var location = new SourceLocation(1, 1);
             var builder = new CommandInput.Builder(location, "cmd");
-            builder.AddParameter(new VariableReference("var", new[] { "1" }));
+            builder.AddParameter(new SourceValueCommandParameter(new SourceLocation(1, 5),  new VariableReference("var", new[] { "1" })));
             var expectedCommand = builder.Build();
 
             var sut = CreateParser();
@@ -563,7 +568,7 @@ namespace Chel.UnitTests.Parsing
             // arrange
             var location = new SourceLocation(1, 1);
             var builder = new CommandInput.Builder(location, "cmd");
-            builder.AddParameter(new VariableReference("var", new[] { "1", "2" }));
+            builder.AddParameter(new SourceValueCommandParameter(new SourceLocation(1, 5), new VariableReference("var", new[] { "1", "2" })));
             var expectedCommand = builder.Build();
 
             var sut = CreateParser();
@@ -593,7 +598,7 @@ namespace Chel.UnitTests.Parsing
             // arrange
             var location = new SourceLocation(1, 1);
             var builder = new CommandInput.Builder(location, "cmd");
-            builder.AddParameter(new ParameterNameCommandParameter("par"));
+            builder.AddParameter(new ParameterNameCommandParameter(new SourceLocation(1, 5), "par"));
             var expectedCommand = builder.Build();
 
             var sut = CreateParser();
@@ -611,7 +616,7 @@ namespace Chel.UnitTests.Parsing
             // arrange
             var location = new SourceLocation(1, 1);
             var builder = new CommandInput.Builder(location, "cmd");
-            builder.AddParameter(new Literal("-par"));
+            builder.AddParameter(new SourceValueCommandParameter(new SourceLocation(1, 6), new Literal("-par")));
             var expectedCommand = builder.Build();
 
             var sut = CreateParser();
@@ -629,7 +634,7 @@ namespace Chel.UnitTests.Parsing
             // arrange
             var location = new SourceLocation(1, 1);
             var builder = new CommandInput.Builder(location, "cmd");
-            builder.AddParameter(new Literal("p-ar"));
+            builder.AddParameter(new SourceValueCommandParameter(new SourceLocation(1, 5), new Literal("p-ar")));
             var expectedCommand = builder.Build();
 
             var sut = CreateParser();
@@ -647,7 +652,7 @@ namespace Chel.UnitTests.Parsing
             // arrange
             var location = new SourceLocation(1, 1);
             var builder = new CommandInput.Builder(location, "cmd");
-            builder.AddParameter(new Literal("p -ar"));
+            builder.AddParameter(new SourceValueCommandParameter(new SourceLocation(1, 5), new Literal("p -ar")));
             var expectedCommand = builder.Build();
 
             var sut = CreateParser();
@@ -663,14 +668,15 @@ namespace Chel.UnitTests.Parsing
         public void Parse_InputContainsListParameter_ParsesList()
         {
             // arrange
-            var expectedList = new List(new ChelType[]{
-                new Literal("a"),
-                new VariableReference("b")
+            var expectedList = new List(new[]
+            {
+                new SourceValueCommandParameter(new SourceLocation(1, 6), new Literal("a")),
+                new SourceValueCommandParameter(new SourceLocation(1, 8), new VariableReference("b"))
             });
 
             var location = new SourceLocation(1, 1);
             var builder = new CommandInput.Builder(location, "cmd");
-            builder.AddParameter(expectedList);
+            builder.AddParameter(new SourceValueCommandParameter(new SourceLocation(1, 5), expectedList));
             var expectedCommand = builder.Build();
 
             var sut = CreateParser();
@@ -712,7 +718,7 @@ namespace Chel.UnitTests.Parsing
             // arrange
             var location = new SourceLocation(1, 1);
             var builder = new CommandInput.Builder(location, "cmd");
-            builder.AddParameter(new Literal("[a]"));
+            builder.AddParameter(new SourceValueCommandParameter(new SourceLocation(1, 6), new Literal("[a]")));
             var expectedCommand = builder.Build();
 
             var sut = CreateParser();
@@ -730,7 +736,7 @@ namespace Chel.UnitTests.Parsing
             // arrange
             var location = new SourceLocation(1, 1);
             var builder = new CommandInput.Builder(location, "cmd");
-            builder.AddParameter(new Literal("[a b]"));
+            builder.AddParameter(new SourceValueCommandParameter(new SourceLocation(1, 5), new Literal("[a b]")));
             var expectedCommand = builder.Build();
 
             var sut = CreateParser();
@@ -749,10 +755,17 @@ namespace Chel.UnitTests.Parsing
             var location = new SourceLocation(1, 1);
             var builder = new CommandInput.Builder(location, "cmd");
 
-            var map1Entries = new Dictionary<string, ICommandParameter> { { "a", new Literal("b") }};
-            var map2Entries = new Dictionary<string, ICommandParameter> { { "c", new Literal("d") }};
+            var map1Entries = new Dictionary<string, ICommandParameter> { { "a", new SourceValueCommandParameter(new SourceLocation(1, 9), new Literal("b")) }};
+            var map2Entries = new Dictionary<string, ICommandParameter> { { "c", new SourceValueCommandParameter(new SourceLocation(1, 20), new Literal("d")) }};
 
-            builder.AddParameter(new List(new[]{ new Map(map1Entries), new Map(map2Entries) }));
+            builder.AddParameter(
+                new SourceValueCommandParameter(new SourceLocation(1, 5),
+                    new List(new[] {
+                        new SourceValueCommandParameter(new SourceLocation(1, 6), new Map(map1Entries)),
+                        new SourceValueCommandParameter(new SourceLocation(1, 14), new Map(map2Entries))
+                    }
+                ))
+            );
             var expectedCommand = builder.Build();
 
             var sut = CreateParser();
@@ -766,17 +779,17 @@ namespace Chel.UnitTests.Parsing
 
         [Theory]
         [MemberData(nameof(Parse_InputContainsMapParameter_ParsesMap_DataSource))]
-        public void Parse_InputContainsMapParameter_ParsesMap(string input)
+        public void Parse_InputContainsMapParameter_ParsesMap(string input, SourceLocation valueLocation)
         {
             // arrange
             var expectedMap = new Map(new Dictionary<string, ICommandParameter>
             {
-                { "a", new Literal("b")}
+                { "a", new SourceValueCommandParameter(valueLocation, new Literal("b")) }
             });
 
             var location = new SourceLocation(1, 1);
             var builder = new CommandInput.Builder(location, "cmd");
-            builder.AddParameter(expectedMap);
+            builder.AddParameter(new SourceValueCommandParameter(new SourceLocation(1, 5), expectedMap));
             var expectedCommand = builder.Build();
 
             var sut = CreateParser();
@@ -790,26 +803,26 @@ namespace Chel.UnitTests.Parsing
 
         public static IEnumerable<object[]> Parse_InputContainsMapParameter_ParsesMap_DataSource()
         {
-            yield return new[] { "cmd {a: b}" };
-            yield return new[] { "cmd { a: b }" };
-            yield return new[] { "cmd {a:b}" };
-            yield return new[] { "cmd {     a        :      b        }" };
-            yield return new[] { "cmd {\n  a:  b  \n}" };
+            yield return new object[] { "cmd {a: b}", new SourceLocation(1, 9) };
+            yield return new object[] { "cmd { a: b }", new SourceLocation(1, 10) };
+            yield return new object[] { "cmd {a:b}", new SourceLocation(1, 8) };
+            yield return new object[] { "cmd {     a        :      b        }", new SourceLocation(1, 27) };
+            yield return new object[] { "cmd {\n  a:  b  \n}", new SourceLocation(2, 7) };
         }
 
         [Theory]
         [MemberData(nameof(Parse_InputContainsMapParameterWithVariableReference_ParsesMap_DataSource))]
-        public void Parse_InputContainsMapParameterWithVariableReference_ParsesMap(string input)
+        public void Parse_InputContainsMapParameterWithVariableReference_ParsesMap(string input, SourceLocation valueLocation)
         {
             // arrange
             var expectedMap = new Map(new Dictionary<string, ICommandParameter>
             {
-                { "a", new VariableReference("b")}
+                { "a", new SourceValueCommandParameter(valueLocation, new VariableReference("b")) }
             });
 
             var location = new SourceLocation(1, 1);
             var builder = new CommandInput.Builder(location, "cmd");
-            builder.AddParameter(expectedMap);
+            builder.AddParameter(new SourceValueCommandParameter(new SourceLocation(1, 5), expectedMap));
             var expectedCommand = builder.Build();
 
             var sut = CreateParser();
@@ -823,10 +836,10 @@ namespace Chel.UnitTests.Parsing
 
         public static IEnumerable<object[]> Parse_InputContainsMapParameterWithVariableReference_ParsesMap_DataSource()
         {
-            yield return new[] { "cmd {a: $b$}" };
-            yield return new[] { "cmd {a:$b$}" };
-            yield return new[] { "cmd {     a        :      $b$        }" };
-            yield return new[] { "cmd {\n  a:  $b$  \n}" };
+            yield return new object[] { "cmd {a: $b$}", new SourceLocation(1, 9) };
+            yield return new object[] { "cmd {a:$b$}", new SourceLocation(1, 8)};
+            yield return new object[] { "cmd {     a        :      $b$        }", new SourceLocation(1, 27) };
+            yield return new object[] { "cmd {\n  a:  $b$  \n}", new SourceLocation(2, 7) };
         }
 
         [Fact]
@@ -835,13 +848,13 @@ namespace Chel.UnitTests.Parsing
             // arrange
             var expectedMap = new Map(new Dictionary<string, ICommandParameter>
             {
-                { "foo", new Literal("bar")},
-                { "num", new Literal("12")}
+                { "foo", new SourceValueCommandParameter(new SourceLocation(1, 11), new Literal("bar")) },
+                { "num", new SourceValueCommandParameter(new SourceLocation(1, 21), new Literal("12")) }
             });
 
             var location = new SourceLocation(1, 1);
             var builder = new CommandInput.Builder(location, "cmd");
-            builder.AddParameter(expectedMap);
+            builder.AddParameter(new SourceValueCommandParameter(new SourceLocation(1, 5), expectedMap));
             var expectedCommand = builder.Build();
 
             var sut = CreateParser();
@@ -859,13 +872,13 @@ namespace Chel.UnitTests.Parsing
             // arrange
             var expectedMap = new Map(new Dictionary<string, ICommandParameter>
             {
-                { "foo", new Literal("bar baz")},
-                { "num", new Literal("12")}
+                { "foo", new SourceValueCommandParameter(new SourceLocation(1, 11), new Literal("bar baz")) },
+                { "num", new SourceValueCommandParameter(new SourceLocation(1, 27),new Literal("12")) }
             });
 
             var location = new SourceLocation(1, 1);
             var builder = new CommandInput.Builder(location, "cmd");
-            builder.AddParameter(expectedMap);
+            builder.AddParameter(new SourceValueCommandParameter(new SourceLocation(1, 5), expectedMap));
             var expectedCommand = builder.Build();
 
             var sut = CreateParser();
@@ -883,13 +896,13 @@ namespace Chel.UnitTests.Parsing
             // arrange
             var expectedMap = new Map(new Dictionary<string, ICommandParameter>
             {
-                { "foo", new Literal("bar baz")},
-                { "num", new Literal("12")}
+                { "foo", new SourceValueCommandParameter(new SourceLocation(2, 22), new Literal("bar baz")) },
+                { "num", new SourceValueCommandParameter(new SourceLocation(3, 23), new Literal("12")) }
             });
 
             var location = new SourceLocation(1, 1);
             var builder = new CommandInput.Builder(location, "cmd");
-            builder.AddParameter(expectedMap);
+            builder.AddParameter(new SourceValueCommandParameter(new SourceLocation(1, 5), expectedMap));
             var expectedCommand = builder.Build();
 
             var sut = CreateParser();
@@ -910,12 +923,12 @@ namespace Chel.UnitTests.Parsing
             // arrange
             var expectedMap = new Map(new Dictionary<string, ICommandParameter>
             {
-                { "the-key", new Literal("the-value")}
+                { "the-key", new SourceValueCommandParameter(new SourceLocation(1, 16), new Literal("the-value")) }
             });
 
             var location = new SourceLocation(1, 1);
             var builder = new CommandInput.Builder(location, "cmd");
-            builder.AddParameter(expectedMap);
+            builder.AddParameter(new SourceValueCommandParameter(new SourceLocation(1, 5), expectedMap));
             var expectedCommand = builder.Build();
 
             var sut = CreateParser();
@@ -957,7 +970,7 @@ namespace Chel.UnitTests.Parsing
             // arrange
             var location = new SourceLocation(1, 1);
             var builder = new CommandInput.Builder(location, "cmd");
-            builder.AddParameter(new Literal("{a:b}"));
+            builder.AddParameter(new SourceValueCommandParameter(new SourceLocation(1, 6), new Literal("{a:b}")));
             var expectedCommand = builder.Build();
 
             var sut = CreateParser();
@@ -975,7 +988,7 @@ namespace Chel.UnitTests.Parsing
             // arrange
             var location = new SourceLocation(1, 1);
             var builder = new CommandInput.Builder(location, "cmd");
-            builder.AddParameter(new Literal("{a: b}"));
+            builder.AddParameter(new SourceValueCommandParameter(new SourceLocation(1, 5),new Literal("{a: b}")));
             var expectedCommand = builder.Build();
 
             var sut = CreateParser();
@@ -996,11 +1009,19 @@ namespace Chel.UnitTests.Parsing
 
             var expectedMap1 = new Map(new Dictionary<string, ICommandParameter>
             {
-                { "a", new List(new[]{ new Literal("1"), new Literal("2") })},
-                { "b", new List(new[]{ new Literal("3"), new Literal("4") })}
+                { "a", new SourceValueCommandParameter(new SourceLocation(1, 9), new List(new[]
+                {
+                    new SourceValueCommandParameter(new SourceLocation(1, 10), new Literal("1")),
+                    new SourceValueCommandParameter(new SourceLocation(1, 12), new Literal("2"))
+                }))},
+                { "b", new SourceValueCommandParameter(new SourceLocation(1, 20), new List(new[]
+                {
+                    new SourceValueCommandParameter(new SourceLocation(1, 22), new Literal("3")),
+                    new SourceValueCommandParameter(new SourceLocation(1, 24), new Literal("4"))
+                }))}
             });
 
-            builder.AddParameter(expectedMap1);
+            builder.AddParameter(new SourceValueCommandParameter(new SourceLocation(1, 5), expectedMap1));
             var expectedCommand = builder.Build();
 
             var sut = CreateParser();
@@ -1148,8 +1169,8 @@ namespace Chel.UnitTests.Parsing
             // arrange
             var sublocation = new SourceLocation(1, 9);
             var subcommandBuilder = new CommandInput.Builder(sublocation, "subcmd");
-            subcommandBuilder.AddParameter(new ParameterNameCommandParameter("a"));
-            subcommandBuilder.AddParameter(new Literal("name"));
+            subcommandBuilder.AddParameter(new ParameterNameCommandParameter(new SourceLocation(1, 16), "a"));
+            subcommandBuilder.AddParameter(new SourceValueCommandParameter(new SourceLocation(1, 19), new Literal("name")));
             var subcommand = subcommandBuilder.Build();
 
             var location = new SourceLocation(1, 1);
@@ -1218,9 +1239,15 @@ namespace Chel.UnitTests.Parsing
             var sublocation = new SourceLocation(1, 11);
             var subcommand = new CommandInput.Builder(sublocation, "subcmd").Build();
 
+            var expectedList = new List(new ICommandParameter[]
+            {
+                new SourceValueCommandParameter(new SourceLocation(1, 6), new Literal("1")),
+                subcommand
+            });
+
             var location = new SourceLocation(1, 1);
             var builder = new CommandInput.Builder(location, "cmd");
-            builder.AddParameter(new List(new ICommandParameter[] { new Literal("1"), subcommand }));
+            builder.AddParameter(new SourceValueCommandParameter(new SourceLocation(1, 5), expectedList));
             var expectedCommand = builder.Build();
 
             var sut = CreateParser();
@@ -1238,12 +1265,19 @@ namespace Chel.UnitTests.Parsing
             // arrange
             var sublocation = new SourceLocation(1, 12);
             var subcommandBuilder = new CommandInput.Builder(sublocation, "subcmd");
-            subcommandBuilder.AddParameter(new Literal("foo"));
+            subcommandBuilder.AddParameter(new SourceValueCommandParameter(new SourceLocation(1, 19), new Literal("foo")));
             var subcommand = subcommandBuilder.Build();
+
+            var expectedList = new List(new ICommandParameter[]
+            {
+                new SourceValueCommandParameter(new SourceLocation(1, 6), new Literal("1")),
+                subcommand
+            });
 
             var location = new SourceLocation(1, 1);
             var builder = new CommandInput.Builder(location, "cmd");
-            builder.AddParameter(new List(new ICommandParameter[] { new Literal("1"), subcommand }));
+
+            builder.AddParameter(new SourceValueCommandParameter(new SourceLocation(1, 5), expectedList));
             var expectedCommand = builder.Build();
 
             var sut = CreateParser();
@@ -1302,7 +1336,7 @@ namespace Chel.UnitTests.Parsing
             var location = new SourceLocation(1, 1);
             var builder = new CommandInput.Builder(location, "cmd");
             builder.AddParameter(subcommand);
-            builder.AddParameter(new Literal("foo bar"));
+            builder.AddParameter(new SourceValueCommandParameter(new SourceLocation(1, 15), new Literal("foo bar")));
             var expectedCommand = builder.Build();
 
             var sut = CreateParser();
@@ -1320,12 +1354,12 @@ namespace Chel.UnitTests.Parsing
             // arrange
             var sublocationInner = new SourceLocation(1, 23);
             var subcommandBuilderInner = new CommandInput.Builder(sublocationInner, "subcmdi");
-            subcommandBuilderInner.AddParameter(new Literal("foo"));
+            subcommandBuilderInner.AddParameter(new SourceValueCommandParameter(new SourceLocation(1, 31), new Literal("foo")));
             var subCommandInner = subcommandBuilderInner.Build();
 
             var sublocationOuter = new SourceLocation(1, 9);
             var subcommandBuilderOuter = new CommandInput.Builder(sublocationOuter, "subcmdo");
-            subcommandBuilderOuter.AddParameter(new ParameterNameCommandParameter("a"));
+            subcommandBuilderOuter.AddParameter(new ParameterNameCommandParameter(new SourceLocation(1, 17), "a"));
             subcommandBuilderOuter.AddParameter(subCommandInner);
             var subcommandOuter = subcommandBuilderOuter.Build();
 

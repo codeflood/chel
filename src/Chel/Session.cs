@@ -113,6 +113,9 @@ namespace Chel
             {
                 var parameter = commandInput.Parameters[i];
 
+                if(parameter is SourceValueCommandParameter sourceValueCommandParameter)
+                    parameter = sourceValueCommandParameter.Value;
+
                 if(parameter is CommandInput subcommand)
                 {
                     var result = Execute(subcommand);
@@ -123,7 +126,8 @@ namespace Chel
                         subcommand.SubstituteValue = valueResult.Value;
                     else
                         new FailureResult(subcommand.SourceLocation, new[] { Texts.SubcommandResultMustBeChelType });
-                } else if(parameter is List listParameter)
+                }
+                else if(parameter is List listParameter)
                 {
                     foreach(var value in listParameter.Values)
                     {

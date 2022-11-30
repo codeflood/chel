@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Chel.Abstractions.Parsing;
 using Chel.Abstractions.Types;
 using Xunit;
 
@@ -8,10 +9,10 @@ namespace Chel.Abstractions.UnitTests.Types
     public class CompoundValueTests
     {
         [Fact]
-        public void Ctor_NullLiteral_SetsPropertyToEmptyCollection()
+        public void Ctor_NoValues_SetsPropertyToEmptyCollection()
         {
             // arrange, act
-            var sut = new CompoundValue((Literal)null);
+            var sut = new CompoundValue(new ICommandParameter[0]);
 
             // assert
             Assert.Empty(sut.Values);
@@ -24,20 +25,10 @@ namespace Chel.Abstractions.UnitTests.Types
             var value = new Literal("lit");
 
             // act
-            var sut = new CompoundValue(value);
+            var sut = new CompoundValue(new[]{value});
 
             // assert
             Assert.Equal(new[] { value }, sut.Values);
-        }
-
-        [Fact]
-        public void Ctor_NullVariableReference_SetsPropertyToEmptyCollection()
-        {
-            // arrange, act
-            var sut = new CompoundValue((VariableReference)null);
-
-            // assert
-            Assert.Empty(sut.Values);
         }
 
         [Fact]
@@ -47,7 +38,7 @@ namespace Chel.Abstractions.UnitTests.Types
             var value = new VariableReference("var");
 
             // act
-            var sut = new CompoundValue(value);
+            var sut = new CompoundValue(new[]{value});
 
             // assert
             Assert.Equal(new[] { value }, sut.Values);
@@ -55,7 +46,7 @@ namespace Chel.Abstractions.UnitTests.Types
 
         [Theory]
         [MemberData(nameof(Ctor_ListContainsUnexpectedTypes_ThrowsException_DataSource))]
-        public void Ctor_ListContainsUnexpectedTypes_ThrowsException(IReadOnlyList<ChelType> input)
+        public void Ctor_ListContainsUnexpectedTypes_ThrowsException(IReadOnlyList<ICommandParameter> input)
         {
             // arrange
             Action sutAction = () => new CompoundValue(input);
@@ -68,15 +59,15 @@ namespace Chel.Abstractions.UnitTests.Types
         public static IEnumerable<object[]> Ctor_ListContainsUnexpectedTypes_ThrowsException_DataSource()
         {
             yield return new[] {
-                new ChelType[] {
+                new ICommandParameter[] {
                     new Literal("val"),
                     new List(new[] { new Literal("val") })
                 }
             };
 
             yield return new[] {
-                new ChelType[] {
-                    new CompoundValue(new Literal("val"))
+                new ICommandParameter[] {
+                    new CompoundValue(new[]{new Literal("val")})
                 }
             };
         }
@@ -91,8 +82,8 @@ namespace Chel.Abstractions.UnitTests.Types
             var param12 = new VariableReference("val2");
             var param22 = new VariableReference("val2");
 
-            var sut1 = new CompoundValue(new ChelType[] { param11, param12 });
-            var sut2 = new CompoundValue(new ChelType[] { param21, param22 });
+            var sut1 = new CompoundValue(new ICommandParameter[] { param11, param12 });
+            var sut2 = new CompoundValue(new ICommandParameter[] { param21, param22 });
 
             // act
             var result = sut1.Equals(sut2);
@@ -111,8 +102,8 @@ namespace Chel.Abstractions.UnitTests.Types
             var param12 = new VariableReference("val2");
             var param22 = new VariableReference("val2");
 
-            var sut1 = new CompoundValue(new ChelType[] { param11, param12 });
-            var sut2 = new CompoundValue(new ChelType[] { param22, param21 });
+            var sut1 = new CompoundValue(new ICommandParameter[] { param11, param12 });
+            var sut2 = new CompoundValue(new ICommandParameter[] { param22, param21 });
 
             // act
             var result = sut1.Equals(sut2);
@@ -128,8 +119,8 @@ namespace Chel.Abstractions.UnitTests.Types
             var param1 = new Literal("val");
             var param2 = new Literal("other");
 
-            var sut1 = new CompoundValue(param1);
-            var sut2 = new CompoundValue(param2);
+            var sut1 = new CompoundValue(new[]{param1});
+            var sut2 = new CompoundValue(new[]{param2});
 
             // act
             var result = sut1.Equals(sut2);
@@ -184,7 +175,7 @@ namespace Chel.Abstractions.UnitTests.Types
         public void ToString_SingleValue_ReturnsValue()
         {
             // arrange
-            var sut = new CompoundValue(new Literal("val"));
+            var sut = new CompoundValue(new[]{new Literal("val")});
 
             // act
             var result = sut.ToString();

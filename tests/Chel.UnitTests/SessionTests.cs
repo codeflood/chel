@@ -259,7 +259,7 @@ namespace Chel.UnitTests
             FailureResult executionResult = null;
 
             // act
-            sut.Execute("fail", result => executionResult = result as FailureResult);
+            sut.Execute("fail", result => executionResult = (FailureResult)result);
 
             // assert
             Assert.Equal(new SourceLocation(1, 1), executionResult.SourceLocation);
@@ -273,7 +273,7 @@ namespace Chel.UnitTests
             ValueResult executionResult = null;
 
             // act
-            sut.Execute("num << (num 1 2) 3", result => executionResult = result as ValueResult);
+            sut.Execute("num << (num 1 2) 3", result => executionResult = (ValueResult)result);
             
             // assert
             Assert.Equal("1 2 3", executionResult.Value.ToString());
@@ -287,7 +287,7 @@ namespace Chel.UnitTests
             ValueResult executionResult = null;
 
             // act
-            sut.Execute("num << (num 1 2) <<(num 3 4)", result => executionResult = result as ValueResult);
+            sut.Execute("num << (num 1 2) <<(num 3 4)", result => executionResult = (ValueResult)result);
             
             // assert
             Assert.Equal("1 2 3 4", executionResult.Value.ToString());
@@ -301,7 +301,7 @@ namespace Chel.UnitTests
             ValueResult executionResult = null;
 
             // act
-            sut.Execute("num << (num 1 << (num 2 3)) 4", result => executionResult = result as ValueResult);
+            sut.Execute("num << (num 1 << (num 2 3)) 4", result => executionResult = (ValueResult)result);
             
             // assert
             Assert.Equal("1 2 3 4", executionResult.Value.ToString());
@@ -315,7 +315,7 @@ namespace Chel.UnitTests
             ValueResult executionResult = null;
 
             // act
-            sut.Execute("list-params -array [1 << (num 2 3) 4]", result => executionResult = result as ValueResult);
+            sut.Execute("list-params -array [1 << (num 2 3) 4]", result => executionResult = (ValueResult)result);
             
             // assert
             Assert.Equal("[ 1 (2 3) 4 ]", executionResult.Value.ToString());
@@ -329,7 +329,7 @@ namespace Chel.UnitTests
             ValueResult executionResult = null;
 
             // act
-            sut.Execute("list-params -array [<< (num 1 2) << (num 3 4)]", result => executionResult = result as ValueResult);
+            sut.Execute("list-params -array [<< (num 1 2) << (num 3 4)]", result => executionResult = (ValueResult)result);
             
             // assert
             Assert.Equal("[ (1 2) (3 4) ]", executionResult.Value.ToString());
@@ -343,11 +343,13 @@ namespace Chel.UnitTests
             ValueResult executionResult = null;
 
             // act
-            sut.Execute("list-params -array [ << (num 1 << (num 2 3)) 4]", result => executionResult = result as ValueResult);
+            sut.Execute("list-params -array [ << (num 1 << (num 2 3)) 4]", result => executionResult = (ValueResult)result);
             
             // assert
             Assert.Equal("[ (1 2 3) 4 ]", executionResult.Value.ToString());
         }
+
+        // todo: tests for subcommands in maps
 
         [Fact]
         public void Execute_SubcommandFails_FailureResultReturned()
@@ -357,7 +359,7 @@ namespace Chel.UnitTests
             FailureResult executionResult = null;
 
             // act
-            sut.Execute("num << fail 2", result => executionResult = result as FailureResult);
+            sut.Execute("num << fail 2", result => executionResult = (FailureResult)result);
             
             // assert
             Assert.Equal(new SourceLocation(1, 8), executionResult.SourceLocation);
@@ -371,7 +373,7 @@ namespace Chel.UnitTests
             FailureResult executionResult = null;
 
             // act
-            sut.Execute("num << (num << fail 2) 3", result => executionResult = result as FailureResult);
+            sut.Execute("num << (num << fail 2) 3", result => executionResult = (FailureResult)result);
             
             // assert
             Assert.Equal(new SourceLocation(1, 16), executionResult.SourceLocation);
@@ -385,7 +387,7 @@ namespace Chel.UnitTests
             FailureResult executionResult = null;
 
             // act
-            sut.Execute("num << unknown", result => executionResult = result as FailureResult);
+            sut.Execute("num << unknown", result => executionResult = (FailureResult)result);
             
             // assert
             Assert.Equal(new SourceLocation(1, 8), executionResult.SourceLocation);
@@ -400,7 +402,7 @@ namespace Chel.UnitTests
             FailureResult executionResult = null;
 
             // act
-            sut.Execute("num << (\nunknown)", result => executionResult = result as FailureResult);
+            sut.Execute("num << (\nunknown)", result => executionResult = (FailureResult)result);
             
             // assert
             Assert.Equal(new SourceLocation(2, 1), executionResult.SourceLocation);

@@ -43,8 +43,8 @@ namespace Chel.Abstractions.UnitTests.Parsing
                 var subcommand = new CommandInput.Builder(SourceLocation, "subcmd").Build();
 
                 var builder = new CommandInput.Builder(SourceLocation, "cmd");
-                builder.AddParameter(new Literal("val"));
-                builder.AddParameter(new List(new[]{ new Literal("lv1"), new Literal("lv2") }));
+                builder.AddParameter(new SourceValueCommandParameter(new SourceLocation(1, 2), new Literal("val")));
+                builder.AddParameter(new SourceValueCommandParameter(new SourceLocation(2, 1), new List(new[]{ new Literal("lv1"), new Literal("lv2") })));
                 builder.AddParameter(subcommand);
                 return builder.Build();
             };
@@ -64,7 +64,7 @@ namespace Chel.Abstractions.UnitTests.Parsing
         {
             // arrange
             var builder1 = new CommandInput.Builder(SourceLocation, "cmd");
-            builder1.AddParameter(new Literal("val"));
+            builder1.AddParameter(new SourceValueCommandParameter(new SourceLocation(1, 1), new Literal("val")));
             var sut1 = builder1.Build();
 
             var builder2 = new CommandInput.Builder(SourceLocation, "cmd");
@@ -82,11 +82,11 @@ namespace Chel.Abstractions.UnitTests.Parsing
         {
             // arrange
             var builder1 = new CommandInput.Builder(SourceLocation, "cmd");
-            builder1.AddParameter(new Literal("val"));
+            builder1.AddParameter(new SourceValueCommandParameter(new SourceLocation(1, 1), new Literal("val")));
             var sut1 = builder1.Build();
 
             var builder2 = new CommandInput.Builder(SourceLocation, "cmd");
-            builder2.AddParameter(new Literal("val"));
+            builder2.AddParameter(new SourceValueCommandParameter(new SourceLocation(1, 1), new Literal("val")));
             var sut2 = builder2.Build();
 
             // act
@@ -102,7 +102,7 @@ namespace Chel.Abstractions.UnitTests.Parsing
         {
             // arrange
             var builder1 = new CommandInput.Builder(SourceLocation, "cmd");
-            builder1.AddParameter(new Literal("val"));
+            builder1.AddParameter(new SourceValueCommandParameter(new SourceLocation(1, 1), new Literal("val")));
             var sut1 = builder1.Build();
 
             var builder2 = new CommandInput.Builder(SourceLocation, "cmd");

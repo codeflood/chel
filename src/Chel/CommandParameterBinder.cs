@@ -57,7 +57,7 @@ namespace Chel
             if(descriptor == null)
                 throw new InvalidOperationException(string.Format(Texts.DescriptorForCommandCouldNotBeResolved, input.CommandName));
 
-            var parameters = ExtractParameterValues(input.Parameters, result);
+            var parameters = ExtractParameterValues(input.Parameters, result, input.SourceLocation);
 
             if(!result.Success)
                 return result;
@@ -67,67 +67,86 @@ namespace Chel
 
             AssertNoNamedOrFlagParameters(parameters, result);
 
-            BindNumberedParameters(instance, descriptor, parameters, result);       
+            BindNumberedParameters(instance, descriptor, parameters, result);
 
             // Anything left over was unexpected
             foreach(var parameter in parameters)
             {
-                result.AddError(string.Format(Texts.UnexpectedNumberedParameter, parameter));
+                var reportValue = parameter.ToString();
+                if(parameter is SourceValueCommandParameter sourceValueCommandParameter)
+                    reportValue = sourceValueCommandParameter.Value.ToString();
+
+                result.AddError(string.Format(Texts.UnexpectedNumberedParameter, reportValue));
             }
 
             return result;
         }
 
-        private List<ChelType> ExtractParameterValues(IReadOnlyList<ICommandParameter> parameters, ParameterBindResult result)
+        private List<SourceCommandParameter> ExtractParameterValues(IReadOnlyList<ICommandParameter> parameters, ParameterBindResult result, SourceLocation fallbackLocation)
         {
-            var output = new List<ChelType>();
+            var output = new List<SourceCommandParameter>();
 
             foreach(var parameter in parameters)
             {
-                // Don't use an 'is' check because CompoundValue is also a list.
-                if(parameter.GetType() == typeof(List))
-                {
-                    var list = parameter as List;
-                    var values = ExtractParameterValues(list.Values, result);
-                    output.Add(new List(values));
-                }
-                else if(parameter is VariableReference variableReference && variableReference.VariableName[0] == Symbol.Expansion)
-                {
-                    var variableName = variableReference.VariableName.Substring(1);
-                    var updatedVariableReference = new VariableReference(variableName, variableReference.SubReferences);
-
-                    var extractedVariable = _variableReplacer.ReplaceVariables(_variables, updatedVariableReference);
-
-                    if(extractedVariable is Map extractedMap)
-                    {
-                        foreach(var entry in extractedMap.Entries)
-                        {
-                            output.Add(new ParameterNameCommandParameter(entry.Key));
-                            
-                            var values = ExtractParameterValues(new[] { entry.Value }, result);
-                            output.AddRange(values);
-                        }
-                    }
-                    else
-                    {
-                        result.AddError(string.Format(Texts.VariableIsNotMap, variableName));
-                    }
-                }
-                else if(parameter is ChelType value)
-                    output.Add(value);
-                else if(parameter is CommandInput commandInput)
+                if(parameter is CommandInput commandInput)
                 {
                     if(commandInput.SubstituteValue == null)
                         throw new InvalidOperationException(Texts.CannotBindCommandInputWithoutSubstituteValue);
 
-                    output.Add(commandInput.SubstituteValue);
+                    output.Add(new SourceValueCommandParameter(commandInput.SourceLocation, commandInput.SubstituteValue));
                 }
+                else if(parameter is SourceValueCommandParameter valueParameter)
+                {
+                    var value = valueParameter.Value;
+
+                    // Don't use an 'is' check because CompoundValue is also a list.
+                    if(value.GetType() == typeof(List))
+                    {
+                        var list = value as List;
+                        var values = ExtractParameterValues(list.Values, result, valueParameter.SourceLocation);
+                        output.Add(new SourceValueCommandParameter(valueParameter.SourceLocation, new List(values)));
+
+                    }
+                    else if(value is VariableReference variableReference && variableReference.VariableName[0] == Symbol.Expansion)
+                    {
+                        var variableName = variableReference.VariableName.Substring(1);
+                        var updatedVariableReference = new VariableReference(variableName, variableReference.SubReferences);
+
+                        var extractedVariable = _variableReplacer.ReplaceVariables(_variables, updatedVariableReference);
+
+                        if(extractedVariable is Map extractedMap)
+                        {
+                            foreach(var entry in extractedMap.Entries)
+                            {
+                                output.Add(new ParameterNameCommandParameter(valueParameter.SourceLocation, entry.Key));
+                                
+                                var values = ExtractParameterValues(new[] { entry.Value }, result, valueParameter.SourceLocation);
+                                // todo: add test for when map value is not a SourceValueCommandParameter
+                                output.AddRange(values.Select(x => new SourceValueCommandParameter(valueParameter.SourceLocation, ((SourceValueCommandParameter)x).Value)));
+                            }
+                        }
+                        else
+                        {
+                            result.AddError(string.Format(Texts.VariableIsNotMap, variableName));
+                        }
+                    }
+                    else if(value is ChelType plainValue)
+                        output.Add(new SourceValueCommandParameter(valueParameter.SourceLocation, plainValue));
+                    
+                }
+                else if(parameter is SourceCommandParameter sourceParameter)
+                {
+                    output.Add(sourceParameter);
+                }
+                else if(parameter is ChelType plainValue)
+                    output.Add(new SourceValueCommandParameter(fallbackLocation, plainValue));
             }
 
+            //return output.Select(x => x as ICommandParameter).ToList();
             return output;
         }
 
-        private void BindFlagParameters(ICommand instance, CommandDescriptor descriptor, List<ChelType> parameters, ParameterBindResult result)
+        private void BindFlagParameters(ICommand instance, CommandDescriptor descriptor, List<SourceCommandParameter> parameters, ParameterBindResult result)
         {
             foreach(var describedParameter in descriptor.FlagParameters)
             {
@@ -137,13 +156,13 @@ namespace Chel
                     continue;
                 
                 AssertWritableProperty(describedParameter, instance);
-                BindProperty(instance, describedParameter.Property, describedParameter.Name, new Literal("True"), result);
+                BindProperty(instance, describedParameter.Property, describedParameter.Name, new SourceValueCommandParameter(parameters[markerIndex].SourceLocation, new Literal("True")), result);
 
                 // Make sure there's no duplicates
                 var repeatParameter = false;
                 while(markerIndex >= 0)
                 {
-                    parameters.RemoveAt(markerIndex);
+					parameters.RemoveAt(markerIndex);
                     markerIndex = FindParameterMarker(describedParameter.Name, parameters);
                     if(markerIndex >= 0)
                         repeatParameter = true;
@@ -154,7 +173,7 @@ namespace Chel
             }
         }
 
-        private void BindNamedParameters(ICommand instance, CommandDescriptor descriptor, List<ChelType> parameters, ParameterBindResult result)
+        private void BindNamedParameters(ICommand instance, CommandDescriptor descriptor, List<SourceCommandParameter> parameters, ParameterBindResult result)
         {
             foreach(var describedParameter in descriptor.NamedParameters.Values)
             {
@@ -182,11 +201,19 @@ namespace Chel
 
                     try
                     {
-                        BindProperty(instance, describedParameter.Property, describedParameter.Name, value, result);
+                        // todo: add test for incorrect type
+                        if(!(value is SourceValueCommandParameter valueCommandParameter))
+                            throw new InvalidOperationException("Unexpected parameter type");
+
+                        BindProperty(instance, describedParameter.Property, describedParameter.Name, valueCommandParameter, result);
                     }
                     catch(Exception ex)
                     {
-                        result.AddError(string.Format(Texts.InvalidParameterValueForNamedParameter, value, describedParameter.Name, ex.Message));
+                        var reportValue = value.ToString();
+                        if(value is SourceValueCommandParameter valueCommandParameter)
+                            reportValue = valueCommandParameter.Value.ToString();
+
+                        result.AddError(string.Format(Texts.InvalidParameterValueForNamedParameter, reportValue, describedParameter.Name, ex.Message));
                     }
 
                     // Make sure there's no duplicates
@@ -194,9 +221,9 @@ namespace Chel
                     while(markerIndex >= 0)
                     {
                         if(markerIndex + 2 <= parameters.Count)
-                            parameters.RemoveAt(markerIndex + 1);
+							parameters.RemoveAt(markerIndex + 1);
 
-                        parameters.RemoveAt(markerIndex);
+						parameters.RemoveAt(markerIndex);
                         markerIndex = FindParameterMarker(describedParameter.Name, parameters);
                         if(markerIndex >= 0)
                             repeatParameter = true;
@@ -213,7 +240,7 @@ namespace Chel
             }
         }
 
-        private void BindNumberedParameters(ICommand instance, CommandDescriptor descriptor, List<ChelType> parameters, ParameterBindResult result)
+        private void BindNumberedParameters(ICommand instance, CommandDescriptor descriptor, List<SourceCommandParameter> parameters, ParameterBindResult result)
         {
             var boundParameterIndexes = new List<int>();
 
@@ -228,11 +255,19 @@ namespace Chel
 
                     try
                     {
-                        BindProperty(instance, describedParameter.Property, describedParameter.Number.ToString(), value, result);
+                        // todo: add test for incorrect type
+                        if(!(value is SourceValueCommandParameter valueCommandParameter))
+                            throw new InvalidOperationException("Unexpected parameter type");
+
+                        BindProperty(instance, describedParameter.Property, describedParameter.Number.ToString(), valueCommandParameter, result);
                     }
-                    catch(Exception)
+                    catch(Exception ex)
                     {
-                        result.AddError(string.Format(Texts.InvalidParameterValueForNumberedParameter, value, describedParameter.PlaceholderText));
+                        var reportValue = value.ToString();
+                        if(value is SourceValueCommandParameter valueCommandParameter)
+                            reportValue = valueCommandParameter.Value.ToString();
+
+                        result.AddError(string.Format(Texts.InvalidParameterValueForNumberedParameter, reportValue, describedParameter.PlaceholderText, ex.Message));
                     }
 
                     boundParameterIndexes.Add(describedParameter.Number - 1);
@@ -246,10 +281,10 @@ namespace Chel
 
             boundParameterIndexes.Reverse();
             foreach(var index in boundParameterIndexes)
-                parameters.RemoveAt(index);
+				parameters.RemoveAt(index);
         }
 
-        private void AssertNoNamedOrFlagParameters(List<ChelType> parameters, ParameterBindResult result)
+        private void AssertNoNamedOrFlagParameters(List<SourceCommandParameter> parameters, ParameterBindResult result)
         {
             for(var i = parameters.Count - 1; i >= 0; i--)
             {
@@ -259,17 +294,17 @@ namespace Chel
                     if(parameters.Count > i + 1)
                     {
                         result.AddError(string.Format(Texts.UnknownNamedParameter, commandParameter.ParameterName));
-                        parameters.RemoveAt(i + 1);
+						parameters.RemoveAt(i + 1);
                     }
                     else
                         result.AddError(string.Format(Texts.UnknownFlagParameter, commandParameter.ParameterName));
 
-                    parameters.RemoveAt(i);
+					parameters.RemoveAt(i);
                 }
             }
         }
 
-        private int FindParameterMarker(string marker, List<ChelType> parameters)
+        private int FindParameterMarker(string marker, List<SourceCommandParameter> parameters)
         {
             return parameters.FindIndex(x => {
                 if(x is ParameterNameCommandParameter commandParameter)
@@ -285,9 +320,9 @@ namespace Chel
                 throw new InvalidOperationException(string.Format(Texts.PropertyMissingSetter, descriptor.Property.Property.Name, instance.GetType().FullName));
         }
 
-        private void BindProperty(ICommand instance, Abstractions.PropertyDescriptor propertyDescriptor, string parameterIdentifier, ChelType value, ParameterBindResult result)
+        private void BindProperty(ICommand instance, Abstractions.PropertyDescriptor propertyDescriptor, string parameterIdentifier, /*ChelType*/ SourceValueCommandParameter value, ParameterBindResult result)
         {
-            var bindingValue = ReplaceVariables(value, result);
+            var bindingValue = ReplaceVariables(value.Value, result);
             if(bindingValue == null)
                 return;
 
@@ -331,16 +366,9 @@ namespace Chel
             var values = Activator.CreateInstance(valuesType) as IList;
             foreach(var listValue in value.Values)
             {
-                if(!listValue.GetType().IsSubclassOf(typeof(ChelType)))
-                    throw new InvalidOperationException(Texts.ListValuesMustBeChelType);
-
-                var bindingValue = ReplaceVariables(listValue as ChelType, result);
-                if(bindingValue == null)
-                    continue;
-
-                var convertedValue = ConvertPropertyValue(bindingValue, listElementType, property);
-                
-                values.Add(convertedValue);
+                var convertedValue = GetValue(listValue, Texts.ListValuesMustBeChelType, listElementType, property, result);
+                if(convertedValue != null)
+                    values.Add(convertedValue);
             }
 
             if(property.PropertyType.IsArray)
@@ -371,19 +399,29 @@ namespace Chel
             var elements = Activator.CreateInstance(elementType) as IDictionary;
             foreach(var entry in value.Entries)
             {
-                if(!entry.Value.GetType().IsSubclassOf(typeof(ChelType)))
-                    throw new InvalidOperationException(Texts.ListValuesMustBeChelType);
-
-                var bindingValue = ReplaceVariables(entry.Value as ChelType, result);
-                if(bindingValue == null)
-                    continue;
-
-                var convertedValue = ConvertPropertyValue(bindingValue, valueType, property);
-                
-                elements.Add(entry.Key, convertedValue);
+                var convertedValue = GetValue(entry.Value, Texts.MapValuesMustBeChelType, valueType, property, result);
+                if(convertedValue != null)
+                    elements.Add(entry.Key, convertedValue);
             }
 
             property.SetValue(instance, elements);
+        }
+
+        private object GetValue(ICommandParameter value, string errorText, Type targetType, PropertyInfo property, ParameterBindResult result)
+        {
+            var wipValue = value;
+
+            if(wipValue is SourceValueCommandParameter sourceValueCommandParameter)
+                wipValue = sourceValueCommandParameter.Value;
+
+            if(!wipValue.GetType().IsSubclassOf(typeof(ChelType)))
+                throw new InvalidOperationException(errorText);
+
+            var bindingValue = ReplaceVariables(wipValue as ChelType, result);
+            if(bindingValue == null)
+                return null;
+
+            return ConvertPropertyValue(bindingValue, targetType, property);
         }
 
         private ICommandParameter ReplaceVariables(ICommandParameter value, ParameterBindResult result)

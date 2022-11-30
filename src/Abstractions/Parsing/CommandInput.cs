@@ -22,7 +22,7 @@ namespace Chel.Abstractions.Parsing
         /// <summary>
         /// Gets the parameters for the command.
         /// </summary>
-        public IReadOnlyList<SourceCommandParameter> Parameters { get; private set; }
+        public IReadOnlyList<ICommandParameter> Parameters { get; private set; }
 
         private CommandInput(SourceLocation sourceLocation)
             : base(sourceLocation)
@@ -77,7 +77,7 @@ namespace Chel.Abstractions.Parsing
         {
             private SourceLocation _sourceLocation;
             private string _commandName = null;
-            private List<SourceCommandParameter> _parameters = null;
+            private List<ICommandParameter> _parameters = null;
 
             /// <summary>
             /// Create a new instance.
@@ -95,14 +95,14 @@ namespace Chel.Abstractions.Parsing
                 _sourceLocation = sourceLocation;
                 _commandName = commandName;
 
-                _parameters = new List<SourceCommandParameter>();
+                _parameters = new List<ICommandParameter>();
             }
 
             /// <summary>
             /// Add a parameter to the command input.
             /// </summary>
             /// <param name="value">The parameter value to add.</param>
-            public void AddParameter(SourceCommandParameter value)
+            public void AddParameter(ICommandParameter value)
             {
                 if(value == null)
                     throw new ArgumentNullException(nameof(value));
@@ -118,7 +118,7 @@ namespace Chel.Abstractions.Parsing
                 var commandInput = new CommandInput(_sourceLocation)
                 {
                     CommandName = _commandName,
-                    Parameters = new List<SourceCommandParameter>(_parameters),
+                    Parameters = new List<ICommandParameter>(_parameters),
                 };
 
                 return commandInput;

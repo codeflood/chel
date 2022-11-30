@@ -40,11 +40,13 @@ namespace Chel
 
         public const string InvalidParameterValueForNamedParameter = "Invalid parameter value '{0}' for named parameter '{1}'. {2}";
 
-        public const string InvalidParameterValueForNumberedParameter = "Invalid parameter value '{0}' for numbered parameter '{1}'.";
+        public const string InvalidParameterValueForNumberedParameter = "Invalid parameter value '{0}' for numbered parameter '{1}'. {2}";
 
         public const string KeyTypeMustBeString = "Key type of property '{0}' must be 'string'.";
 
         public const string ListValuesMustBeChelType = "List values must only be of type ChelType";
+
+        public const string MapValuesMustBeChelType = "Map values must only be of type ChelType";
 
         public const string MissingBlockEnd = "Missing block end )";
 
