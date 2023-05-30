@@ -8,29 +8,43 @@ Chel is modelled after shell scripting languages like the Windows command prompt
 
 Chel in a nutshell:
 
-	# comment
-	var varname value
-	command numparam -parameter $varname$ -flag
-	command << subcommand
-	command >> chained-command $~$
+    # This is a comment
 
-	(#
-		block comment
-		block comment
-	#)
-	sub rigel (
-		command -flag
-		command -param value
-	)
+    # Set a variable
+    var varname value
 
-	var list [1 2 3 4]
-	var params {
-		key1 : value1
-		key2 : value2
-	}
-	var moreParams {
-		foo : $list$
-		bar : $params$
-	}
-	command $*moreparams$ -flag -param $list:2$
-	rigel
+    # Execute commands
+    command numparam -parameter $varname$ -flag
+    command << subcommand
+    command >> chained-command $~$
+
+    (#
+        block comment
+        block comment
+    #)
+
+    # Set a list variable
+    var list [1 2 3 4]
+
+    # Set a map variable
+    var params {
+        key1 : value1
+        key2 : value2
+    }
+
+    var moreParams {
+        foo : $list$
+        bar : $params$
+    }
+
+    # Bind map entries to command parameters with map expansion
+    command $*moreparams$ -flag -param $list:2$
+
+    # Define a subcommand
+    sub mysub (
+        command -flag
+        command -param value
+    )
+
+    # Call the subcommand
+    rigel
