@@ -1485,6 +1485,79 @@ namespace Chel.UnitTests
         }
 
         [Fact]
+        public void Bind_PropertyIsChelTypeInputIsSourceValueCommandParameter_BindsValue()
+        {
+            // arrange
+            var sut = CreateCommandParameterBinder(typeof(Var));
+            var variables = new VariableCollection();
+            var command = new Var(variables, new PhraseDictionary(), new NameValidator());
+            var input = CreateCommandInput(
+                "var",
+                new Literal("foo"),
+                new SourceValueCommandParameter(new SourceLocation(1, 1), new Literal("lit"))
+            );
+
+            // act
+            var result = sut.Bind(command, input);
+
+            // assert
+            Assert.True(result.Success);
+            Assert.IsType<Literal>(command.Value);
+        }
+
+        [Fact]
+        public void Bind_PropertyIsChelTypeInputIsSourceValueCommandParameterWithList_BindsListValues()
+        {
+            // arrange
+            var sut = CreateCommandParameterBinder(typeof(Var));
+            var variables = new VariableCollection();
+            var command = new Var(variables, new PhraseDictionary(), new NameValidator());
+            var input = CreateCommandInput(
+                "var",
+                new Literal("foo"),
+                new SourceValueCommandParameter(new SourceLocation(1, 1), new List(new[]{
+                    new SourceValueCommandParameter(new SourceLocation(1, 3), new Literal("lit")),
+                    new SourceValueCommandParameter(new SourceLocation(1, 7), new Literal("lit2"))
+                }))
+            );
+
+            // act
+            var result = sut.Bind(command, input);
+
+            // assert
+            Assert.True(result.Success);
+            var list = Assert.IsType<List>(command.Value);
+            Assert.IsType<Literal>(list.Values[0]);
+            Assert.IsType<Literal>(list.Values[1]);
+        }
+
+        [Fact]
+        public void Bind_PropertyIsChelTypeInputIsSourceValueCommandParameterWithMap_BindsMapValues()
+        {
+            // arrange
+            var sut = CreateCommandParameterBinder(typeof(Var));
+            var variables = new VariableCollection();
+            var command = new Var(variables, new PhraseDictionary(), new NameValidator());
+            var input = CreateCommandInput(
+                "var",
+                new Literal("foo"),
+                new SourceValueCommandParameter(new SourceLocation(1, 1), new Map(new Dictionary<string, ICommandParameter> {
+                    { "a", new SourceValueCommandParameter(new SourceLocation(1, 3), new Literal("lit")) },
+                    { "b", new SourceValueCommandParameter(new SourceLocation(1, 7), new Literal("lit2")) }
+                }))
+            );
+
+            // act
+            var result = sut.Bind(command, input);
+
+            // assert
+            Assert.True(result.Success);
+            var map = Assert.IsType<Map>(command.Value);
+            Assert.IsType<Literal>(map.Entries["a"]);
+            Assert.IsType<Literal>(map.Entries["b"]);
+        }
+
+        [Fact]
         public void Bind_ParameterIsCommandLineWithoutSubstituteValue_ThrowsException()
         {
             // arrange

@@ -281,7 +281,7 @@ namespace Chel
 
             boundParameterIndexes.Reverse();
             foreach(var index in boundParameterIndexes)
-				parameters.RemoveAt(index);
+                parameters.RemoveAt(index);
         }
 
         private void AssertNoNamedOrFlagParameters(List<SourceCommandParameter> parameters, ParameterBindResult result)
@@ -294,12 +294,12 @@ namespace Chel
                     if(parameters.Count > i + 1)
                     {
                         result.AddError(string.Format(Texts.UnknownNamedParameter, commandParameter.ParameterName));
-						parameters.RemoveAt(i + 1);
+                        parameters.RemoveAt(i + 1);
                     }
                     else
                         result.AddError(string.Format(Texts.UnknownFlagParameter, commandParameter.ParameterName));
 
-					parameters.RemoveAt(i);
+                    parameters.RemoveAt(i);
                 }
             }
         }

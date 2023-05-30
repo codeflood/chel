@@ -108,5 +108,44 @@ namespace Chel.Abstractions.UnitTests.Parsing
                 new SourceValueCommandParameter(new SourceLocation(31, 1), new Literal("lit1"))
             };
         }
+
+        [Theory]
+        [MemberData(nameof(ToStringDataSource))]
+        public void ToString_WhenCalled_ReturnsExpectedString(SourceValueCommandParameter sut, string expected)
+        {
+            // act
+            var result = sut.ToString();
+
+            // assert
+            Assert.Equal(expected, result);
+        }
+
+        public static IEnumerable<object[]> ToStringDataSource()
+        {
+            yield return new object[] {
+                new SourceValueCommandParameter(new SourceLocation(30, 1), new Literal("lit1")),
+                "lit1"
+            };
+
+            yield return new object[] {
+                new SourceValueCommandParameter(
+                    new SourceLocation(30, 1),
+                    new List(new[]{
+                        new SourceValueCommandParameter(new SourceLocation(30, 2), new Literal("1")),
+                        new SourceValueCommandParameter(new SourceLocation(30, 4), new Literal("2"))
+                    })),
+                "[ 1 2 ]"
+            };
+
+            yield return new object[] {
+                new SourceValueCommandParameter(
+                    new SourceLocation(30, 1),
+                    new Map(new Dictionary<string, ICommandParameter> {
+                        { "a", new SourceValueCommandParameter(new SourceLocation(30, 2), new Literal("1")) },
+                        { "b", new SourceValueCommandParameter(new SourceLocation(30, 4), new Literal("2")) }
+                    })),
+                "{ a: 1 b: 2 }"
+            };
+        }
     }
 }

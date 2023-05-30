@@ -52,5 +52,10 @@ namespace Chel.Abstractions.Parsing
 
             return code;
         }
+
+        public override string ToString()
+        {
+            return Value.ToString();
+        }
     }
 }
