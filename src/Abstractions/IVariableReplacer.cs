@@ -1,5 +1,4 @@
 using Chel.Abstractions.Parsing;
-using Chel.Abstractions.Types;
 using Chel.Abstractions.Variables;
 
 namespace Chel.Abstractions

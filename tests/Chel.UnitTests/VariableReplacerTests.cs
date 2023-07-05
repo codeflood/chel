@@ -405,5 +405,153 @@ namespace Chel.UnitTests
             var listResult = Assert.IsType<List>(result);
             Assert.IsType<CommandInput>(listResult.Values[0]);
         }
+
+        [Fact]
+        public void ReplaceVariables_InputIsSourceValueCommandParameter_ReturnsValue()
+        {
+            // arrange
+            var sut = new VariableReplacer();
+            var variables = new VariableCollection();
+            var input = new SourceValueCommandParameter(new SourceLocation(13, 1), new Literal("lit"));
+
+            // act
+            var result = sut.ReplaceVariables(variables, input);
+
+            // assert
+            Assert.IsType<Literal>(result);
+        }
+
+        [Fact]
+        public void ReplaceVariables_InputIsListWithSourceValueCommandParameterValue_ReturnsListWithValues()
+        {
+            // arrange
+            var sut = new VariableReplacer();
+            var variables = new VariableCollection();
+            var input = new SourceValueCommandParameter(
+                new SourceLocation(1,1),
+                new List(new[]{
+                    new SourceValueCommandParameter(new SourceLocation(1, 2), new Literal("lit")),
+                    new SourceValueCommandParameter(new SourceLocation(1, 5), new Literal("lit2"))
+                })
+            );
+
+            // act
+            var result = sut.ReplaceVariables(variables, input);
+
+            // assert
+            var listResult = Assert.IsType<List>(result);
+            Assert.IsType<Literal>(listResult.Values[0]);
+            Assert.IsType<Literal>(listResult.Values[1]);
+        }
+
+        [Fact]
+        public void ReplaceVariables_InputIsNestedListWithSourceValueCommandParameterValue_ReturnsListWithValues()
+        {
+            // arrange
+            var sut = new VariableReplacer();
+            var variables = new VariableCollection();
+            var input = new SourceValueCommandParameter(
+                new SourceLocation(1,1),
+                new List(new[]{
+                    new SourceValueCommandParameter(
+                        new SourceLocation(1, 2),
+                        new List(new[]{
+                            new SourceValueCommandParameter(new SourceLocation(1, 5), new Literal("lit1"))
+                        })
+                    ),
+                    new SourceValueCommandParameter(new SourceLocation(1, 8), new Literal("lit2"))
+                })
+            );
+
+            // act
+            var result = sut.ReplaceVariables(variables, input);
+
+            // assert
+            var listResult = Assert.IsType<List>(result);
+            var nestedListResult = Assert.IsType<List>(listResult.Values[0]);
+            Assert.IsType<Literal>(nestedListResult.Values[0]);
+            Assert.IsType<Literal>(listResult.Values[1]);
+        }
+
+        [Fact]
+        public void ReplaceVariables_InputIsMapWithSourceValueCommandParameterValue_ReturnsMapWithValues()
+        {
+            // arrange
+            var sut = new VariableReplacer();
+            var variables = new VariableCollection();
+            var input = new SourceValueCommandParameter(
+                new SourceLocation(1,1),
+                new Map(new Dictionary<string, ICommandParameter> {
+                    { "key1", new SourceValueCommandParameter(new SourceLocation(1, 2), new Literal("lit")) },
+                    { "key2", new SourceValueCommandParameter(new SourceLocation(1, 5), new Literal("lit2")) }
+                })
+            );
+
+            // act
+            var result = sut.ReplaceVariables(variables, input);
+
+            // assert
+            var mapResult = Assert.IsType<Map>(result);
+            Assert.IsType<Literal>(mapResult.Entries["key1"]);
+            Assert.IsType<Literal>(mapResult.Entries["key2"]);
+        }
+
+        [Fact]
+        public void ReplaceVariables_InputIsNestedMapWithSourceValueCommandParameterValue_ReturnsMapWithValues()
+        {
+            // arrange
+            var sut = new VariableReplacer();
+            var variables = new VariableCollection();
+            var input = new SourceValueCommandParameter(
+                new SourceLocation(1,1),
+                new Map(new Dictionary<string, ICommandParameter> {
+                    { "key1", new SourceValueCommandParameter(new SourceLocation(1, 2), new Literal("lit")) },
+                    { "key2", new SourceValueCommandParameter(
+                        new SourceLocation(1, 5),
+                        new Map(new Dictionary<string, ICommandParameter> {
+                            { "keya", new SourceValueCommandParameter(new SourceLocation(1, 2), new Literal("lit")) }
+                        })
+                    )}
+                })
+            );
+
+            // act
+            var result = sut.ReplaceVariables(variables, input);
+
+            // assert
+            var mapResult = Assert.IsType<Map>(result);
+            Assert.IsType<Literal>(mapResult.Entries["key1"]);
+            var nestedMapResult = Assert.IsType<Map>(mapResult.Entries["key2"]);
+            Assert.IsType<Literal>(nestedMapResult.Entries["keya"]);
+        }
+
+        [Fact]
+        public void ReplaceVariables_InputIsListWithMapWithSourceValueCommandParameterValue_ReturnsListWithMapWithValues()
+        {
+            // arrange
+            var sut = new VariableReplacer();
+            var variables = new VariableCollection();
+            var input = new SourceValueCommandParameter(
+                new SourceLocation(1,1),
+                new List(new[] {
+                    new SourceValueCommandParameter(new SourceLocation(1, 2), new Literal("lit")),
+                    new SourceValueCommandParameter(
+                        new SourceLocation(1, 5),
+                        new Map(new Dictionary<string, ICommandParameter> {
+                            { "keya", new SourceValueCommandParameter(new SourceLocation(1, 2), new Literal("lit")) }
+                        })
+                    )
+                })
+            );
+
+            // act
+            var result = sut.ReplaceVariables(variables, input);
+
+            // assert
+            var listResult = Assert.IsType<List>(result);
+            Assert.IsType<Literal>(listResult.Values[0]);
+            var mapResult = Assert.IsType<Map>(listResult.Values[1]);
+            Assert.IsType<Literal>(mapResult.Entries["keya"]);
+        }
     }
 }

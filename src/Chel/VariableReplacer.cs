@@ -8,6 +8,7 @@ using Chel.Exceptions;
 
 namespace Chel
 {
+    // todo: Might need to change the scope of this class as it also handles extracting SourceValueCommandParameter values.
 	internal class VariableReplacer : IVariableReplacer
     {
         public ICommandParameter ReplaceVariables(VariableCollection variables, ICommandParameter input)
@@ -30,6 +31,9 @@ namespace Chel
 
                 case Literal literal:
                     return literal;
+                
+                case SourceValueCommandParameter sourceValueCommandParameter:
+                    return ProcessParameter(sourceValueCommandParameter.Value, variables);
 
                 case VariableReference variableReference:
                     return ProcessVariableReference(variableReference, variables);
