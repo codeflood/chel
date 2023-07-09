@@ -4,6 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <DefaultNamespace>Chel.Abstractions</DefaultNamespace>
     <AssemblyName>Chel.Abstractions</AssemblyName>
+    <LangVersion>10</LangVersion>
   </PropertyGroup>
 
 </Project>

@@ -58,7 +58,7 @@ namespace Chel
             }
             catch(ParseException ex)
             {
-                var commandResult = new FailureResult(ex.SourceLocation, new[] { ex.Message });
+                var commandResult = new FailureResult(ex.SourceLocation, ex.Message);
                 resultHandler(commandResult);
                 return;
             }
@@ -66,7 +66,16 @@ namespace Chel
             foreach(var commandInput in commandInputs)
             {
                 var commandResult = Execute(commandInput);
-                resultHandler(commandResult);
+
+                if(commandResult is AggregateFailureResult aggregateFailureResult)
+                {
+                    foreach(var result in aggregateFailureResult.InnerResults)
+                    {
+                        resultHandler(result);
+                    }
+                }
+                else
+                    resultHandler(commandResult);
             }
         }
 
@@ -90,17 +99,20 @@ namespace Chel
                         commandResult = command.Execute();
 
                         if(commandResult is FailureResult failureResult && failureResult.SourceLocation.Equals(SourceLocation.CurrentLocation))
-                            commandResult = new FailureResult(commandInput.SourceLocation, failureResult.Messages.ToArray());
+                            commandResult = new FailureResult(commandInput.SourceLocation, failureResult.Message);
                     }
                     else
-                        commandResult = new FailureResult(commandInput.SourceLocation, bindingResult.Errors.ToArray());
+                    {
+                        var innerResults = bindingResult.Errors.Select(x => new FailureResult(x.SourceLocation, x.Message)).ToArray();
+                        commandResult = new AggregateFailureResult(innerResults);
+                    }
                 }
                 else
-                    commandResult = new FailureResult(commandInput.SourceLocation, new[] { string.Format(Texts.UnknownCommand, commandInput.CommandName) });
+                    commandResult = new FailureResult(commandInput.SourceLocation, string.Format(Texts.UnknownCommand, commandInput.CommandName));
             }
             catch(Exception ex)
             {
-                commandResult = new FailureResult(commandInput.SourceLocation, new[] { ex.Message });
+                commandResult = new FailureResult(commandInput.SourceLocation, ex.Message);
             }
 
             return commandResult;
@@ -125,7 +137,7 @@ namespace Chel
                     if(result is ValueResult valueResult)
                         subcommand.SubstituteValue = valueResult.Value;
                     else
-                        new FailureResult(subcommand.SourceLocation, new[] { Texts.SubcommandResultMustBeChelType });
+                        new FailureResult(subcommand.SourceLocation, Texts.SubcommandResultMustBeChelType);
                 }
                 else if(parameter is List listParameter)
                 {
@@ -140,7 +152,7 @@ namespace Chel
                             if(result is ValueResult valueResult)
                                 listSubcommand.SubstituteValue = valueResult.Value;
                             else
-                                new FailureResult(listSubcommand.SourceLocation, new[] { Texts.SubcommandResultMustBeChelType });
+                                new FailureResult(listSubcommand.SourceLocation, Texts.SubcommandResultMustBeChelType);
                         }
                     }
                 }
@@ -154,7 +166,7 @@ namespace Chel
             if(!subcommandResult.SourceLocation.Equals(SourceLocation.CurrentLocation))
                 return subcommandResult;
 
-            var result = new FailureResult(subcommand.SourceLocation, subcommandResult.Messages.ToArray());
+            var result = new FailureResult(subcommand.SourceLocation, subcommandResult.Message);
             return result;
         }
     }

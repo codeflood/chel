@@ -120,7 +120,7 @@ namespace Chel.UnitTests.Commands
 
             // assert
             var failureResult = Assert.IsType<FailureResult>(result);
-            Assert.Contains("Invalid character in variable name 'invalid:name'.", failureResult.Messages);
+            Assert.Equal("Invalid character in variable name 'invalid:name'.", failureResult.Message);
         }
 
         [Fact]
@@ -194,7 +194,7 @@ namespace Chel.UnitTests.Commands
 
             // assert
             var failureResult = Assert.IsType<FailureResult>(result);
-            Assert.Contains("Missing variable name.", failureResult.Messages);
+            Assert.Equal("Missing variable name.", failureResult.Message);
         }
 
         [Fact]

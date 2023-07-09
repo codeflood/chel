@@ -1,14 +1,13 @@
 using Xunit;
 using Chel.Abstractions.Results;
 using System;
-using Chel.Abstractions.Parsing;
 
 namespace Chel.Abstractions.UnitTests.Results
 {
     public class FailureResultTests
     {   
         [Fact]
-        public void Ctor_MessagesIsNull_ThrowsException()
+        public void Ctor_MessageIsNull_ThrowsException()
         {
             // arrange
             var location = new SourceLocation(1, 1);
@@ -20,16 +19,16 @@ namespace Chel.Abstractions.UnitTests.Results
         }
 
         [Fact]
-        public void Ctor_MessagesIsEmpty_ThrowsException()
+        public void Ctor_MessageIsEmpty_ThrowsException()
         {
             // arrange
             var location = new SourceLocation(1, 1);
-            Action sutAction = () => new FailureResult(location, new string[0]);
+            Action sutAction = () => new FailureResult(location, "");
 
             // act, assert
             var ex = Assert.Throws<ArgumentException>(sutAction);
-            Assert.Equal("messages", ex.ParamName);
-            Assert.Contains("'messages' cannot be empty", ex.Message);
+            Assert.Equal("message", ex.ParamName);
+            Assert.Contains("'message' cannot be empty or whitespace", ex.Message);
         }
 
         [Fact]
@@ -37,7 +36,7 @@ namespace Chel.Abstractions.UnitTests.Results
         {
             // act
             var location = new SourceLocation(1, 1);
-            var sut = new FailureResult(location, new[]{ "message" });
+            var sut = new FailureResult(location, "message");
 
             // assert
             Assert.False(sut.Success);
@@ -48,11 +47,11 @@ namespace Chel.Abstractions.UnitTests.Results
         {
             // act
             var location = new SourceLocation(2, 4);
-            var sut = new FailureResult(location, new[]{ "message" });
+            var sut = new FailureResult(location, "message");
 
             // assert
             Assert.Equal(location, sut.SourceLocation);
-            Assert.Equal(new[]{ "message" }, sut.Messages);
+            Assert.Equal("message", sut.Message);
         }
 
         [Fact]
@@ -60,28 +59,13 @@ namespace Chel.Abstractions.UnitTests.Results
         {
             // arrange
             var location = new SourceLocation(3, 1);
-            var sut = new FailureResult(location, new[] { "message" });
+            var sut = new FailureResult(location, "message");
 
             // act
             var result = sut.ToString();
 
             // assert
             Assert.Equal("ERROR (line 3, character 1): message", result);
-        }
-
-        [Fact]
-        public void ToString_MultipleMessages_ReturnsEachMessageOnSeparateLine()
-        {
-            // arrange
-            var location = new SourceLocation(3, 6);
-            var sut = new FailureResult(location, new[] { "message", "message2" });
-
-            // act
-            var result = sut.ToString();
-
-            // assert
-            var nl = Environment.NewLine;
-            Assert.Equal($"ERROR (line 3, character 6):{nl}message{nl}message2", result);
         }
     }
 }

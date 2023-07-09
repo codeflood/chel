@@ -18,19 +18,6 @@ namespace Chel.Abstractions.UnitTests
         }
 
         [Fact]
-        public void AddError_ErrorIsEmpty_ThrowsException()
-        {
-            // arrange
-            var sut = new ParameterBindResult();
-            Action sutAction = () => sut.AddError("");
-
-            // act, assert
-            var ex = Assert.Throws<ArgumentException>(sutAction);
-            Assert.Equal("error", ex.ParamName);
-            Assert.Contains("'error' cannot be empty", ex.Message);
-        }
-
-        [Fact]
         public void Success_NoErrorsAdded_ReturnsTrue()
         {
             // arrange
@@ -48,7 +35,7 @@ namespace Chel.Abstractions.UnitTests
         {
             // arrange
             var sut = new ParameterBindResult();
-            sut.AddError("error");
+            sut.AddError(new SourceError(new SourceLocation(1, 1), "error"));
 
             // act
             var result = sut.Success;
@@ -75,14 +62,16 @@ namespace Chel.Abstractions.UnitTests
         {
             // arrange
             var sut = new ParameterBindResult();
-            sut.AddError("error1");
-            sut.AddError("error2");
+            var error1 = new SourceError(new SourceLocation(1, 1), "error1");
+            var error2 = new SourceError(new SourceLocation(2, 1), "error2");
+            sut.AddError(error1);
+            sut.AddError(error2);
 
             // act
             var result = sut.Errors;
 
             // assert
-            Assert.Equal(new[]{ "error1", "error2" }, result);
+            Assert.Equal(new[]{ error1, error2 }, result);
         }
     }
 }

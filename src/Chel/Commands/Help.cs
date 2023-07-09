@@ -44,7 +44,7 @@ namespace Chel.Commands
             {
                 var successful = DetailCommand(output);
                 if(!successful)
-                    return new FailureResult(new[]{ string.Format(Texts.CannotDisplayHelpUnknownCommnad, CommandName) });
+                    return new FailureResult(string.Format(Texts.CannotDisplayHelpUnknownCommnad, CommandName));
             }
 
             return new ValueResult(new Literal(output.ToString()));

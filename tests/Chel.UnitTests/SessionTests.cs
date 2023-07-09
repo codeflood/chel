@@ -153,7 +153,7 @@ namespace Chel.UnitTests
             sut.Execute("num p1 p2 p3", result => executionResult = result as FailureResult);
             
             // assert
-            Assert.Equal("ERROR (line 1, character 1): Unexpected numbered parameter 'p3'", executionResult.ToString());
+            Assert.Equal("ERROR (line 1, character 11): Unexpected numbered parameter 'p3'", executionResult.ToString());
         }
 
         [Fact]
@@ -227,7 +227,7 @@ namespace Chel.UnitTests
             sut.Execute("nam -param1 $foo$", result => executionResult = result as FailureResult);
 
             // assert
-            Assert.Contains("Variable $foo$ is not set", executionResult.Messages);
+            Assert.Equal("Variable $foo$ is not set", executionResult.Message);
         }
 
         [Fact]
@@ -391,7 +391,7 @@ namespace Chel.UnitTests
             
             // assert
             Assert.Equal(new SourceLocation(1, 8), executionResult.SourceLocation);
-            Assert.Contains("Unknown command 'unknown'", executionResult.Messages);
+            Assert.Equal("Unknown command 'unknown'", executionResult.Message);
         }
 
         [Fact]

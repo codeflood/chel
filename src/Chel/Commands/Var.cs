@@ -54,10 +54,10 @@ namespace Chel
             ChelType output = null;
 
             if(!string.IsNullOrEmpty(Name) && !_nameValidator.IsValid(Name))
-                return new FailureResult(new[] { string.Format(Texts.InvalidCharacterInVariableName, Name) });
+                return new FailureResult(string.Format(Texts.InvalidCharacterInVariableName, Name));
 
             if(Clear && string.IsNullOrEmpty(Name))
-                return new FailureResult(new[] { _phraseDictionary.GetPhrase(Texts.PhraseKeys.MissingVariableName, _executionCultureName) });
+                return new FailureResult(_phraseDictionary.GetPhrase(Texts.PhraseKeys.MissingVariableName, _executionCultureName));
 
             if(Value == null)
             {

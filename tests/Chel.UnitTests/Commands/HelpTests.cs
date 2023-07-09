@@ -126,7 +126,7 @@ namespace Chel.UnitTests.Commands
             var result = sut.Execute() as FailureResult;
 
             // assert
-            Assert.Equal(new[]{ "Cannot display help for unknown command 'boo'" }, result.Messages);
+            Assert.Equal("Cannot display help for unknown command 'boo'", result.Message);
         }
 
         [Fact]

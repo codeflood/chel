@@ -1,7 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using Chel.Abstractions.Parsing;
 
 namespace Chel.Abstractions.Results
 {
@@ -16,16 +13,16 @@ namespace Chel.Abstractions.Results
         public SourceLocation SourceLocation { get; }
 
         /// <summary>
-        /// Gets the messages describing the failure.
+        /// Gets the message describing the failure.
         /// </summary>
-        public IReadOnlyList<string> Messages { get; }
+        public string Message { get; }
 
         /// <summary>
         /// Create a new instance.
         /// </sumamry>
-        /// <param name="messages">The messages describing the failure.</param>
-        public FailureResult(string[] messages)
-            : this(SourceLocation.CurrentLocation, messages)
+        /// <param name="message">A message describing the failure.</param>
+        public FailureResult(string message)
+            : this(SourceLocation.CurrentLocation, message)
         {
         }
 
@@ -33,30 +30,20 @@ namespace Chel.Abstractions.Results
         /// Create a new instance.
         /// </sumamry>
         /// <param name="sourceLocation">The location where the failure occurred.</param>
-        /// <param name="messages">The messages describing the failure.</param>
-        public FailureResult(SourceLocation sourceLocation, string[] messages)
+        /// <param name="message">A messages describing the failure.</param>
+        public FailureResult(SourceLocation sourceLocation, string message)
         {
-            if(messages == null)
-                throw new ArgumentNullException(nameof(messages));
-
-            if(messages.Length == 0)
-                throw new ArgumentException(string.Format(Texts.ArgumentCannotBeEmpty, nameof(messages)), nameof(messages));
+            Message = message ?? throw new ArgumentNullException(nameof(message));
+            if(string.IsNullOrWhiteSpace(message))
+                throw new ArgumentException(string.Format(Texts.ArgumentCannotBeEmptyOrWhitespace, nameof(message)), nameof(message));
 
             Success = false;
             SourceLocation = sourceLocation;
-            Messages = messages;
         }
 
         public override string ToString()
         {
-            var message = string.Format(Texts.ErrorAtLocation, SourceLocation.LineNumber, SourceLocation.CharacterNumber) + ":";
-            
-            if(Messages.Count == 1)
-                message += " " + Messages.First();
-            else
-                message += Environment.NewLine + string.Join(Environment.NewLine, Messages);
-
-            return message;
+            return string.Format(Texts.ErrorAtLocation, SourceLocation.LineNumber, SourceLocation.CharacterNumber) + ": " + Message;
         }
     }
 }

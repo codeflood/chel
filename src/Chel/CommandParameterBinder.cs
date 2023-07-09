@@ -63,11 +63,11 @@ namespace Chel
                 return result;
 
             BindFlagParameters(instance, descriptor, parameters, result);
-            BindNamedParameters(instance, descriptor, parameters, result);
+            BindNamedParameters(instance, descriptor, parameters, result, input.SourceLocation);
 
             AssertNoNamedOrFlagParameters(parameters, result);
 
-            BindNumberedParameters(instance, descriptor, parameters, result);
+            BindNumberedParameters(instance, descriptor, parameters, result, input.SourceLocation);
 
             // Anything left over was unexpected
             foreach(var parameter in parameters)
@@ -76,7 +76,7 @@ namespace Chel
                 if(parameter is SourceValueCommandParameter sourceValueCommandParameter)
                     reportValue = sourceValueCommandParameter.Value.ToString();
 
-                result.AddError(string.Format(Texts.UnexpectedNumberedParameter, reportValue));
+                result.AddError(new SourceError(parameter.SourceLocation, string.Format(Texts.UnexpectedNumberedParameter, reportValue)));
             }
 
             return result;
@@ -88,6 +88,11 @@ namespace Chel
 
             foreach(var parameter in parameters)
             {
+                var location = fallbackLocation;
+
+                if(parameter is SourceCommandParameter sourceCommandParameter)
+                    location = sourceCommandParameter.SourceLocation;
+
                 if(parameter is CommandInput commandInput)
                 {
                     if(commandInput.SubstituteValue == null)
@@ -127,11 +132,11 @@ namespace Chel
                         }
                         else
                         {
-                            result.AddError(string.Format(Texts.VariableIsNotMap, variableName));
+                            result.AddError(new SourceError(location, string.Format(Texts.VariableIsNotMap, variableName)));
                         }
                     }
                     else if(value is ChelType plainValue)
-                        output.Add(new SourceValueCommandParameter(valueParameter.SourceLocation, plainValue));
+                        output.Add(new SourceValueCommandParameter(location, plainValue));
                     
                 }
                 else if(parameter is SourceCommandParameter sourceParameter)
@@ -142,7 +147,6 @@ namespace Chel
                     output.Add(new SourceValueCommandParameter(fallbackLocation, plainValue));
             }
 
-            //return output.Select(x => x as ICommandParameter).ToList();
             return output;
         }
 
@@ -159,21 +163,22 @@ namespace Chel
                 BindProperty(instance, describedParameter.Property, describedParameter.Name, new SourceValueCommandParameter(parameters[markerIndex].SourceLocation, new Literal("True")), result);
 
                 // Make sure there's no duplicates
-                var repeatParameter = false;
                 while(markerIndex >= 0)
                 {
 					parameters.RemoveAt(markerIndex);
                     markerIndex = FindParameterMarker(describedParameter.Name, parameters);
                     if(markerIndex >= 0)
-                        repeatParameter = true;
+                    {
+                        result.AddError(new SourceError(
+                            parameters[markerIndex].SourceLocation,
+                            string.Format(Texts.CannotRepeatFlagParameter, describedParameter.Name)
+                        ));
+                    }
                 }
-                
-                if(repeatParameter)
-                    result.AddError(string.Format(Texts.CannotRepeatFlagParameter, describedParameter.Name));
             }
         }
 
-        private void BindNamedParameters(ICommand instance, CommandDescriptor descriptor, List<SourceCommandParameter> parameters, ParameterBindResult result)
+        private void BindNamedParameters(ICommand instance, CommandDescriptor descriptor, List<SourceCommandParameter> parameters, ParameterBindResult result, SourceLocation sourceLocation)
         {
             foreach(var describedParameter in descriptor.NamedParameters.Values)
             {
@@ -183,7 +188,11 @@ namespace Chel
                 {
                     if(markerIndex + 2 > parameters.Count)
                     {
-                        result.AddError(string.Format(Texts.MissingValueForNamedParameter, describedParameter.Name));
+                        result.AddError(new SourceError(
+                            parameters[markerIndex].SourceLocation,
+                            string.Format(Texts.MissingValueForNamedParameter, describedParameter.Name)
+                        ));
+
                         parameters.RemoveAt(markerIndex);
                         continue;
                     }
@@ -192,7 +201,11 @@ namespace Chel
                     if(value is ParameterNameCommandParameter commandParameter)
                     {
                         // This is a parameter name, which cannot be a value.
-                        result.AddError(string.Format(Texts.MissingValueForNamedParameter, describedParameter.Name));
+                        result.AddError(new SourceError(
+                            commandParameter.SourceLocation,
+                            string.Format(Texts.MissingValueForNamedParameter, describedParameter.Name)
+                        ));
+
                         parameters.RemoveAt(markerIndex);
                         continue;
                     }
@@ -213,11 +226,13 @@ namespace Chel
                         if(value is SourceValueCommandParameter valueCommandParameter)
                             reportValue = valueCommandParameter.Value.ToString();
 
-                        result.AddError(string.Format(Texts.InvalidParameterValueForNamedParameter, reportValue, describedParameter.Name, ex.Message));
+                        result.AddError(new SourceError(
+                            value.SourceLocation,
+                            string.Format(Texts.InvalidParameterValueForNamedParameter, reportValue, describedParameter.Name, ex.Message)
+                        ));
                     }
 
                     // Make sure there's no duplicates
-                    var repeatParameter = false;
                     while(markerIndex >= 0)
                     {
                         if(markerIndex + 2 <= parameters.Count)
@@ -226,21 +241,28 @@ namespace Chel
 						parameters.RemoveAt(markerIndex);
                         markerIndex = FindParameterMarker(describedParameter.Name, parameters);
                         if(markerIndex >= 0)
-                            repeatParameter = true;
+                        {
+                            result.AddError(new SourceError(
+                                parameters[markerIndex].SourceLocation,
+                                string.Format(Texts.CannotRepeatNamedParameter, describedParameter.Name)
+                            ));
+                        }
                     }
-                    
-                    if(repeatParameter)
-                        result.AddError(string.Format(Texts.CannotRepeatNamedParameter, describedParameter.Name));
                 }
                 else
                 {
                     if(describedParameter.Required)
-                        result.AddError(string.Format(Texts.MissingRequiredNamedParameter, describedParameter.Name));
+                    {
+                        result.AddError(new SourceError(
+                            sourceLocation,
+                            string.Format(Texts.MissingRequiredNamedParameter, describedParameter.Name)
+                        ));
+                    }
                 }
             }
         }
 
-        private void BindNumberedParameters(ICommand instance, CommandDescriptor descriptor, List<SourceCommandParameter> parameters, ParameterBindResult result)
+        private void BindNumberedParameters(ICommand instance, CommandDescriptor descriptor, List<SourceCommandParameter> parameters, ParameterBindResult result, SourceLocation sourceLocation)
         {
             var boundParameterIndexes = new List<int>();
 
@@ -267,7 +289,10 @@ namespace Chel
                         if(value is SourceValueCommandParameter valueCommandParameter)
                             reportValue = valueCommandParameter.Value.ToString();
 
-                        result.AddError(string.Format(Texts.InvalidParameterValueForNumberedParameter, reportValue, describedParameter.PlaceholderText, ex.Message));
+                        result.AddError(new SourceError(
+                            value.SourceLocation,
+                            string.Format(Texts.InvalidParameterValueForNumberedParameter, reportValue, describedParameter.PlaceholderText, ex.Message)
+                        ));
                     }
 
                     boundParameterIndexes.Add(describedParameter.Number - 1);
@@ -275,7 +300,12 @@ namespace Chel
                 else
                 {
                     if(describedParameter.Required)
-                        result.AddError(string.Format(Texts.MissingRequiredNumberedParameter, describedParameter.PlaceholderText));
+                    {
+                        result.AddError(new SourceError(
+                            sourceLocation,
+                            string.Format(Texts.MissingRequiredNumberedParameter, describedParameter.PlaceholderText)
+                        ));
+                    }
                 }
             }
 
@@ -293,11 +323,17 @@ namespace Chel
                     // If the following parameter is a parameter name, we'll treat this one as a flag parameter.
                     if(parameters.Count > i + 1)
                     {
-                        result.AddError(string.Format(Texts.UnknownNamedParameter, commandParameter.ParameterName));
+                        result.AddError(new SourceError(                            
+                            commandParameter.SourceLocation,
+                            string.Format(Texts.UnknownNamedParameter, commandParameter.ParameterName)
+                        ));
                         parameters.RemoveAt(i + 1);
                     }
                     else
-                        result.AddError(string.Format(Texts.UnknownFlagParameter, commandParameter.ParameterName));
+                        result.AddError(new SourceError(
+                            commandParameter.SourceLocation,
+                            string.Format(Texts.UnknownFlagParameter, commandParameter.ParameterName)
+                        ));
 
                     parameters.RemoveAt(i);
                 }
@@ -320,9 +356,9 @@ namespace Chel
                 throw new InvalidOperationException(string.Format(Texts.PropertyMissingSetter, descriptor.Property.Property.Name, instance.GetType().FullName));
         }
 
-        private void BindProperty(ICommand instance, Abstractions.PropertyDescriptor propertyDescriptor, string parameterIdentifier, /*ChelType*/ SourceValueCommandParameter value, ParameterBindResult result)
+        private void BindProperty(ICommand instance, Abstractions.PropertyDescriptor propertyDescriptor, string parameterIdentifier, SourceValueCommandParameter value, ParameterBindResult result)
         {
-            var bindingValue = ReplaceVariables(value.Value, result);
+            var bindingValue = ReplaceVariables(value.Value, result, value.SourceLocation);
             if(bindingValue == null)
                 return;
 
@@ -334,18 +370,28 @@ namespace Chel
 
             if(bindingValue is List list)
             {
-                BindListProperty(instance, propertyDescriptor.Property, propertyDescriptor.GenericValueType, parameterIdentifier, list, result);
+                BindListProperty(instance, propertyDescriptor.Property, propertyDescriptor.GenericValueType, parameterIdentifier, list, result, value.SourceLocation);
                 return;
             }
             else if(bindingValue is Map map)
             {
-                BindDictionaryProperty(instance, propertyDescriptor.Property, propertyDescriptor.GenericKeyType, propertyDescriptor.GenericValueType, parameterIdentifier, map, result);
+                BindDictionaryProperty(instance, propertyDescriptor.Property, propertyDescriptor.GenericKeyType, propertyDescriptor.GenericValueType, parameterIdentifier, map, result, value.SourceLocation);
                 return;
             }
             else if(propertyDescriptor.IsTypeListCompatible)
-                result.AddError(string.Format(Texts.CannotBindNonListToListParameter, parameterIdentifier));
+            {
+                result.AddError(new SourceError(
+                    value.SourceLocation,
+                    string.Format(Texts.CannotBindNonListToListParameter, parameterIdentifier)
+                ));
+            }
             else if(propertyDescriptor.IsTypeMapCompatible)
-                result.AddError(string.Format(Texts.CannotBindNonMapToMapParameter, parameterIdentifier));
+            {
+                result.AddError(new SourceError(
+                    value.SourceLocation,
+                    string.Format(Texts.CannotBindNonMapToMapParameter, parameterIdentifier)
+                ));
+            }
 
             var convertedValue = ConvertPropertyValue(bindingValue, propertyDescriptor.Property.PropertyType, propertyDescriptor.Property);
             if(convertedValue == null)
@@ -354,11 +400,14 @@ namespace Chel
             propertyDescriptor.Property.SetValue(instance, convertedValue);
         }
 
-        private void BindListProperty(ICommand instance, PropertyInfo property, Type listElementType, string parameterIdentifier, List value, ParameterBindResult result)
+        private void BindListProperty(ICommand instance, PropertyInfo property, Type listElementType, string parameterIdentifier, List value, ParameterBindResult result, SourceLocation sourceLocation)
         {
             if(listElementType == null)
             {
-                result.AddError(string.Format(Texts.CannotBindListToNonListParameter, parameterIdentifier));
+                result.AddError(new SourceError(
+                    sourceLocation,
+                    string.Format(Texts.CannotBindListToNonListParameter, parameterIdentifier)
+                ));
                 return;
             }
             
@@ -366,7 +415,7 @@ namespace Chel
             var values = Activator.CreateInstance(valuesType) as IList;
             foreach(var listValue in value.Values)
             {
-                var convertedValue = GetValue(listValue, Texts.ListValuesMustBeChelType, listElementType, property, result);
+                var convertedValue = GetValue(listValue, Texts.ListValuesMustBeChelType, listElementType, property, result, sourceLocation);
                 if(convertedValue != null)
                     values.Add(convertedValue);
             }
@@ -381,17 +430,23 @@ namespace Chel
                 property.SetValue(instance, values);
         }
 
-        private void BindDictionaryProperty(ICommand instance, PropertyInfo property, Type keyType, Type valueType, string parameterIdentifier, Map value, ParameterBindResult result)
+        private void BindDictionaryProperty(ICommand instance, PropertyInfo property, Type keyType, Type valueType, string parameterIdentifier, Map value, ParameterBindResult result, SourceLocation sourceLocation)
         {
             if(keyType == null || valueType == null)
             {
-                result.AddError(string.Format(Texts.CannotBindMapToNonMapParameter, parameterIdentifier));
+                result.AddError(new SourceError(
+                    sourceLocation,
+                    string.Format(Texts.CannotBindMapToNonMapParameter, parameterIdentifier)
+                ));
                 return;
             }
 
             if(keyType != typeof(string))
             {
-                result.AddError(string.Format(Texts.KeyTypeMustBeString, property.DeclaringType.FullName + "." + property.Name));
+                result.AddError(new SourceError(
+                    sourceLocation,
+                    string.Format(Texts.KeyTypeMustBeString, property.DeclaringType.FullName + "." + property.Name)
+                ));
                 return;
             }
 
@@ -399,7 +454,7 @@ namespace Chel
             var elements = Activator.CreateInstance(elementType) as IDictionary;
             foreach(var entry in value.Entries)
             {
-                var convertedValue = GetValue(entry.Value, Texts.MapValuesMustBeChelType, valueType, property, result);
+                var convertedValue = GetValue(entry.Value, Texts.MapValuesMustBeChelType, valueType, property, result, sourceLocation);
                 if(convertedValue != null)
                     elements.Add(entry.Key, convertedValue);
             }
@@ -407,7 +462,7 @@ namespace Chel
             property.SetValue(instance, elements);
         }
 
-        private object GetValue(ICommandParameter value, string errorText, Type targetType, PropertyInfo property, ParameterBindResult result)
+        private object GetValue(ICommandParameter value, string errorText, Type targetType, PropertyInfo property, ParameterBindResult result, SourceLocation sourceLocation)
         {
             var wipValue = value;
 
@@ -417,14 +472,14 @@ namespace Chel
             if(!wipValue.GetType().IsSubclassOf(typeof(ChelType)))
                 throw new InvalidOperationException(errorText);
 
-            var bindingValue = ReplaceVariables(wipValue as ChelType, result);
+            var bindingValue = ReplaceVariables(wipValue as ChelType, result, sourceLocation);
             if(bindingValue == null)
                 return null;
 
             return ConvertPropertyValue(bindingValue, targetType, property);
         }
 
-        private ICommandParameter ReplaceVariables(ICommandParameter value, ParameterBindResult result)
+        private ICommandParameter ReplaceVariables(ICommandParameter value, ParameterBindResult result, SourceLocation sourceLocation)
         {
             try
             {
@@ -432,15 +487,15 @@ namespace Chel
             }
             catch(UnsetVariableException ex)
             {
-                result.AddError(ex.Message);
+                result.AddError(new SourceError(sourceLocation, ex.Message));
             }
             catch(ArgumentException ex)
             {
-                result.AddError(ex.Message);
+                result.AddError(new SourceError(sourceLocation, ex.Message));
             }
             catch(InvalidOperationException ex)
             {
-                result.AddError(ex.Message);
+                result.AddError(new SourceError(sourceLocation, ex.Message));
             }
 
             return null;

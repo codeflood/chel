@@ -21,11 +21,12 @@ namespace Chel.Sandbox
 
             Console.WriteLine("Type 'exit' to exit.");
             Console.WriteLine("Type 'help' for help.");
-            Console.WriteLine();
 
             var exit = false;
             while(!exit)
             {
+                Console.WriteLine();
+                Console.Write("> ");
                 var input = Console.ReadLine();
                 // todo: allow SHIFT+ENTER to continue input
 
@@ -39,7 +40,6 @@ namespace Chel.Sandbox
                     if(!result.Success)
                         Console.ForegroundColor = ConsoleColor.Red;
 
-                    Console.WriteLine();
                     Console.WriteLine(result);
 
                     Console.ForegroundColor = previousColor;
