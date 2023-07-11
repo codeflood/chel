@@ -16,16 +16,19 @@ namespace Chel.Abstractions.UnitTests
             Assert.Equal("message", ex.ParamName);
         }
 
-        [Fact]
-        public void Ctor_MessageIsEmpty_ThrowsException()
+        [Theory]
+        [InlineData("")]
+        [InlineData("  ")]
+        [InlineData("\t")]
+        public void Ctor_MessageIsEmpty_ThrowsException(string message)
         {
             // arrange
-            var action = () => new SourceError(new SourceLocation(1, 1), "");
+            var action = () => new SourceError(new SourceLocation(1, 1), message);
 
             // act, assert
-            var ex = Assert.Throws<ArgumentNullException>(action);
+            var ex = Assert.Throws<ArgumentException>(action);
             Assert.Equal("message", ex.ParamName);
-            Assert.Contains("'error' cannot be empty", ex.Message);
+            Assert.Contains("'message' cannot be empty or whitespace", ex.Message);
         }
     }
 }

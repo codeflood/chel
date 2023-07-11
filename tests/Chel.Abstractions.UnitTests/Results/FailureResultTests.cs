@@ -15,7 +15,7 @@ namespace Chel.Abstractions.UnitTests.Results
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
-            Assert.Equal("messages", ex.ParamName);
+            Assert.Equal("message", ex.ParamName);
         }
 
         [Fact]
