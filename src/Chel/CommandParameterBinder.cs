@@ -126,8 +126,14 @@ namespace Chel
                                 output.Add(new ParameterNameCommandParameter(valueParameter.SourceLocation, entry.Key));
                                 
                                 var values = ExtractParameterValues(new[] { entry.Value }, result, valueParameter.SourceLocation);
-                                // todo: add test for when map value is not a SourceValueCommandParameter
-                                output.AddRange(values.Select(x => new SourceValueCommandParameter(valueParameter.SourceLocation, ((SourceValueCommandParameter)x).Value)));
+
+                                foreach(var entryValue in values)
+                                {
+                                    if(entryValue is SourceValueCommandParameter sourceValueCommandParameter)
+                                        output.Add(new SourceValueCommandParameter(valueParameter.SourceLocation, sourceValueCommandParameter.Value));
+                                    else
+                                        result.AddError(new SourceError(location, string.Format(Texts.ValueOfMapEntryNotValue, variableName, entry.Key)));
+                                }
                             }
                         }
                         else

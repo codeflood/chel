@@ -1805,6 +1805,34 @@ namespace Chel.UnitTests
         }
 
         [Fact]
+        public void Bind_ExpandMapParameterValueIsNotValid_ErrorsIncludedInResult()
+        {
+            // arrange
+            var map = new Map(new MapEntries
+            {
+                { "param1", new ParameterNameCommandParameter(new(1, 1), "bad") }
+            });
+            var variables = new VariableCollection();
+            variables.Set(new Variable("map", map));
+
+            var replacer = new VariableReplacer();
+            var sut = CreateCommandParameterBinder(variables, typeof(NamedParameterCommand));
+            var command = new NamedParameterCommand();
+
+            var commandInput = CreateCommandInput(
+                "nam",
+                new SourceValueCommandParameter(new(1, 5), new VariableReference("*map"))
+            );
+
+            // act
+            var result = sut.Bind(command, commandInput);
+
+            // assert
+            Assert.False(result.Success);
+            Assert.Equal(new SourceError(new (1, 5), "Value of map 'map' entry 'param1' is not a SourceValueCommandParameter."), result.Errors[0]);
+        }
+
+        [Fact]
         public void Bind_MapToDictionaryProperty_BindsProperty()
         {
             // arrange

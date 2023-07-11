@@ -112,6 +112,8 @@ namespace Chel
 
         public const string UnpairedVariableToken = "Unpaired variable token $";
 
+        public const string ValueOfMapEntryNotValue = "Value of map '{0}' entry '{1}' is not a SourceValueCommandParameter.";
+
         public const string VariableIsNotMap = "Variable '{0}' is not a map and cannot be expanded";
 
         public const string VariableIsUnset = "Variable ${0}$ is not set";
