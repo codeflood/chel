@@ -7,7 +7,7 @@ using Chel.Abstractions.Results;
 using Chel.Abstractions.Types;
 using Chel.Abstractions.Variables;
 
-namespace Chel
+namespace Chel.Commands
 {
 	[Command("var")]
     [Description("Manage variables.")]

@@ -27,6 +27,15 @@ namespace Chel
                 _types.Add(type);
         }
 
+        public void RegisterInstance<T>(T instance)
+        {
+            if(instance == null)
+                throw new ArgumentNullException(nameof(instance));
+
+            var type = typeof(T);
+            _instances.Add(type, instance);
+        }
+
         public object Resolve(Type type)
         {
             object instance = null;

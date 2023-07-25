@@ -1,6 +1,3 @@
-using System;
-using Chel.Abstractions.Results;
-
 namespace Chel.Abstractions
 {
     /// <summary>
@@ -11,6 +8,6 @@ namespace Chel.Abstractions
         /// <summary>
         /// Execute input.
         /// </summary>
-        void Execute(string input, Action<CommandResult> resultHandler);
+        void Execute(string input);
     }
 }

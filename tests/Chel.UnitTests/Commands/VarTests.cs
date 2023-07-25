@@ -4,6 +4,7 @@ using Chel.Abstractions;
 using Chel.Abstractions.Results;
 using Chel.Abstractions.Types;
 using Chel.Abstractions.Variables;
+using Chel.Commands;
 using NSubstitute;
 using Xunit;
 

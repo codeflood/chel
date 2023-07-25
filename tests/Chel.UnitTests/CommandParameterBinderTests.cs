@@ -5,6 +5,7 @@ using Chel.Abstractions.Parsing;
 using Chel.Abstractions.Types;
 using Chel.Abstractions.UnitTests.SampleCommands;
 using Chel.Abstractions.Variables;
+using Chel.Commands;
 using Chel.UnitTests.SampleCommands;
 using Xunit;
 

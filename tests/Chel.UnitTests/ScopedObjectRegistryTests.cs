@@ -19,6 +19,49 @@ namespace Chel.UnitTests
         }
 
         [Fact]
+        public void RegisterInstance_InstanceIsNull_ThrowsException()
+        {
+            // arrange
+            var sut = new ScopedObjectRegistry();
+            Action sutAction = () => sut.RegisterInstance<GoodObject>(null);
+
+            // act, assert
+            var ex = Assert.Throws<ArgumentNullException>(sutAction);
+            Assert.Equal("instance", ex.ParamName);
+        }
+
+        [Fact]
+        public void ResolveRegisteredInstance_InstanceRegistered_ReturnsInstance()
+        {
+            // arrange
+            var sut = new ScopedObjectRegistry();
+            var instance = new GoodObject();
+
+            // act
+            sut.RegisterInstance(instance);
+            var result = sut.Resolve(typeof(GoodObject));
+
+            // assert
+            Assert.Same(instance, result);
+        }
+
+        [Fact]
+        public void ResolveRegisteredInstance_TypeAlreadyRegistered_ReturnsInstance()
+        {
+            // arrange
+            var sut = new ScopedObjectRegistry();
+            sut.Register<GoodObject>();
+            var instance = new GoodObject();
+
+            // act
+            sut.RegisterInstance(instance);
+            var result = sut.Resolve(typeof(GoodObject));
+
+            // assert
+            Assert.Same(instance, result);
+        }
+
+        [Fact]
         public void Resolve_TypeNotRegistered_ReturnsNull()
         {
             // arrange

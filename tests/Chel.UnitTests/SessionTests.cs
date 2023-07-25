@@ -22,7 +22,8 @@ namespace Chel.UnitTests
             Action sutAction = () => new Session(
                     null,
                     Substitute.For<ICommandFactory>(),
-                    Substitute.For<ICommandParameterBinder>()
+                    Substitute.For<ICommandParameterBinder>(),
+                    _ => { }
                 );
 
             // act, assert
@@ -37,7 +38,8 @@ namespace Chel.UnitTests
             Action sutAction = () => new Session(
                     Substitute.For<IParser>(),
                     null,
-                    Substitute.For<ICommandParameterBinder>()
+                    Substitute.For<ICommandParameterBinder>(),
+                    _ => { }
                 );
 
             // act, assert
@@ -52,7 +54,8 @@ namespace Chel.UnitTests
             Action sutAction = () => new Session(
                     Substitute.For<IParser>(),
                     Substitute.For<ICommandFactory>(),
-                    null
+                    null,
+                    _ => { }
                 );
 
             // act, assert
@@ -61,21 +64,15 @@ namespace Chel.UnitTests
         }
 
         [Fact]
-        public void Execute_InputIsNull_DoNothing()
+        public void Ctor_ResultHandlerIsNull_ThrowsException()
         {
             // arrange
-            var sut = CreateSession();
-
-            // act, assert
-            sut.Execute(null, _ => {});
-        }
-
-        [Fact]
-        private void Execute_ResultHandlerIsNull_ThrowsException()
-        {
-            // arrange
-            var sut = CreateSession();
-            Action sutAction = () => sut.Execute(null, null);
+            Action sutAction = () => new Session(
+                    Substitute.For<IParser>(),
+                    Substitute.For<ICommandFactory>(),
+                    Substitute.For<ICommandParameterBinder>(),
+                    null
+                );
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -83,14 +80,24 @@ namespace Chel.UnitTests
         }
 
         [Fact]
+        public void Execute_InputIsNull_DoNothing()
+        {
+            // arrange
+            var sut = CreateSession(_ => {});
+
+            // act, assert
+            sut.Execute(null);
+        }
+
+        [Fact]
         private void Execute_SingleCommandNotRegistered_PassesCommandNotFoundResultToHandler()
         {
             // arrange
-            var sut = CreateSession();
             CommandResult executionResult = null;
-
+            var sut = CreateSession(result => executionResult = result);
+            
             // act
-            sut.Execute("sample", result => executionResult = result);
+            sut.Execute("sample");
 
             // assert
             Assert.IsType<FailureResult>(executionResult);
@@ -102,11 +109,11 @@ namespace Chel.UnitTests
         private void Execute_ErrorOnLine2_ReportsFailureOnLine2()
         {
             // arrange
-            var sut = CreateSession(typeof(SampleCommand));
             CommandResult executionResult = null;
+            var sut = CreateSession(result => executionResult = result, typeof(SampleCommand));
 
             // act
-            sut.Execute("sample\nboo", result => executionResult = result);
+            sut.Execute("sample\nboo");
 
             // assert
             Assert.IsType<FailureResult>(executionResult);
@@ -118,11 +125,11 @@ namespace Chel.UnitTests
         private void Execute_SingleCommand_PassesCommandResultToHandler()
         {
             // arrange
-            var sut = CreateSession(typeof(SampleCommand));
             CommandResult executionResult = null;
+            var sut = CreateSession(result => executionResult = result, typeof(SampleCommand));
 
             // act
-            sut.Execute("sample", result => executionResult = result);
+            sut.Execute("sample");
             
             // assert
             Assert.IsType<SuccessResult>(executionResult);
@@ -132,11 +139,11 @@ namespace Chel.UnitTests
         public void Execute_ParameterProvided_ParameterSetOnCommand()
         {
             // arrange
-            var sut = CreateSession(typeof(NumberedParameterCommand));
             ValueResult executionResult = null;
+            var sut = CreateSession(result => executionResult = result as ValueResult, typeof(NumberedParameterCommand));
 
             // act
-            sut.Execute("num p1 p2", result => executionResult = result as ValueResult);
+            sut.Execute("num p1 p2");
             
             // assert
             Assert.Equal("p1 p2", executionResult.Value.ToString());
@@ -146,11 +153,11 @@ namespace Chel.UnitTests
         public void Execute_ParameterBindingHasErrors_FailureResultReturned()
         {
             // arrange
-            var sut = CreateSession(typeof(NumberedParameterCommand));
             FailureResult executionResult = null;
+            var sut = CreateSession(result => executionResult = result as FailureResult, typeof(NumberedParameterCommand));
 
             // act
-            sut.Execute("num p1 p2 p3", result => executionResult = result as FailureResult);
+            sut.Execute("num p1 p2 p3");
             
             // assert
             Assert.Equal("ERROR (line 1, character 11): Unexpected numbered parameter 'p3'", executionResult.ToString());
@@ -167,11 +174,11 @@ namespace Chel.UnitTests
             var factory = Substitute.For<ICommandFactory>();
             var binder = Substitute.For<ICommandParameterBinder>();
 
-            var sut = new Session(parser, factory, binder);
             FailureResult executionResult = null;
+            var sut = new Session(parser, factory, binder, result => executionResult = result as FailureResult);
 
             // act
-            sut.Execute("command", result => executionResult = result as FailureResult);
+            sut.Execute("command");
 
             // assert
             Assert.Equal(new SourceLocation(1, 1), executionResult.SourceLocation);
@@ -192,11 +199,11 @@ namespace Chel.UnitTests
 
             var binder = Substitute.For<ICommandParameterBinder>();
 
-            var sut = new Session(parser, factory, binder);
             FailureResult executionResult = null;
+            var sut = new Session(parser, factory, binder, result => executionResult = result as FailureResult);
 
             // act
-            sut.Execute("command", result => executionResult = result as FailureResult);
+            sut.Execute("command");
 
             // assert
             Assert.Equal(new SourceLocation(1, 1), executionResult.SourceLocation);
@@ -206,11 +213,11 @@ namespace Chel.UnitTests
         public void Execute_CommandThrowsException_FailureResultReturned()
         {
             // arrange
-            var sut = CreateSession(typeof(ExceptionCommand));
             FailureResult executionResult = null;
+            var sut = CreateSession(result => executionResult = result as FailureResult, typeof(ExceptionCommand));
 
             // act
-            sut.Execute("ex", result => executionResult = result as FailureResult);
+            sut.Execute("ex");
 
             // assert
             Assert.Equal(new SourceLocation(1, 1), executionResult.SourceLocation);
@@ -220,11 +227,11 @@ namespace Chel.UnitTests
         public void Execute_ParameterIsUnsetVariable_ReturnsFailure()
         {
             // arrange
-            var sut = CreateSession(typeof(NamedParameterCommand));
             FailureResult executionResult = null;
+            var sut = CreateSession(result => executionResult = result as FailureResult, typeof(NamedParameterCommand));
 
             // act
-            sut.Execute("nam -param1 $foo$", result => executionResult = result as FailureResult);
+            sut.Execute("nam -param1 $foo$");
 
             // assert
             Assert.Equal("Variable $foo$ is not set", executionResult.Message);
@@ -234,17 +241,17 @@ namespace Chel.UnitTests
         public void Execute_ParameterIsSetVariable_PerformsSubstitution()
         {
             // arrange
+            CommandResult executionResult = null;
             var sut = CreateSession(
+                result => executionResult = result,
                 sessionObjectsConfigurator: x => {
                     x.Register<VariableCollection>();
                     ((VariableCollection)x.Resolve(typeof(VariableCollection))).Set(new Variable("foo", new Literal("lorem")));
                 },
                 typeof(NamedParameterCommand));
 
-            CommandResult executionResult = null;
-
             // act
-            sut.Execute("nam -param1 $foo$ -param2 $foo$", result => executionResult = result);
+            sut.Execute("nam -param1 $foo$ -param2 $foo$");
 
             // assert
             Assert.IsType<ValueResult>(executionResult);
@@ -255,11 +262,11 @@ namespace Chel.UnitTests
         public void Execute_CommandReturnsFailureWithCurrentSourceLineToken_ReportsProperSourceLine()
         {
             // arrange
-            var sut = CreateSession(typeof(FailureCommand));
             FailureResult executionResult = null;
+            var sut = CreateSession(result => executionResult = (FailureResult)result, typeof(FailureCommand));
 
             // act
-            sut.Execute("fail", result => executionResult = (FailureResult)result);
+            sut.Execute("fail");
 
             // assert
             Assert.Equal(new SourceLocation(1, 1), executionResult.SourceLocation);
@@ -269,11 +276,11 @@ namespace Chel.UnitTests
         public void Execute_CommandIncludesSubcommand_ExpandsSubcommandBeforeExecution()
         {
             // arrange
-            var sut = CreateSession(typeof(NumberedParameterCommand));
             ValueResult executionResult = null;
+            var sut = CreateSession(result => executionResult = (ValueResult)result, typeof(NumberedParameterCommand));
 
             // act
-            sut.Execute("num << (num 1 2) 3", result => executionResult = (ValueResult)result);
+            sut.Execute("num << (num 1 2) 3");
             
             // assert
             Assert.Equal("1 2 3", executionResult.Value.ToString());
@@ -283,11 +290,11 @@ namespace Chel.UnitTests
         public void Execute_CommandIncludesManySubcommands_ExpandsSubcommandsBeforeExecution()
         {
             // arrange
-            var sut = CreateSession(typeof(NumberedParameterCommand));
             ValueResult executionResult = null;
+            var sut = CreateSession(result => executionResult = (ValueResult)result, typeof(NumberedParameterCommand));
 
             // act
-            sut.Execute("num << (num 1 2) <<(num 3 4)", result => executionResult = (ValueResult)result);
+            sut.Execute("num << (num 1 2) <<(num 3 4)");
             
             // assert
             Assert.Equal("1 2 3 4", executionResult.Value.ToString());
@@ -297,11 +304,11 @@ namespace Chel.UnitTests
         public void Execute_CommandIncludesSubSubcommand_ExpandsSubcommandsBeforeExecution()
         {
             // arrange
-            var sut = CreateSession(typeof(NumberedParameterCommand));
             ValueResult executionResult = null;
+            var sut = CreateSession(result => executionResult = (ValueResult)result, typeof(NumberedParameterCommand));
 
             // act
-            sut.Execute("num << (num 1 << (num 2 3)) 4", result => executionResult = (ValueResult)result);
+            sut.Execute("num << (num 1 << (num 2 3)) 4");
             
             // assert
             Assert.Equal("1 2 3 4", executionResult.Value.ToString());
@@ -311,11 +318,11 @@ namespace Chel.UnitTests
         public void Execute_CommandIncludesSubcommandInList_ExpandsSubcommandBeforeExecution()
         {
             // arrange
-            var sut = CreateSession(typeof(ListParameterCommand), typeof(NumberedParameterCommand));
             ValueResult executionResult = null;
+            var sut = CreateSession(result => executionResult = (ValueResult)result, typeof(ListParameterCommand), typeof(NumberedParameterCommand));
 
             // act
-            sut.Execute("list-params -array [1 << (num 2 3) 4]", result => executionResult = (ValueResult)result);
+            sut.Execute("list-params -array [1 << (num 2 3) 4]");
             
             // assert
             Assert.Equal("[ 1 (2 3) 4 ]", executionResult.Value.ToString());
@@ -325,11 +332,11 @@ namespace Chel.UnitTests
         public void Execute_CommandIncludesManySubcommandsInList_ExpandsSubcommandsBeforeExecution()
         {
             // arrange
-            var sut = CreateSession(typeof(ListParameterCommand), typeof(NumberedParameterCommand));
             ValueResult executionResult = null;
+            var sut = CreateSession(result => executionResult = (ValueResult)result, typeof(ListParameterCommand), typeof(NumberedParameterCommand));
 
             // act
-            sut.Execute("list-params -array [<< (num 1 2) << (num 3 4)]", result => executionResult = (ValueResult)result);
+            sut.Execute("list-params -array [<< (num 1 2) << (num 3 4)]");
             
             // assert
             Assert.Equal("[ (1 2) (3 4) ]", executionResult.Value.ToString());
@@ -339,11 +346,11 @@ namespace Chel.UnitTests
         public void Execute_CommandIncludesSubSubcommandInList_ExpandsSubcommandsBeforeExecution()
         {
             // arrange
-            var sut = CreateSession(typeof(ListParameterCommand), typeof(NumberedParameterCommand));
             ValueResult executionResult = null;
+            var sut = CreateSession(result => executionResult = (ValueResult)result, typeof(ListParameterCommand), typeof(NumberedParameterCommand));
 
             // act
-            sut.Execute("list-params -array [ << (num 1 << (num 2 3)) 4]", result => executionResult = (ValueResult)result);
+            sut.Execute("list-params -array [ << (num 1 << (num 2 3)) 4]");
             
             // assert
             Assert.Equal("[ (1 2 3) 4 ]", executionResult.Value.ToString());
@@ -355,11 +362,11 @@ namespace Chel.UnitTests
         public void Execute_SubcommandFails_FailureResultReturned()
         {
             // arrange
-            var sut = CreateSession(typeof(NumberedParameterCommand), typeof(FailureCommand));
             FailureResult executionResult = null;
+            var sut = CreateSession(result => executionResult = (FailureResult)result, typeof(NumberedParameterCommand), typeof(FailureCommand));
 
             // act
-            sut.Execute("num << fail 2", result => executionResult = (FailureResult)result);
+            sut.Execute("num << fail 2");
             
             // assert
             Assert.Equal(new SourceLocation(1, 8), executionResult.SourceLocation);
@@ -369,11 +376,11 @@ namespace Chel.UnitTests
         public void Execute_SubSubcommandFails_FailureResultReturned()
         {
             // arrange
-            var sut = CreateSession(typeof(NumberedParameterCommand), typeof(FailureCommand));
             FailureResult executionResult = null;
+            var sut = CreateSession(result => executionResult = (FailureResult)result, typeof(NumberedParameterCommand), typeof(FailureCommand));
 
             // act
-            sut.Execute("num << (num << fail 2) 3", result => executionResult = (FailureResult)result);
+            sut.Execute("num << (num << fail 2) 3");
             
             // assert
             Assert.Equal(new SourceLocation(1, 16), executionResult.SourceLocation);
@@ -383,11 +390,11 @@ namespace Chel.UnitTests
         public void Execute_UnknownSubcommand_FailureResultReturned()
         {
             // arrange
-            var sut = CreateSession(typeof(NumberedParameterCommand));
             FailureResult executionResult = null;
+            var sut = CreateSession(result => executionResult = (FailureResult)result, typeof(NumberedParameterCommand));
 
             // act
-            sut.Execute("num << unknown", result => executionResult = (FailureResult)result);
+            sut.Execute("num << unknown");
             
             // assert
             Assert.Equal(new SourceLocation(1, 8), executionResult.SourceLocation);
@@ -398,22 +405,23 @@ namespace Chel.UnitTests
         public void Execute_UnknownSubcommand_ReportsErrorOnLine2()
         {
             // arrange
-            var sut = CreateSession(typeof(NumberedParameterCommand));
             FailureResult executionResult = null;
+            var sut = CreateSession(result => executionResult = (FailureResult)result, typeof(NumberedParameterCommand));
 
             // act
-            sut.Execute("num << (\nunknown)", result => executionResult = (FailureResult)result);
+            sut.Execute("num << (\nunknown)");
             
             // assert
             Assert.Equal(new SourceLocation(2, 1), executionResult.SourceLocation);
         }
 
-        private Session CreateSession(params Type[] commandTypes)
+        private Session CreateSession(Action<CommandResult> resultHandler, params Type[] commandTypes)
         {
-            return CreateSession(null, commandTypes);
+            return CreateSession(resultHandler, null, commandTypes);
         }
 
         private Session CreateSession(
+            Action<CommandResult> resultHandler,
             Action<ScopedObjectRegistry> sessionObjectsConfigurator = null,
             params Type[] commandTypes)
         {
@@ -436,7 +444,7 @@ namespace Chel.UnitTests
             var replacer = new VariableReplacer();
             var binder = new CommandParameterBinder(registry, replacer, variables);
 
-            return new Session(parser, factory, binder);
+            return new Session(parser, factory, binder, resultHandler);
         }
     }
 }

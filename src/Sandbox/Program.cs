@@ -14,15 +14,29 @@ namespace Chel.Sandbox
 
             var runtime = new Runtime();
             runtime.RegisterCommandType(typeof(Echo));
+            runtime.RegisterCommandType(typeof(If));
             runtime.RegisterCommandType(typeof(Chel.Sandbox.Commands.Random));
             runtime.RegisterCommandType(typeof(Exit));
 
-            var session = runtime.NewSession();
+            var exit = false;
+            var session = runtime.NewSession(result => 
+            {
+                if(result is ExitResult)
+                    exit = true;
+
+                var previousColor = Console.ForegroundColor;
+
+                if(!result.Success)
+                    Console.ForegroundColor = ConsoleColor.Red;
+
+                Console.WriteLine(result);
+
+                Console.ForegroundColor = previousColor;
+            });
 
             Console.WriteLine("Type 'exit' to exit.");
             Console.WriteLine("Type 'help' for help.");
-
-            var exit = false;
+            
             while(!exit)
             {
                 Console.WriteLine();
@@ -30,20 +44,7 @@ namespace Chel.Sandbox
                 var input = Console.ReadLine();
                 // todo: allow SHIFT+ENTER to continue input
 
-                session.Execute(input, result => 
-                {
-                    if(result is ExitResult)
-                        exit = true;
-
-                    var previousColor = Console.ForegroundColor;
-
-                    if(!result.Success)
-                        Console.ForegroundColor = ConsoleColor.Red;
-
-                    Console.WriteLine(result);
-
-                    Console.ForegroundColor = previousColor;
-                });
+                session.Execute(input);
             }
         }
     }

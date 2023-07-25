@@ -14,9 +14,10 @@ namespace Chel
     /// </summary>
     public class Session : ISession
     {
-        private IParser _parser = null;
-        private ICommandFactory _commandFactory = null;
-        private ICommandParameterBinder _parameterBinder = null;
+        private readonly IParser _parser = null;
+        private readonly ICommandFactory _commandFactory = null;
+        private readonly ICommandParameterBinder _parameterBinder = null;
+        private readonly Action<CommandResult> _resultHandler = null;
 
         /// <summary>
         /// Create a new instance.
@@ -24,32 +25,21 @@ namespace Chel
         /// <param name="parser">The <see cref="IParser" /> used to parse input.</param>
         /// <param name="commandFactory">The <see cref="ICommandFactory" /> used to instantiate commands.</param>
         /// <param name="parameterBinder">The binder used to bind parameters to command properties.</summary>
-        public Session(IParser parser, ICommandFactory commandFactory, ICommandParameterBinder parameterBinder)
+        /// <param name="resultHandler">The handler to execute for the results of the input.</param>
+        public Session(IParser parser, ICommandFactory commandFactory, ICommandParameterBinder parameterBinder, Action<CommandResult> resultHandler)
         {   
-            if(parser == null)
-                throw new ArgumentNullException(nameof(parser));
-
-            if(commandFactory == null)
-                throw new ArgumentNullException(nameof(commandFactory));
-
-            if(parameterBinder == null)
-                throw new ArgumentNullException(nameof(parameterBinder));
-
-            _commandFactory = commandFactory;
-            _parser = parser;
-            _parameterBinder = parameterBinder;
+            _parser = parser ?? throw new ArgumentNullException(nameof(parser));
+            _commandFactory = commandFactory ?? throw new ArgumentNullException(nameof(commandFactory));
+            _parameterBinder = parameterBinder ?? throw new ArgumentNullException(nameof(parameterBinder));
+            _resultHandler = resultHandler ?? throw new ArgumentNullException(nameof(resultHandler));
         }
 
         /// <summary>
         /// Executes input.
         /// </summary>
         /// <param name="input">The input to execute.</param>
-        /// <param name="resultHandler">The handler to execute for the results of the input.</param>
-        public void Execute(string input, Action<CommandResult> resultHandler)
+        public void Execute(string input)
         {
-            if(resultHandler == null)
-                throw new ArgumentNullException(nameof(resultHandler));
-
             IList<CommandInput> commandInputs = null;
 
             try
@@ -59,7 +49,7 @@ namespace Chel
             catch(ParseException ex)
             {
                 var commandResult = new FailureResult(ex.SourceLocation, ex.Message);
-                resultHandler(commandResult);
+                _resultHandler(commandResult);
                 return;
             }
 
@@ -71,11 +61,11 @@ namespace Chel
                 {
                     foreach(var result in aggregateFailureResult.InnerResults)
                     {
-                        resultHandler(result);
+                        _resultHandler(result);
                     }
                 }
                 else
-                    resultHandler(commandResult);
+                    _resultHandler(commandResult);
             }
         }
 

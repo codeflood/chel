@@ -10,7 +10,15 @@ namespace Chel.Abstractions
         /// <summary>
         /// Register a type.
         /// </summary>
+        /// <typeparam name="T">The type to register.</typeparam>
         void Register<T>();
+
+        /// <summary>
+        /// Register an instance of a type.
+        /// </summary>
+        /// <typeparam name="T">The type to register.</typeparam>
+        /// <param name="instance">The instance to register for the type.</param>
+        void RegisterInstance<T>(T instance);
 
         /// <summary>
         /// Resolve a scoped object.

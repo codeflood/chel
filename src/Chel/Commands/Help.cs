@@ -61,6 +61,8 @@ namespace Chel.Commands
                 output.Append($"{descriptor.CommandName, Constants.FirstColumnWidth}{descriptor.GetDescription(_executionCultureName)}");
                 output.Append(Environment.NewLine);
             }
+
+            output.Remove(output.Length - 1, 1);
         }
 
         private bool DetailCommand(StringBuilder output)

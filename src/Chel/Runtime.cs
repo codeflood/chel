@@ -1,5 +1,6 @@
 using System;
 using Chel.Abstractions;
+using Chel.Abstractions.Results;
 using Chel.Abstractions.Parsing;
 using Chel.Abstractions.Variables;
 using Chel.Commands;
@@ -79,7 +80,7 @@ namespace Chel
         /// <summary>
         /// Creates a new <see cref="ISession" />.
         /// </summary>
-        public ISession NewSession()
+        public ISession NewSession(Action<CommandResult> resultHandler)
         {
             var sessionObjects = _sessionObjectTypes.CreateScope();
             var factory = new CommandFactory(_commandRegistry, _commandServices, sessionObjects);
@@ -87,7 +88,10 @@ namespace Chel
             var variables = sessionObjects.Resolve(typeof(VariableCollection)) as VariableCollection;
             var parameterBinder = new CommandParameterBinder(_commandRegistry, _variableReplacer, variables);
             
-            return new Session(_parser, factory, parameterBinder);
+            var session = new Session(_parser, factory, parameterBinder, resultHandler);
+            sessionObjects.RegisterInstance<ISession>(session);
+
+            return session;
         }
     }
 }

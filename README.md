@@ -13,9 +13,13 @@ Chel in a nutshell:
     # Set a variable
     var varname value
 
-    # Execute commands
+    # Execute a command, using a variable value for a parameter
     command numparam -parameter $varname$ -flag
+
+    # Use the output of another command as a parameter
     command << subcommand
+
+    # Pass the output of a command to the next command
     command >> chained-command $~$
 
     (#
