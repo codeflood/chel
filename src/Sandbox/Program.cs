@@ -1,5 +1,6 @@
 ﻿using System;
 using Chel.Commands;
+using Chel.Commands.Conditions;
 using Chel.Sandbox.Commands;
 using Chel.Sandbox.Results;
 
@@ -15,6 +16,7 @@ namespace Chel.Sandbox
             var runtime = new Runtime();
             runtime.RegisterCommandType(typeof(Echo));
             runtime.RegisterCommandType(typeof(If));
+            runtime.RegisterCommandType(typeof(Equals));
             runtime.RegisterCommandType(typeof(Chel.Sandbox.Commands.Random));
             runtime.RegisterCommandType(typeof(Exit));
 

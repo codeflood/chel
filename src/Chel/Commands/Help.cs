@@ -34,6 +34,7 @@ namespace Chel.Commands
 
         public CommandResult Execute()
         {
+            // todo: Get culture from context. The command might be executed remotely and need a different culture.
             _executionCultureName = Thread.CurrentThread.CurrentCulture.Name;
 
             var output = new StringBuilder();

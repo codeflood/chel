@@ -128,9 +128,13 @@ namespace Chel
 
             public const string AvailableCommands = "AVAILABLE COMMANDS";
 
+            public const string CouldNotParseNumber = "COULD NOT PARSE NUMBER";
+
             public const string MissingVariableName = "MISSING VARIABLE NAME";
 
             public const string NoVariablesSet = "NO VARIABLES SET";
+
+            public const string NumberedParameterNotSet = "NUMBERED PARAMETER NOT SET";
 
             public const string Required = "REQUIRED";
 

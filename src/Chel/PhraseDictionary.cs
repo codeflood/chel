@@ -37,6 +37,14 @@ namespace Chel
             var variableNotSetPhrases = new LocalisedTexts();
             variableNotSetPhrases.AddText("Variable '{0}' is not set.", null);
             _phrases.Add(Texts.PhraseKeys.VariableNotSet, variableNotSetPhrases);
+
+            var numberedParameterNotSetPhrases = new LocalisedTexts();
+            numberedParameterNotSetPhrases.AddText("Numbered parameter {0} is not set.", null);
+            _phrases.Add(Texts.PhraseKeys.NumberedParameterNotSet, numberedParameterNotSetPhrases);
+
+            var couldNotParseNumberPhrases = new LocalisedTexts();
+            couldNotParseNumberPhrases.AddText("Could not parse '{0}' as a number.", null);
+            _phrases.Add(Texts.PhraseKeys.CouldNotParseNumber, couldNotParseNumberPhrases);
         }
 
         public string GetPhrase(string phraseKey, string cultureName)
