@@ -24,6 +24,10 @@ namespace Chel.Commands
         [Required]
         public string ScriptBlock { get; set;}
 
+        [NamedParameter("else", "script")]
+        [Description("The script block to execute if the condition is false.")]
+        public string ElseScriptBlock { get; set; }
+
         /// <summary>
         /// Create a new instance.
         /// </summary>
@@ -38,6 +42,8 @@ namespace Chel.Commands
         {
             if(ShouldExecute)
                 Session.Execute(ScriptBlock);
+            else if(!string.IsNullOrWhiteSpace(ElseScriptBlock))
+                Session.Execute(ElseScriptBlock);
 
             return new SuccessResult();
         }

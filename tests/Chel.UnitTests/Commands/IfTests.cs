@@ -40,6 +40,26 @@ namespace Chel.UnitTests.Commands
         }
 
         [Fact]
+        public void Execute_ConditionIsTrue_DoesNotExecuteElseScript()
+        {
+            // arrange
+            var session = Substitute.For<ISession>();
+            var sut = new If(session)
+            {
+                ShouldExecute = true,
+                ScriptBlock = "a",
+                ElseScriptBlock = "b"
+            };
+
+            // act
+            var result = sut.Execute();
+
+            // assert
+            Assert.IsType<SuccessResult>(result);
+            session.DidNotReceive().Execute("b");
+        }
+
+        [Fact]
         public void Execute_ConditionIsFalse_DoesNotExecuteScript()
         {
             // arrange
@@ -56,6 +76,26 @@ namespace Chel.UnitTests.Commands
             // assert
             Assert.IsType<SuccessResult>(result);
             session.DidNotReceive().Execute("a");
+        }
+
+        [Fact]
+        public void Execute_ConditionIsFalse_ExecutesElseScript()
+        {
+            // arrange
+            var session = Substitute.For<ISession>();
+            var sut = new If(session)
+            {
+                ShouldExecute = false,
+                ScriptBlock = "a",
+                ElseScriptBlock = "b"
+            };
+
+            // act
+            var result = sut.Execute();
+
+            // assert
+            Assert.IsType<SuccessResult>(result);
+            session.Received().Execute("b");
         }
     }
 }
