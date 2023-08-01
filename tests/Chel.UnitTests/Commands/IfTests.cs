@@ -40,6 +40,45 @@ namespace Chel.UnitTests.Commands
         }
 
         [Fact]
+        public void Execute_ConditionIsTrueScriptIsNull_DoesNotExecuteScript()
+        {
+            // arrange
+            var session = Substitute.For<ISession>();
+            var sut = new If(session)
+            {
+                ShouldExecute = true,
+                ScriptBlock = null
+            };
+
+            // act
+            var result = sut.Execute();
+
+            // assert
+            Assert.IsType<SuccessResult>(result);
+            session.DidNotReceive().Execute(Arg.Any<string>());
+        }
+
+        [Fact]
+        public void Execute_ConditionIsTrueScriptIsNull_DoesNotExecuteElseScript()
+        {
+            // arrange
+            var session = Substitute.For<ISession>();
+            var sut = new If(session)
+            {
+                ShouldExecute = true,
+                ScriptBlock = null,
+                ElseScriptBlock = "b"
+            };
+
+            // act
+            var result = sut.Execute();
+
+            // assert
+            Assert.IsType<SuccessResult>(result);
+            session.DidNotReceive().Execute(Arg.Any<string>());
+        }
+
+        [Fact]
         public void Execute_ConditionIsTrue_DoesNotExecuteElseScript()
         {
             // arrange
@@ -96,6 +135,26 @@ namespace Chel.UnitTests.Commands
             // assert
             Assert.IsType<SuccessResult>(result);
             session.Received().Execute("b");
+        }
+
+        [Fact]
+        public void Execute_ConditionIsFalseElseScriptIsNull_DoesNotExecuteScript()
+        {
+            // arrange
+            var session = Substitute.For<ISession>();
+            var sut = new If(session)
+            {
+                ShouldExecute = false,
+                ScriptBlock = "a",
+                ElseScriptBlock = null
+            };
+
+            // act
+            var result = sut.Execute();
+
+            // assert
+            Assert.IsType<SuccessResult>(result);
+            session.DidNotReceive().Execute(Arg.Any<string>());
         }
     }
 }

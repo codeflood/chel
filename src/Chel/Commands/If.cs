@@ -41,7 +41,10 @@ namespace Chel.Commands
         public CommandResult Execute()
         {
             if(ShouldExecute)
-                Session.Execute(ScriptBlock);
+            {
+                if(!string.IsNullOrWhiteSpace(ScriptBlock))
+                    Session.Execute(ScriptBlock);
+            }
             else if(!string.IsNullOrWhiteSpace(ElseScriptBlock))
                 Session.Execute(ElseScriptBlock);
 
