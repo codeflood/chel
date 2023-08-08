@@ -45,6 +45,18 @@ namespace Chel
             var couldNotParseNumberPhrases = new LocalisedTexts();
             couldNotParseNumberPhrases.AddText("Could not parse '{0}' as a number.", null);
             _phrases.Add(Texts.PhraseKeys.CouldNotParseNumber, couldNotParseNumberPhrases);
+
+            var couldNotParseDatePhrases = new LocalisedTexts();
+            couldNotParseDatePhrases.AddText("Could not parse '{0}' as a date.", null);
+            _phrases.Add(Texts.PhraseKeys.CouldNotParseDate, couldNotParseDatePhrases);
+
+            var couldNotParseGuidPhrases = new LocalisedTexts();
+            couldNotParseGuidPhrases.AddText("Could not parse '{0}' as a GUID.", null);
+            _phrases.Add(Texts.PhraseKeys.CouldNotParseGuid, couldNotParseGuidPhrases);
+
+            var cannotSetMulitpleFlagsPhrases = new LocalisedTexts();
+            cannotSetMulitpleFlagsPhrases.AddText("Cannot set multiple flags '{0}' at once.", null);
+            _phrases.Add(Texts.PhraseKeys.CannotSetMultipleFlags, cannotSetMulitpleFlagsPhrases);
         }
 
         public string GetPhrase(string phraseKey, string cultureName)

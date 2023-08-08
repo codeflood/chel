@@ -197,7 +197,7 @@ namespace Chel.UnitTests.Commands.Conditions
         }
 
         [Fact]
-        public void Execute_NumericOperandsNotEqual_ReturnsTrue()
+        public void Execute_NumericOperandsNotEqual_ReturnsFalse()
         {
             // arrange
             var sut = CreateEqualsCommand();
@@ -214,8 +214,185 @@ namespace Chel.UnitTests.Commands.Conditions
             Assert.Equal("false", literalValue.Value);
         }
 
-        // dates
-        // guids
+        [Theory]
+        [MemberData(nameof(Execute_MultipleTreatmentsSet_ReturnsFalse_DataSource))]
+        public void Execute_MultipleTreatmentsSet_ReturnsFailure(Equals sut)
+        {
+            // act
+            var result = sut.Execute();
+
+            // assert
+            Assert.IsType<FailureResult>(result);
+        }
+
+        public static IEnumerable<object[]> Execute_MultipleTreatmentsSet_ReturnsFalse_DataSource()
+        {
+            yield return new[] { 
+                new Equals(new PhraseDictionary())
+                {
+                    FirstOperand = new Literal("1"),
+                    SecondOperand = new Literal("2"),
+                    IsNumeric = true,
+                    IsDate = true
+                } 
+            };
+            
+            yield return new[] { 
+                new Equals(new PhraseDictionary())
+                {
+                    FirstOperand = new Literal("1"),
+                    SecondOperand = new Literal("2"),
+                    IsNumeric = true,
+                    IsGuid = true
+                } 
+            };
+
+            yield return new[] { 
+                new Equals(new PhraseDictionary())
+                {
+                    FirstOperand = new Literal("2023-05-04"),
+                    SecondOperand = new Literal("2023-05-04"),
+                    IsDate = true,
+                    IsGuid = true
+                } 
+            };
+        }
+
+        [Fact]
+        public void Execute_DateOperand1IsNotDate_ReturnsError()
+        {
+            // arrange
+            var sut = CreateEqualsCommand();
+            sut.IsDate = true;
+            sut.FirstOperand = new Literal("abc");
+            sut.SecondOperand = new Literal("2023-08-08 12:13:14");
+
+            // act
+            var result = sut.Execute();
+
+            // assert
+            Assert.IsType<FailureResult>(result);
+        }
+
+        [Fact]
+        public void Execute_DateOperand2IsNotDate_ReturnsError()
+        {
+            // arrange
+            var sut = CreateEqualsCommand();
+            sut.IsDate = true;
+            sut.FirstOperand = new Literal("2023-08-08 12:13:14");
+            sut.SecondOperand = new Literal("abc");
+
+            // act
+            var result = sut.Execute();
+
+            // assert
+            Assert.IsType<FailureResult>(result);
+        }
+
+        [Fact]
+        public void Execute_DateOperandsAreEqual_ReturnsTrue()
+        {
+            // arrange
+            var sut = CreateEqualsCommand();
+            sut.IsDate = true;
+            sut.FirstOperand = new Literal("2023-08-08 12:13:14");
+            sut.SecondOperand = new Literal("2023-08-08T12:13:14");
+
+            // act
+            var result = sut.Execute();
+
+            // assert
+            var valueResult = Assert.IsType<ValueResult>(result);
+            var literalValue = Assert.IsType<Literal>(valueResult.Value);
+            Assert.Equal("true", literalValue.Value);
+        }
+
+        [Fact]
+        public void Execute_DateOperandsNotEqual_ReturnsFalse()
+        {
+            // arrange
+            var sut = CreateEqualsCommand();
+            sut.IsDate = true;
+            sut.FirstOperand = new Literal("2023-08-08 12:13:14");
+            sut.SecondOperand = new Literal("2023-08-08 12:13:15");
+
+            // act
+            var result = sut.Execute();
+
+            // assert
+            var valueResult = Assert.IsType<ValueResult>(result);
+            var literalValue = Assert.IsType<Literal>(valueResult.Value);
+            Assert.Equal("false", literalValue.Value);
+        }
+
+        [Fact]
+        public void Execute_GuidOperand1IsNotGuid_ReturnsError()
+        {
+            // arrange
+            var sut = CreateEqualsCommand();
+            sut.IsGuid = true;
+            sut.FirstOperand = new Literal("abc");
+            sut.SecondOperand = new Literal("61a76fd0-ac65-47a9-95d5-24bd7cb5f149");
+
+            // act
+            var result = sut.Execute();
+
+            // assert
+            Assert.IsType<FailureResult>(result);
+        }
+
+        [Fact]
+        public void Execute_GuidOperand2IsNotGuid_ReturnsError()
+        {
+            // arrange
+            var sut = CreateEqualsCommand();
+            sut.IsGuid = true;
+            sut.FirstOperand = new Literal("61a76fd0-ac65-47a9-95d5-24bd7cb5f149");
+            sut.SecondOperand = new Literal("abc");
+
+            // act
+            var result = sut.Execute();
+
+            // assert
+            Assert.IsType<FailureResult>(result);
+        }
+
+        [Fact]
+        public void Execute_GuidOperandsAreEqual_ReturnsTrue()
+        {
+            // arrange
+            var sut = CreateEqualsCommand();
+            sut.IsGuid = true;
+            sut.FirstOperand = new Literal("61a76fd0-ac65-47a9-95d5-24bd7cb5f149");
+            sut.SecondOperand = new Literal("{61A76FD0-AC65-47A9-95D5-24BD7CB5F149}");
+
+            // act
+            var result = sut.Execute();
+
+            // assert
+            var valueResult = Assert.IsType<ValueResult>(result);
+            var literalValue = Assert.IsType<Literal>(valueResult.Value);
+            Assert.Equal("true", literalValue.Value);
+        }
+
+        [Fact]
+        public void Execute_GuidOperandsNotEqual_ReturnsFalse()
+        {
+            // arrange
+            var sut = CreateEqualsCommand();
+            sut.IsGuid = true;
+            sut.FirstOperand = new Literal("61a76fd0-ac65-47a9-95d5-24bd7cb5f149");
+            sut.SecondOperand = new Literal("71a76fd0-ac65-47a9-95d5-24bd7cb5f149");
+
+            // act
+            var result = sut.Execute();
+
+            // assert
+            var valueResult = Assert.IsType<ValueResult>(result);
+            var literalValue = Assert.IsType<Literal>(valueResult.Value);
+            Assert.Equal("false", literalValue.Value);
+        }
 
         private Equals CreateEqualsCommand()
         {

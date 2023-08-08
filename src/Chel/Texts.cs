@@ -128,6 +128,12 @@ namespace Chel
 
             public const string AvailableCommands = "AVAILABLE COMMANDS";
 
+            public const string CannotSetMultipleFlags = "CANNOT SET MULTIPLE FLAGS";
+
+            public const string CouldNotParseDate = "COULD NOT PARSE DATE";
+
+            public const string CouldNotParseGuid = "COULD NOT PARSE GUID";
+
             public const string CouldNotParseNumber = "COULD NOT PARSE NUMBER";
 
             public const string MissingVariableName = "MISSING VARIABLE NAME";

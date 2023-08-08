@@ -29,6 +29,14 @@ namespace Chel.Commands.Conditions
         [Description("Treat the values as numeric")]
         public bool IsNumeric { get; set; }
 
+        [FlagParameter("date")]
+        [Description("Treat the values as dates")]
+        public bool IsDate { get; set; }
+
+        [FlagParameter("guid")]
+        [Description("Treat the values as GUIDs")]
+        public bool IsGuid { get; set; }
+
         /// <summary>
         /// Creates a new instance.
         /// </summary>
@@ -55,8 +63,26 @@ namespace Chel.Commands.Conditions
                 return new FailureResult(string.Format(message, "2"));
             }
 
+            // todo: Get culture from context. The command might be executed remotely and need a different culture.
+            var multipleFlagsMessage = PhraseDictionary.GetPhrase(Texts.PhraseKeys.CannotSetMultipleFlags, Thread.CurrentThread.CurrentCulture.Name);;
+
+            if(IsNumeric && IsDate)
+                return new FailureResult(string.Format(multipleFlagsMessage, "num, date"));
+
+            if(IsNumeric && IsGuid)
+                return new FailureResult(string.Format(multipleFlagsMessage, "num, guid"));
+
+            if(IsGuid && IsDate)
+                return new FailureResult(string.Format(multipleFlagsMessage, "guid, date"));
+
             if(IsNumeric)
                 return CompareNumeric();
+            
+            if(IsDate)
+                return CompareDates();
+
+            if(IsGuid)
+                return CompareGuids();
 
             return CompareNormal();
         }
@@ -84,6 +110,58 @@ namespace Chel.Commands.Conditions
             if(SecondOperand is Literal literalSecondOperand)
             {
                 if(!double.TryParse(literalSecondOperand.Value, out op2))
+                    return new FailureResult(string.Format(message, SecondOperand));
+            }
+            else
+                return new FailureResult(string.Format(message, "second"));
+
+            var value = op1 == op2 ? "true" : "false";
+            return new ValueResult(new Literal(value));
+        }
+
+        private CommandResult CompareDates()
+        {
+            var message = PhraseDictionary.GetPhrase(Texts.PhraseKeys.CouldNotParseDate, Thread.CurrentThread.CurrentCulture.Name);
+
+            var op1 = DateTime.Now;
+            if(FirstOperand is Literal literalFirstOperand)
+            {
+                if(!DateTime.TryParse(literalFirstOperand.Value, out op1))
+                    return new FailureResult(string.Format(message, FirstOperand));
+            }
+            else
+                return new FailureResult(string.Format(message, "first"));
+
+            var op2 = DateTime.Now;
+            if(SecondOperand is Literal literalSecondOperand)
+            {
+                if(!DateTime.TryParse(literalSecondOperand.Value, out op2))
+                    return new FailureResult(string.Format(message, SecondOperand));
+            }
+            else
+                return new FailureResult(string.Format(message, "second"));
+
+            var value = op1 == op2 ? "true" : "false";
+            return new ValueResult(new Literal(value));
+        }
+
+        private CommandResult CompareGuids()
+        {
+            var message = PhraseDictionary.GetPhrase(Texts.PhraseKeys.CouldNotParseGuid, Thread.CurrentThread.CurrentCulture.Name);
+
+            var op1 = Guid.Empty;
+            if(FirstOperand is Literal literalFirstOperand)
+            {
+                if(!Guid.TryParse(literalFirstOperand.Value, out op1))
+                    return new FailureResult(string.Format(message, FirstOperand));
+            }
+            else
+                return new FailureResult(string.Format(message, "first"));
+
+            var op2 = Guid.Empty;
+            if(SecondOperand is Literal literalSecondOperand)
+            {
+                if(!Guid.TryParse(literalSecondOperand.Value, out op2))
                     return new FailureResult(string.Format(message, SecondOperand));
             }
             else
