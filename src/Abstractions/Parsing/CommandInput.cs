@@ -90,7 +90,7 @@ namespace Chel.Abstractions.Parsing
                     throw new ArgumentNullException(nameof(commandName));
 
                 if(commandName.Equals(string.Empty))
-                    throw new ArgumentException(string.Format(Texts.ArgumentCannotBeEmpty, nameof(commandName)), nameof(commandName));
+                    throw ExceptionFactory.CreateArgumentException(ApplicationTexts.ArgumentCannotBeEmpty, nameof(commandName), nameof(commandName));
 
                 _sourceLocation = sourceLocation;
                 _commandName = commandName;

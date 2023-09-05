@@ -26,13 +26,13 @@ namespace Chel.Abstractions
         public NumberedParameterAttribute(int number, string placeholderText)
         {
             if(number <= 0)
-                throw new ArgumentException(string.Format(Texts.ArgumentMustBeGreaterThanZero, nameof(number)), nameof(number));
+                throw ExceptionFactory.CreateArgumentException(ApplicationTexts.ArgumentMustBeGreaterThanZero, nameof(number), nameof(number));
 
             if(placeholderText == null)
                 throw new ArgumentNullException(nameof(placeholderText));
 
             if(string.IsNullOrWhiteSpace(placeholderText))
-                throw new ArgumentException(string.Format(Texts.ArgumentCannotBeEmptyOrWhitespace, nameof(placeholderText)), nameof(placeholderText));
+                throw ExceptionFactory.CreateArgumentException(ApplicationTexts.ArgumentCannotBeEmptyOrWhitespace, nameof(placeholderText), nameof(placeholderText));
 
             Number = number;
             PlaceholderText = placeholderText;

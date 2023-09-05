@@ -1,4 +1,5 @@
 using System;
+using Chel.Abstractions;
 
 namespace Chel.Exceptions
 {
@@ -23,7 +24,7 @@ namespace Chel.Exceptions
                 throw new ArgumentNullException(nameof(variableName));
 
             if(string.IsNullOrWhiteSpace(variableName))
-                throw new ArgumentException(string.Format(Chel.Abstractions.Texts.ArgumentCannotBeEmptyOrWhitespace, nameof(variableName)), nameof(variableName));
+                throw ExceptionFactory.CreateArgumentException(ApplicationTexts.ArgumentCannotBeEmptyOrWhitespace, nameof(variableName), nameof(variableName));
 
             VariableName = variableName;
         }

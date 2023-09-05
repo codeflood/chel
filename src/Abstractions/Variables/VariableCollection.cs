@@ -46,7 +46,7 @@ namespace Chel.Abstractions.Variables
                 throw new ArgumentNullException(nameof(name));
 
             if(string.IsNullOrEmpty(name))
-                throw new ArgumentException(string.Format(Texts.ArgumentCannotBeNullOrEmpty, nameof(name)), nameof(name));
+                throw ExceptionFactory.CreateArgumentException(ApplicationTexts.ArgumentCannotBeNullOrEmpty, nameof(name), nameof(name));
 
             if(_variables.ContainsKey(name))
                 _variables.Remove(name);
@@ -61,7 +61,7 @@ namespace Chel.Abstractions.Variables
                 throw new ArgumentNullException(nameof(name));
 
             if(string.IsNullOrEmpty(name))
-                throw new ArgumentException(string.Format(Texts.ArgumentCannotBeNullOrEmpty, nameof(name)), nameof(name));
+                throw ExceptionFactory.CreateArgumentException(ApplicationTexts.ArgumentCannotBeNullOrEmpty, nameof(name), nameof(name));
 
             if(_variables.ContainsKey(name))
                 return _variables[name];

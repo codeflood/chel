@@ -22,7 +22,7 @@ namespace Chel.Abstractions.Parsing
             if(parameterName == null)
                 throw new ArgumentNullException(nameof(parameterName));
             else if(string.IsNullOrWhiteSpace(parameterName))
-                throw new ArgumentException(Texts.ArgumentCannotBeEmptyOrWhitespace, nameof(parameterName));
+                throw ExceptionFactory.CreateArgumentException(ApplicationTexts.ArgumentCannotBeEmptyOrWhitespace, nameof(parameterName));
 
             ParameterName = parameterName;
         }

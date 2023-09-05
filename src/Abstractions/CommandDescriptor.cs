@@ -80,7 +80,7 @@ namespace Chel.Abstractions
                     throw new ArgumentNullException(nameof(commandName));
 
                 if(commandName == string.Empty)
-                    throw new ArgumentException(string.Format(Texts.ArgumentCannotBeEmpty, nameof(commandName)), nameof(commandName));
+                    throw ExceptionFactory.CreateArgumentException(ApplicationTexts.ArgumentCannotBeEmpty, nameof(commandName), nameof(commandName));
 
                 if(implementingType == null)
                     throw new ArgumentNullException(nameof(implementingType));
@@ -104,7 +104,7 @@ namespace Chel.Abstractions
 
                 var existing = _numberedParameters.Find(x => x.Number == descriptor.Number);
                 if(existing != null)
-                    throw new InvalidOperationException(string.Format(Texts.DescriptorAlreadyAdded, existing.Number));
+                    throw ExceptionFactory.CreateInvalidOperationException(ApplicationTexts.DescriptorAlreadyAdded, existing.Number);
 
                 _numberedParameters.Add(descriptor);
             }
@@ -119,7 +119,7 @@ namespace Chel.Abstractions
                     throw new ArgumentNullException(nameof(descriptor));
 
                 if(_namedParameters.ContainsKey(descriptor.Name))
-                    throw new InvalidOperationException(string.Format(Texts.DescriptorAlreadyAdded, descriptor.Name));
+                    throw ExceptionFactory.CreateInvalidOperationException(ApplicationTexts.DescriptorAlreadyAdded, descriptor.Name);
 
                 _namedParameters.Add(descriptor.Name, descriptor);
             }
@@ -135,7 +135,7 @@ namespace Chel.Abstractions
 
                 var found = _flagParameters.Exists(x => string.Equals(x.Name, descriptor.Name, StringComparison.OrdinalIgnoreCase));
                 if(found)
-                    throw new InvalidOperationException(string.Format(Texts.DescriptorAlreadyAdded, descriptor.Name));
+                    throw ExceptionFactory.CreateInvalidOperationException(ApplicationTexts.DescriptorAlreadyAdded, descriptor.Name);
 
                 _flagParameters.Add(descriptor);
             }

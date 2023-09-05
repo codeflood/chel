@@ -27,10 +27,10 @@ namespace Chel.Abstractions
                 throw new ArgumentNullException(nameof(name));
 
             if(string.IsNullOrWhiteSpace(name))
-                throw new ArgumentException(string.Format(Texts.ArgumentCannotBeEmptyOrWhitespace, nameof(name)), nameof(name));
+                throw ExceptionFactory.CreateArgumentException(ApplicationTexts.ArgumentCannotBeEmptyOrWhitespace, nameof(name), nameof(name));
 
             if(required)
-                throw new ArgumentException(Texts.FlagParametersCannotBeRequired, nameof(required));
+                throw ExceptionFactory.CreateArgumentException(ApplicationTexts.FlagParametersCannotBeRequired, nameof(required));
 
             Name = name;
         }

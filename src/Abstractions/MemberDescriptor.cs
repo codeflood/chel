@@ -67,7 +67,7 @@ namespace Chel.Abstractions
                     throw new ArgumentNullException(nameof(description));
 
                 if(string.IsNullOrEmpty(description))
-                    throw new ArgumentException(string.Format(Texts.ArgumentCannotBeEmpty, nameof(description)), nameof(description));
+                    throw ExceptionFactory.CreateArgumentException(ApplicationTexts.ArgumentCannotBeEmpty, nameof(description), nameof(description));
 
                 var key = cultureName ?? CultureInfo.InvariantCulture.Name;
 

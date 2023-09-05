@@ -30,13 +30,13 @@ namespace Chel.Abstractions
             : base(property, descriptions, required)
         {
             if(number <= 0)
-                throw new ArgumentException(string.Format(Texts.ArgumentMustBeGreaterThanZero, nameof(number)), nameof(number));
+                throw ExceptionFactory.CreateArgumentException(ApplicationTexts.ArgumentMustBeGreaterThanZero, nameof(number), nameof(number));
 
             if(placeholderText == null)
                 throw new ArgumentNullException(nameof(placeholderText));
 
-            if(placeholderText.Equals(string.Empty))
-                throw new ArgumentException(string.Format(Texts.ArgumentCannotBeEmpty, nameof(placeholderText)), nameof(placeholderText));
+            if(placeholderText.Equals(string.Empty))                
+                throw ExceptionFactory.CreateArgumentException(ApplicationTexts.ArgumentCannotBeEmpty, nameof(placeholderText), nameof(placeholderText));
 
             Number = number;
             PlaceholderText = placeholderText;

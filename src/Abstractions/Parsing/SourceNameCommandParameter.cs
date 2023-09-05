@@ -24,7 +24,7 @@ namespace Chel.Abstractions.Parsing
                 throw new ArgumentNullException(nameof(name));
             
             if(string.IsNullOrWhiteSpace(name))
-                throw new ArgumentException(string.Format(Texts.ArgumentCannotBeEmptyOrWhitespace, nameof(name)), nameof(name));
+                throw ExceptionFactory.CreateArgumentException(ApplicationTexts.ArgumentCannotBeEmptyOrWhitespace, nameof(name), nameof(name));
 
             Name = name;
         }

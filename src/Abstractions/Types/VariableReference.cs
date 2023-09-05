@@ -40,7 +40,7 @@ namespace Chel.Abstractions.Types
             if(variableName == null)
                 throw new ArgumentNullException(nameof(variableName));
             else if(string.IsNullOrEmpty(variableName))
-                throw new ArgumentException(Texts.ArgumentCannotBeEmptyOrWhitespace, nameof(variableName));
+                throw ExceptionFactory.CreateArgumentException(ApplicationTexts.ArgumentCannotBeEmptyOrWhitespace, nameof(variableName));
 
             VariableName = variableName;
             SubReferences = new List<string>();

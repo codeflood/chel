@@ -39,7 +39,7 @@ namespace Chel.Abstractions
                 throw new ArgumentNullException(nameof(error));
 
             if(error.Equals(string.Empty))
-                throw new ArgumentException(string.Format(Texts.ArgumentCannotBeEmpty, nameof(error)), nameof(error));
+                throw ExceptionFactory.CreateArgumentException(ApplicationTexts.ArgumentCannotBeEmpty, nameof(error), nameof(error));
 
             _errors.Add(error);
         }

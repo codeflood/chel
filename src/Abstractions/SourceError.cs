@@ -28,7 +28,7 @@ namespace Chel.Abstractions
         {
             Message = message ?? throw new ArgumentNullException(nameof(message));
             if(string.IsNullOrWhiteSpace(message))
-                throw new ArgumentException(string.Format(Texts.ArgumentCannotBeEmptyOrWhitespace, nameof(message)), nameof(message));
+                throw ExceptionFactory.CreateArgumentException(ApplicationTexts.ArgumentCannotBeEmptyOrWhitespace, nameof(message), nameof(message));
             
             SourceLocation = sourceLocation;
         }

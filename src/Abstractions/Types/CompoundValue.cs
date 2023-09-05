@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Chel.Abstractions.Parsing;
@@ -16,7 +15,7 @@ namespace Chel.Abstractions.Types
             foreach(var value in values)
             {
                 if(!(value is Literal) && !(value is VariableReference))
-                    throw new ArgumentException(Texts.CompoundValueOnlyConsistsLiteralsAndVariables, nameof(values));
+                    throw ExceptionFactory.CreateArgumentException(ApplicationTexts.CompoundValueOnlyConsistsLiteralsAndVariables, nameof(values));
             }
         }
 

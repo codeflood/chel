@@ -11,3 +11,5 @@ Consistency. Everything always works the same. Commands, scripts and subscripts 
 The language is optimized for simple command execution.
 
 Avoid esoteric knowledge.
+
+No dependencies.

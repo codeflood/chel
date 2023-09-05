@@ -39,7 +39,7 @@ namespace Chel.Abstractions
                 throw new ArgumentNullException(nameof(text));
 
             if(string.IsNullOrEmpty(text))
-                throw new ArgumentException(string.Format(Texts.ArgumentCannotBeEmpty, nameof(text)), nameof(text));
+                throw ExceptionFactory.CreateArgumentException(ApplicationTexts.ArgumentCannotBeEmpty, nameof(text), nameof(text));
 
             Text = text;
             CultureName = cultureName ?? CultureInfo.InvariantCulture.Name;

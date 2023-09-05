@@ -34,10 +34,10 @@ namespace Chel.Abstractions
         public SourceLocation(int lineNumber, int characterNumber)
         {
             if(lineNumber <= 0)
-                throw new ArgumentException(string.Format(Texts.ArgumentMustBeGreaterThanZero, nameof(lineNumber)), nameof(lineNumber));
+                throw ExceptionFactory.CreateArgumentException(ApplicationTexts.ArgumentMustBeGreaterThanZero, nameof(lineNumber), nameof(lineNumber));
 
             if(characterNumber <= 0)
-                throw new ArgumentException(string.Format(Texts.ArgumentMustBeGreaterThanZero, nameof(characterNumber)), nameof(characterNumber));
+                throw ExceptionFactory.CreateArgumentException(ApplicationTexts.ArgumentMustBeGreaterThanZero, nameof(characterNumber), nameof(characterNumber));
 
             LineNumber = lineNumber;
             CharacterNumber = characterNumber;

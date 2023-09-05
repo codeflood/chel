@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 
 namespace Chel.Abstractions.Results
 {
@@ -35,7 +36,7 @@ namespace Chel.Abstractions.Results
         {
             Message = message ?? throw new ArgumentNullException(nameof(message));
             if(string.IsNullOrWhiteSpace(message))
-                throw new ArgumentException(string.Format(Texts.ArgumentCannotBeEmptyOrWhitespace, nameof(message)), nameof(message));
+                throw ExceptionFactory.CreateArgumentException(ApplicationTexts.ArgumentCannotBeEmptyOrWhitespace, nameof(message), nameof(message));
 
             Success = false;
             SourceLocation = sourceLocation;
@@ -43,7 +44,8 @@ namespace Chel.Abstractions.Results
 
         public override string ToString()
         {
-            return string.Format(Texts.ErrorAtLocation, SourceLocation.LineNumber, SourceLocation.CharacterNumber) + ": " + Message;
+            var text = ApplicationTextResolver.Instance.Resolve(ApplicationTexts.ErrorAtLocation, CultureInfo.CurrentCulture.Name);
+            return string.Format(text, SourceLocation.LineNumber, SourceLocation.CharacterNumber) + ": " + Message;
         }
     }
 }
