@@ -104,6 +104,7 @@ namespace Chel.Abstractions
                 { ApplicationTexts.TextForCultureAlreadyAdded, "Text for culture '{0}' has already been added" },
                 { ApplicationTexts.TypeIsNotACommand, "{0} is not a command" },
                 { ApplicationTexts.TypeRequiresParameterlessConstructor, "Type {0} requires a parameterless constructor" },
+                { ApplicationTexts.UnexpectedParameterType, "Unexpected parameter type" },
                 { ApplicationTexts.UnexpectedNumberedParameter, "Unexpected numbered parameter '{0}'" },
                 { ApplicationTexts.UnexpectedToken, "Unexpected token '{0}'" },
                 { ApplicationTexts.UnknownCommand, "Unknown command '{0}'" },

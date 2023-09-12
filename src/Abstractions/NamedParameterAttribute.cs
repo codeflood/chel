@@ -29,13 +29,13 @@ namespace Chel.Abstractions
                 throw new ArgumentNullException(nameof(name));
 
             if(string.IsNullOrWhiteSpace(name))
-                throw new ArgumentException(nameof(name) + " cannot be empty or whitespace", nameof(name));
+                throw ExceptionFactory.CreateArgumentException(ApplicationTexts.ArgumentCannotBeEmptyOrWhitespace, nameof(name), nameof(name));
 
             if(valuePlaceholderText == null)
                 throw new ArgumentNullException(nameof(valuePlaceholderText));
 
             if(string.IsNullOrWhiteSpace(valuePlaceholderText))
-                throw new ArgumentException(nameof(valuePlaceholderText) + " cannot be empty or whitespace", nameof(valuePlaceholderText));
+                throw ExceptionFactory.CreateArgumentException(ApplicationTexts.ArgumentCannotBeEmptyOrWhitespace, nameof(valuePlaceholderText), nameof(valuePlaceholderText));
 
             Name = name;
             ValuePlaceholderText = valuePlaceholderText;

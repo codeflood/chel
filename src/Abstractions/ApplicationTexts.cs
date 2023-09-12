@@ -73,6 +73,7 @@ namespace Chel.Abstractions
         public const string TypeIsNotACommand = "TypeIsNotACommand";
         public const string TypeRequiresParameterlessConstructor = "TypeRequiresParameterlessConstructor";
         public const string UnexpectedNumberedParameter = "UnexpectedNumberedParameter";
+        public const string UnexpectedParameterType = "UnexpectedParameterType";
         public const string UnexpectedToken = "UnexpectedToken";
         public const string UnknownCommand = "UnknownCommand";
         public const string UnknownEscapedCharacter = "UnknownEscapedCharacter";

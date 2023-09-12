@@ -31,7 +31,7 @@ namespace Chel
             var serviceType = typeof(T);
 
             if(_serviceRegistrations.ContainsKey(serviceType))
-                throw new InvalidOperationException(ApplicationTextResolver.Instance.ResolveAndFormat(ApplicationTexts.ServiceTypeAlreadyRegistered, serviceType.FullName));
+                throw ExceptionFactory.CreateInvalidOperationException(ApplicationTexts.ServiceTypeAlreadyRegistered, serviceType.FullName);
 
             _serviceRegistrations.Add(serviceType, service);
         }

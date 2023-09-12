@@ -29,7 +29,7 @@ namespace Chel.Abstractions.UnitTests
             // act, assert
             var ex = Assert.Throws<ArgumentException>(sutAction);
             Assert.Equal("name", ex.ParamName);
-            Assert.Contains("name cannot be empty or whitespace", ex.Message);
+            Assert.Contains("'name' cannot be empty or whitespace", ex.Message);
         }
 
         [Fact]
@@ -56,7 +56,7 @@ namespace Chel.Abstractions.UnitTests
             // act, assert
             var ex = Assert.Throws<ArgumentException>(sutAction);
             Assert.Equal("valuePlaceholderText", ex.ParamName);
-            Assert.Contains("valuePlaceholderText cannot be empty or whitespace", ex.Message);
+            Assert.Contains("'valuePlaceholderText' cannot be empty or whitespace", ex.Message);
         }
 
         [Fact]

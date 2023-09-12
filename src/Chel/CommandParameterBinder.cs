@@ -237,7 +237,7 @@ namespace Chel
                     {
                         // todo: add test for incorrect type
                         if(!(value is SourceValueCommandParameter valueCommandParameter))
-                            throw new InvalidOperationException("Unexpected parameter type");
+                            throw ExceptionFactory.CreateInvalidOperationException(ApplicationTexts.UnexpectedParameterType);
 
                         BindProperty(instance, describedParameter.Property, describedParameter.Name, valueCommandParameter, result);
                     }
@@ -300,7 +300,7 @@ namespace Chel
                     {
                         // todo: add test for incorrect type
                         if(!(value is SourceValueCommandParameter valueCommandParameter))
-                            throw new InvalidOperationException("Unexpected parameter type");
+                            throw ExceptionFactory.CreateInvalidOperationException(ApplicationTexts.UnexpectedParameterType);
 
                         BindProperty(instance, describedParameter.Property, describedParameter.Number.ToString(), valueCommandParameter, result);
                     }
