@@ -17,6 +17,7 @@ namespace Chel.Sandbox
             runtime.RegisterCommandType(typeof(Echo));
             runtime.RegisterCommandType(typeof(If));
             runtime.RegisterCommandType(typeof(Equals));
+            runtime.RegisterCommandType(typeof(Not));
             runtime.RegisterCommandType(typeof(Chel.Sandbox.Commands.Random));
             runtime.RegisterCommandType(typeof(Exit));
 
