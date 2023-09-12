@@ -51,6 +51,24 @@ namespace Chel.UnitTests.Commands
         }
 
         [Fact]
+        public void Execute_NoParametersSet_ListsCommandsInAlphabeticalOrder()
+        {
+            // arrange
+            var sut = CreateSut(typeof(Var), typeof(NumberedParameterCommand), typeof(Help));
+
+            // act
+            var result = sut.Execute() as ValueResult;
+
+            // assert
+            var commands = Assert.IsType<Literal>(result.Value);
+            var helpIndex = commands.Value.IndexOf("help");
+            var numIndex = commands.Value.IndexOf("num");
+            var varIndex = commands.Value.IndexOf("var");
+            Assert.True(helpIndex < numIndex);
+            Assert.True(numIndex < varIndex);
+        }
+
+        [Fact]
         public void Execute_NoDescriptionOnCommand_DoesNotError()
         {
             // arrange

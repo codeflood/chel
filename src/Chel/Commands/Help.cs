@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using Chel.Abstractions;
@@ -49,7 +50,7 @@ namespace Chel.Commands
             output.Append(":");
             output.Append(Environment.NewLine);
 
-            foreach(var descriptor in _commandRegistry.GetAllRegistrations())
+            foreach(var descriptor in _commandRegistry.GetAllRegistrations().OrderBy(x => x.CommandName))
             {
                 output.Append($"{descriptor.CommandName, Constants.FirstColumnWidth}{descriptor.GetDescription(_executionCultureName)}");
                 output.Append(Environment.NewLine);
