@@ -112,7 +112,7 @@ namespace Chel
                 else if(value is Map mapValue)
                     value = ProcessMapVariableReference(mapValue, variableName, subreference);
                 else if(subreference != null)
-                    throw new InvalidOperationException(string.Format(Texts.VariableSubreferenceIsInvalid, variableName, subreference));
+                    throw ExceptionFactory.CreateInvalidOperationException(ApplicationTexts.VariableSubreferenceIsInvalid, variableName, subreference);
                 
                 if(subreferences.Count > 0)
                     variableName += Symbol.SubName + subreference;
@@ -144,7 +144,7 @@ namespace Chel
 
                 default:
                     if(!int.TryParse(subreference, out oneBasedIndex))
-                        throw new InvalidOperationException(string.Format(Texts.VariableSubreferenceIsInvalid, variableName, subreference));
+                        throw ExceptionFactory.CreateInvalidOperationException(ApplicationTexts.VariableSubreferenceIsInvalid, variableName, subreference);
                     break;
             }
 
@@ -152,7 +152,7 @@ namespace Chel
                 oneBasedIndex = listValue.Values.Count + (oneBasedIndex + 1);
 
             if(oneBasedIndex < 1 || oneBasedIndex > listValue.Values.Count)
-                throw new InvalidOperationException(string.Format(Texts.VariableSubreferenceIsInvalid, variableName, subreference));
+                throw ExceptionFactory.CreateInvalidOperationException(ApplicationTexts.VariableSubreferenceIsInvalid, variableName, subreference);
 
             return listValue.Values[oneBasedIndex - 1] as ChelType;
         }
@@ -163,7 +163,7 @@ namespace Chel
                 return mapValue;
             
             if(!mapValue.Entries.ContainsKey(subreference))
-                throw new InvalidOperationException(string.Format(Texts.VariableSubreferenceIsInvalid, variableName, subreference));
+                throw ExceptionFactory.CreateInvalidOperationException(ApplicationTexts.VariableSubreferenceIsInvalid, variableName, subreference);
 
             return mapValue.Entries[subreference] as ChelType;
         }

@@ -1,5 +1,4 @@
 using System;
-using System.Globalization;
 
 namespace Chel.Abstractions
 {
@@ -15,9 +14,9 @@ namespace Chel.Abstractions
         public override string ToString()
         {
             if(CommandName == null)
-                return ApplicationTextResolver.Instance.Resolve(ApplicationTexts.InvalidCommandNameNull, CultureInfo.CurrentCulture.Name);
+                return ApplicationTextResolver.Instance.Resolve(ApplicationTexts.InvalidCommandNameNull);
 
-            var text = ApplicationTextResolver.Instance.Resolve(ApplicationTexts.InvalidCommandNameWithParameter, CultureInfo.CurrentCulture.Name);
+            var text = ApplicationTextResolver.Instance.Resolve(ApplicationTexts.InvalidCommandNameWithParameter);
             return string.Format(text, CommandName);
         }
     }

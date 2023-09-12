@@ -457,7 +457,7 @@ namespace Chel.UnitTests.Parsing
 
             // act, assert
             var exception = Assert.Throws<ParseException>(sutAction);
-            Assert.Equal(Texts.MissingBlockEnd, exception.Message);
+            Assert.Equal(ApplicationTextResolver.Instance.Resolve(ApplicationTexts.MissingBlockEnd), exception.Message);
         }
 
         [Fact]
@@ -469,7 +469,7 @@ namespace Chel.UnitTests.Parsing
 
             // act, assert
             var exception = Assert.Throws<ParseException>(sutAction);
-            Assert.Equal(Texts.MissingBlockStart, exception.Message);
+            Assert.Equal(ApplicationTextResolver.Instance.Resolve(ApplicationTexts.MissingBlockStart), exception.Message);
         }
 
         [Fact]
@@ -697,7 +697,7 @@ namespace Chel.UnitTests.Parsing
 
             // act, assert
             var exception = Assert.Throws<ParseException>(sutAction);
-            Assert.Equal(Texts.MissingListEnd, exception.Message);
+            Assert.Equal(ApplicationTextResolver.Instance.Resolve(ApplicationTexts.MissingListEnd), exception.Message);
         }
 
         [Fact]
@@ -709,7 +709,7 @@ namespace Chel.UnitTests.Parsing
 
             // act, assert
             var exception = Assert.Throws<ParseException>(sutAction);
-            Assert.Equal(Texts.MissingListStart, exception.Message);
+            Assert.Equal(ApplicationTextResolver.Instance.Resolve(ApplicationTexts.MissingListStart), exception.Message);
         }
 
         [Fact]
@@ -949,7 +949,7 @@ namespace Chel.UnitTests.Parsing
 
             // act, assert
             var exception = Assert.Throws<ParseException>(sutAction);
-            Assert.Equal(Texts.MissingMapEnd, exception.Message);
+            Assert.Equal(ApplicationTextResolver.Instance.Resolve(ApplicationTexts.MissingMapEnd), exception.Message);
         }
 
         [Fact]
@@ -961,7 +961,7 @@ namespace Chel.UnitTests.Parsing
 
             // act, assert
             var exception = Assert.Throws<ParseException>(sutAction);
-            Assert.Equal(Texts.MissingMapStart, exception.Message);
+            Assert.Equal(ApplicationTextResolver.Instance.Resolve(ApplicationTexts.MissingMapStart), exception.Message);
         }
 
         [Fact]
@@ -1082,7 +1082,7 @@ namespace Chel.UnitTests.Parsing
 
             // act, assert
             var exception = Assert.Throws<ParseException>(sutAction);
-            Assert.Equal(Texts.MissingMapEntryName, exception.Message);
+            Assert.Equal(ApplicationTextResolver.Instance.Resolve(ApplicationTexts.MissingMapEntryName), exception.Message);
         }
 
         [Fact]
@@ -1094,7 +1094,7 @@ namespace Chel.UnitTests.Parsing
 
             // act, assert
             var exception = Assert.Throws<ParseException>(sutAction);
-            Assert.Equal(Texts.MissingMapEntryName, exception.Message);
+            Assert.Equal(ApplicationTextResolver.Instance.Resolve(ApplicationTexts.MissingMapEntryName), exception.Message);
         }
 
         [Fact]
@@ -1106,7 +1106,7 @@ namespace Chel.UnitTests.Parsing
 
             // act, assert
             var exception = Assert.Throws<ParseException>(sutAction);
-            Assert.Equal(Texts.MissingMapEntryValue, exception.Message);
+            Assert.Equal(ApplicationTextResolver.Instance.Resolve(ApplicationTexts.MissingMapEntryValue), exception.Message);
         }
 
         [Fact]

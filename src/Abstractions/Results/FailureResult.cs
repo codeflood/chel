@@ -44,7 +44,7 @@ namespace Chel.Abstractions.Results
 
         public override string ToString()
         {
-            var text = ApplicationTextResolver.Instance.Resolve(ApplicationTexts.ErrorAtLocation, CultureInfo.CurrentCulture.Name);
+            var text = ApplicationTextResolver.Instance.Resolve(ApplicationTexts.ErrorAtLocation);
             return string.Format(text, SourceLocation.LineNumber, SourceLocation.CharacterNumber) + ": " + Message;
         }
     }

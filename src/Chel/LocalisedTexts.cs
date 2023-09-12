@@ -48,12 +48,12 @@ namespace Chel
                 throw new ArgumentNullException(nameof(text));
 
             if(string.IsNullOrEmpty(text))
-                throw new ArgumentException(string.Format(Texts.ParameterCannotBeEmpty, nameof(text)), nameof(text));
+                throw ExceptionFactory.CreateArgumentException(ApplicationTexts.ParameterCannotBeEmpty, nameof(text), nameof(text));
 
             var key = cultureName ?? CultureInfo.InvariantCulture.Name;
 
             if(_descriptions.ContainsKey(key))
-                throw new InvalidOperationException(string.Format(Texts.TextForCultureAlreadyAdded, key));
+                throw ExceptionFactory.CreateInvalidOperationException(ApplicationTexts.TextForCultureAlreadyAdded, key);
 
             _descriptions.Add(key, text);
         }

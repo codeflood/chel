@@ -9,12 +9,11 @@ using Chel.Abstractions.Variables;
 
 namespace Chel.Commands
 {
-	[Command("var")]
+    [Command("var")]
     [Description("Manage variables.")]
     internal class Var : ICommand
     {
         private VariableCollection _variables = null;
-        private IPhraseDictionary _phraseDictionary = null;
         private INameValidator _nameValidator = null;
 
         private string _executionCultureName = string.Empty;
@@ -31,20 +30,10 @@ namespace Chel.Commands
         [Description("Clear the variable.")]
         public bool Clear { get; set; }
 
-        public Var(VariableCollection variables, IPhraseDictionary phraseDictionary, INameValidator nameValidator)
+        public Var(VariableCollection variables, INameValidator nameValidator)
         {
-            if(variables == null)
-                throw new ArgumentNullException(nameof(variables));
-
-            if(phraseDictionary == null)
-                throw new ArgumentNullException(nameof(phraseDictionary));
-
-            if(nameValidator == null)
-                throw new ArgumentNullException(nameof(nameValidator));
-
-            _variables = variables;
-            _phraseDictionary = phraseDictionary;
-            _nameValidator = nameValidator;
+            _variables = variables ?? throw new ArgumentNullException(nameof(variables));
+            _nameValidator = nameValidator ?? throw new ArgumentNullException(nameof(nameValidator));
         }
 
         public CommandResult Execute()
@@ -54,10 +43,12 @@ namespace Chel.Commands
             ChelType output = null;
 
             if(!string.IsNullOrEmpty(Name) && !_nameValidator.IsValid(Name))
-                return new FailureResult(string.Format(Texts.InvalidCharacterInVariableName, Name));
+                return new FailureResult(
+                    ApplicationTextResolver.Instance.ResolveAndFormat(ApplicationTexts.InvalidCharacterInVariableName, Name)
+                );
 
             if(Clear && string.IsNullOrEmpty(Name))
-                return new FailureResult(_phraseDictionary.GetPhrase(Texts.PhraseKeys.MissingVariableName, _executionCultureName));
+                return new FailureResult(ApplicationTextResolver.Instance.Resolve(ApplicationTexts.MissingVariableName));
 
             if(Value == null)
             {
@@ -80,7 +71,7 @@ namespace Chel.Commands
         {
             var names = _variables.Names;
             if(names.Count == 0)
-                return new Literal(_phraseDictionary.GetPhrase(Texts.PhraseKeys.NoVariablesSet, _executionCultureName));
+                return new Literal(ApplicationTextResolver.Instance.Resolve(ApplicationTexts.NoVariablesSet));
 
             var output = new Dictionary<string, ICommandParameter>();
 
@@ -98,14 +89,14 @@ namespace Chel.Commands
             var variable = _variables.Get(Name);
             if(variable == null)
             {
-                var template = _phraseDictionary.GetPhrase(Texts.PhraseKeys.VariableNotSet, _executionCultureName);
+                var template = ApplicationTextResolver.Instance.Resolve(ApplicationTexts.VariableNotSet);
                 return new Literal(string.Format(template, Name));
             }
 
             if(Clear)
             {
                 _variables.Remove(Name);
-                return new Literal(string.Format(_phraseDictionary.GetPhrase(Texts.PhraseKeys.VariableHasBeenCleared, _executionCultureName), Name));
+                return new Literal(string.Format(ApplicationTextResolver.Instance.Resolve(ApplicationTexts.VariableHasBeenCleared), Name));
             }
 
             return variable.Value;

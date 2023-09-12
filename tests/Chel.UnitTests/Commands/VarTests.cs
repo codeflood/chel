@@ -16,7 +16,7 @@ namespace Chel.UnitTests.Commands
         public void Ctor_VariablesIsNull_ThrowsException()
         {
             // arrange
-            Action sutAction = () => new Var(null, Substitute.For<IPhraseDictionary>(), Substitute.For<INameValidator>());
+            Action sutAction = () => new Var(null, Substitute.For<INameValidator>());
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -24,21 +24,10 @@ namespace Chel.UnitTests.Commands
         }
 
         [Fact]
-        public void Ctor_PhraseDictionaryIsNull_ThrowsException()
-        {
-            // arrange
-            Action sutAction = () => new Var(new VariableCollection(), null, Substitute.For<INameValidator>());
-
-            // act, assert
-            var ex = Assert.Throws<ArgumentNullException>(sutAction);
-            Assert.Equal("phraseDictionary", ex.ParamName);
-        }
-
-                [Fact]
         public void Ctor_NameValidatorIsNull_ThrowsException()
         {
             // arrange
-            Action sutAction = () => new Var(new VariableCollection(), Substitute.For<IPhraseDictionary>(), null);
+            Action sutAction = () => new Var(new VariableCollection(), null);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -241,7 +230,7 @@ namespace Chel.UnitTests.Commands
             if(variableConfigurator != null)
                 variableConfigurator.Invoke(variables);
 
-            return new Var(variables, new PhraseDictionary(), new NameValidator());
+            return new Var(variables, new NameValidator());
         }
     }
 }

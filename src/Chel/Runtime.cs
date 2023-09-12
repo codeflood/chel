@@ -39,7 +39,6 @@ namespace Chel
             _commandRegistry.Register(typeof(Var));
 
             _commandServices.Register(_commandRegistry);
-            _commandServices.Register<IPhraseDictionary>(new PhraseDictionary());
             _commandServices.Register<INameValidator>(nameValidator);
         }
 

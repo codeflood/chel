@@ -1,5 +1,4 @@
 using System;
-using System.Globalization;
 
 namespace Chel.Abstractions
 {
@@ -25,7 +24,7 @@ namespace Chel.Abstractions
             if(paramName == null)
                 throw new ArgumentNullException(nameof(paramName));
 
-            var emptyArgMessage = ApplicationTextResolver.Instance.Resolve(ApplicationTexts.ArgumentCannotBeEmpty, CultureInfo.CurrentCulture.Name);
+            var emptyArgMessage = ApplicationTextResolver.Instance.Resolve(ApplicationTexts.ArgumentCannotBeEmpty);
 
             if(textKey == string.Empty)
                 throw new ArgumentException(string.Format(emptyArgMessage, nameof(textKey)), nameof(textKey));
@@ -33,7 +32,7 @@ namespace Chel.Abstractions
             if(paramName == string.Empty)
                 throw new ArgumentException(string.Format(emptyArgMessage, nameof(paramName)), nameof(paramName));
 
-            var text = ApplicationTextResolver.Instance.Resolve(textKey, CultureInfo.CurrentCulture.Name);
+            var text = ApplicationTextResolver.Instance.Resolve(textKey);
 
             if(args.Length > 0)
                 text = string.Format(text, args);
@@ -54,12 +53,12 @@ namespace Chel.Abstractions
             if(textKey == null)
                 throw new ArgumentNullException(nameof(textKey));
 
-            var emptyArgMessage = ApplicationTextResolver.Instance.Resolve(ApplicationTexts.ArgumentCannotBeEmpty, CultureInfo.CurrentCulture.Name);
+            var emptyArgMessage = ApplicationTextResolver.Instance.Resolve(ApplicationTexts.ArgumentCannotBeEmpty);
 
             if(textKey == string.Empty)
                 throw new ArgumentException(string.Format(emptyArgMessage, nameof(textKey)), nameof(textKey));
 
-            var text = ApplicationTextResolver.Instance.Resolve(textKey, CultureInfo.CurrentCulture.Name);
+            var text = ApplicationTextResolver.Instance.Resolve(textKey);
 
             if(args.Length > 0)
                 text = string.Format(text, args);

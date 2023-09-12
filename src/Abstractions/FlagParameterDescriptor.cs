@@ -30,7 +30,7 @@ namespace Chel.Abstractions
                 throw ExceptionFactory.CreateArgumentException(ApplicationTexts.ArgumentCannotBeEmptyOrWhitespace, nameof(name), nameof(name));
 
             if(required)
-                throw ExceptionFactory.CreateArgumentException(ApplicationTexts.FlagParametersCannotBeRequired, nameof(required));
+                throw ExceptionFactory.CreateArgumentException(ApplicationTexts.FlagParametersCannotBeRequired, nameof(required), name);
 
             Name = name;
         }

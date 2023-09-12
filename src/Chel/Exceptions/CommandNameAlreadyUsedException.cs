@@ -1,4 +1,5 @@
 using System;
+using Chel.Abstractions;
 
 namespace Chel
 {
@@ -29,7 +30,10 @@ namespace Chel
         /// <param name="commandType">The <see cref="Type" /> of the command that caused the exception.</param>
         /// <param name="otherCommandType">The <see cref="Type" /> of the command already registered.</param>
         public CommandNameAlreadyUsedException(string commandName, Type commandType, Type otherCommandType)
-            : base(string.Format(Texts.CommandNameAlreadyUsed, commandName, commandType?.FullName, otherCommandType?.FullName))
+            : base(ApplicationTextResolver.Instance.ResolveAndFormat(
+                ApplicationTexts.CommandNameAlreadyUsed,
+                commandName, commandType?.FullName, otherCommandType?.FullName)
+            )
         {
             if(commandName == null)
                 throw new ArgumentNullException(nameof(commandName));

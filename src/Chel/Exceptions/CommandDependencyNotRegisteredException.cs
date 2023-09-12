@@ -1,4 +1,5 @@
 using System;
+using Chel.Abstractions;
 
 namespace Chel
 {
@@ -17,7 +18,7 @@ namespace Chel
         /// </summary>
         /// <param name="type">The <see cref="Type" /> of the service that was not registered.</param>
         public CommandDependencyNotRegisteredException(Type type)
-            : base(string.Format(Texts.CommandDependencyNotRegistered, type?.FullName))
+            : base(ApplicationTextResolver.Instance.ResolveAndFormat(ApplicationTexts.CommandDependencyNotRegistered, type?.FullName))
         {
             if(type == null)
                 throw new ArgumentNullException(nameof(type));

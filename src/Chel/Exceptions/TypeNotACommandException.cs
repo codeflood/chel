@@ -1,4 +1,5 @@
 using System;
+using Chel.Abstractions;
 
 namespace Chel.Exceptions
 {
@@ -17,7 +18,7 @@ namespace Chel.Exceptions
         /// </summary>
         /// <param name="type">The <see cref="Type" /> that was attempted to be used as a command implementation.</param>
         public TypeNotACommandException(Type type)
-            : base(string.Format(Texts.TypeIsNotACommand, type?.FullName))
+            : base(ApplicationTextResolver.Instance.ResolveAndFormat(ApplicationTexts.TypeIsNotACommand, type?.FullName))
         {
             if(type == null)
                 throw new ArgumentNullException(nameof(type));

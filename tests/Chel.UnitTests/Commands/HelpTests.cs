@@ -1,10 +1,8 @@
 using System;
-using Chel.Abstractions;
 using Chel.Abstractions.Results;
 using Chel.Abstractions.Types;
 using Chel.Commands;
 using Chel.UnitTests.SampleCommands;
-using NSubstitute;
 using Xunit;
 
 namespace Chel.UnitTests.Commands
@@ -15,22 +13,11 @@ namespace Chel.UnitTests.Commands
         public void Ctor_CommandRegistryIsNull_ThrowsException()
         {
             // arrange
-            Action sutAction = () => new Help(null, Substitute.For<IPhraseDictionary>());
+            Action sutAction = () => new Help(null);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
             Assert.Equal("commandRegistry", ex.ParamName);
-        }
-
-        [Fact]
-        public void Ctor_PhraseDictionaryIsNull_ThrowsException()
-        {
-            // arrange
-            Action sutAction = () => new Help(Substitute.For<ICommandRegistry>(), null);
-
-            // act, assert
-            var ex = Assert.Throws<ArgumentNullException>(sutAction);
-            Assert.Equal("phraseDictionary", ex.ParamName);
         }
 
         [Fact]
@@ -72,7 +59,7 @@ namespace Chel.UnitTests.Commands
             var registry = new CommandRegistry(nameValidator, descriptorGenerator);
             registry.Register(typeof(SampleCommand2));
 
-            var sut = new Help(registry, new PhraseDictionary());
+            var sut = new Help(registry);
 
             // act
             var result = sut.Execute() as ValueResult;
@@ -202,7 +189,7 @@ namespace Chel.UnitTests.Commands
                 registry.Register(type);
             }
 
-            return new Help(registry, new PhraseDictionary());
+            return new Help(registry);
         }
     }
 }

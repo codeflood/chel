@@ -98,7 +98,7 @@ namespace Chel
                     }
                 }
                 else
-                    commandResult = new FailureResult(commandInput.SourceLocation, string.Format(Texts.UnknownCommand, commandInput.CommandName));
+                    commandResult = new FailureResult(commandInput.SourceLocation, ApplicationTextResolver.Instance.ResolveAndFormat(ApplicationTexts.UnknownCommand, commandInput.CommandName));
             }
             catch(Exception ex)
             {
@@ -127,7 +127,7 @@ namespace Chel
                     if(result is ValueResult valueResult)
                         subcommand.SubstituteValue = valueResult.Value;
                     else
-                        new FailureResult(subcommand.SourceLocation, Texts.SubcommandResultMustBeChelType);
+                        new FailureResult(subcommand.SourceLocation, ApplicationTextResolver.Instance.Resolve(ApplicationTexts.SubcommandResultMustBeChelType));
                 }
                 else if(parameter is List listParameter)
                 {
@@ -142,7 +142,7 @@ namespace Chel
                             if(result is ValueResult valueResult)
                                 listSubcommand.SubstituteValue = valueResult.Value;
                             else
-                                new FailureResult(listSubcommand.SourceLocation, Texts.SubcommandResultMustBeChelType);
+                                new FailureResult(listSubcommand.SourceLocation, ApplicationTextResolver.Instance.Resolve(ApplicationTexts.SubcommandResultMustBeChelType));
                         }
                     }
                 }

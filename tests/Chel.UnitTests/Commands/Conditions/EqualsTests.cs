@@ -10,17 +10,6 @@ namespace Chel.UnitTests.Commands.Conditions
     public class EqualsTests
     {
         [Fact]
-        public void Ctor_PhraseDictionaryIsNull_ThrowsException()
-        {
-            // arrange
-            Action sutAction = () => new Equals(null);
-
-            // act, assert
-            var ex = Assert.Throws<ArgumentNullException>(sutAction);
-            Assert.Equal("phraseDictionary", ex.ParamName);
-        }
-
-        [Fact]
         public void Execute_FirstOperandIsNull_ReturnsFailure()
         {
             // arrange
@@ -228,7 +217,7 @@ namespace Chel.UnitTests.Commands.Conditions
         public static IEnumerable<object[]> Execute_MultipleTreatmentsSet_ReturnsFalse_DataSource()
         {
             yield return new[] { 
-                new Equals(new PhraseDictionary())
+                new Equals()
                 {
                     FirstOperand = new Literal("1"),
                     SecondOperand = new Literal("2"),
@@ -238,7 +227,7 @@ namespace Chel.UnitTests.Commands.Conditions
             };
             
             yield return new[] { 
-                new Equals(new PhraseDictionary())
+                new Equals()
                 {
                     FirstOperand = new Literal("1"),
                     SecondOperand = new Literal("2"),
@@ -248,7 +237,7 @@ namespace Chel.UnitTests.Commands.Conditions
             };
 
             yield return new[] { 
-                new Equals(new PhraseDictionary())
+                new Equals()
                 {
                     FirstOperand = new Literal("2023-05-04"),
                     SecondOperand = new Literal("2023-05-04"),
@@ -396,7 +385,7 @@ namespace Chel.UnitTests.Commands.Conditions
 
         private Equals CreateEqualsCommand()
         {
-            return new Equals(new PhraseDictionary());
+            return new Equals();
         }
     }
 }

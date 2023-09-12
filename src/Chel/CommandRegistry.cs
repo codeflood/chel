@@ -44,11 +44,11 @@ namespace Chel
 
             var implementsInterface = DoesImplementICommand(type);
             if(!implementsInterface)
-                throw new ArgumentException(string.Format(Texts.ParameterDoesNotImplementICommand, type.FullName), nameof(type));
+                throw ExceptionFactory.CreateArgumentException(ApplicationTexts.ParameterDoesNotImplementICommand, nameof(type), type.FullName);
 
             var descriptor = _commandDescriptorGenerator.DescribeCommand(type);
             if(descriptor == null)
-                throw new InvalidOperationException(string.Format(Texts.DescriptorCouldNotBeGenerated, type.FullName));
+                throw ExceptionFactory.CreateInvalidOperationException(ApplicationTexts.DescriptorCouldNotBeGenerated, type.FullName);
 
             var validCommandName = _nameValidator.IsValid(descriptor.CommandName);
             if(!validCommandName)

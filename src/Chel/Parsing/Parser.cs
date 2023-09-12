@@ -9,11 +9,11 @@ using Chel.Exceptions;
 
 namespace Chel.Parsing
 {
-	/// <summary>
-	/// The default implementation of the <see cref="IParser" />.
-	/// </summary>
+    /// <summary>
+    /// The default implementation of the <see cref="IParser" />.
+    /// </summary>
     /// <remarks>This class is not thread-safe.</remarks>
-	public class Parser : IParser
+    public class Parser : IParser
     {
         private const char Newline = '\n';
 
@@ -54,26 +54,26 @@ namespace Chel.Parsing
                 // Any hanging tokens means the input wasn't formed properly
                 if(_nextToken != null)
                 {
-                    var message = string.Format(Texts.UnexpectedToken, _nextToken);
+                    var message = ApplicationTextResolver.Instance.ResolveAndFormat(ApplicationTexts.UnexpectedToken, _nextToken);
 
                     if(_nextToken is SpecialToken specialToken)
                     {
                         switch(specialToken.Type)
                         {
                             case SpecialTokenType.ListEnd:
-                                message = Texts.MissingListStart;
+                                message = ApplicationTextResolver.Instance.Resolve(ApplicationTexts.MissingListStart);
                                 break;
 
                             case SpecialTokenType.MapEnd:
-                                message = Texts.MissingMapStart;
+                                message = ApplicationTextResolver.Instance.Resolve(ApplicationTexts.MissingMapStart);
                                 break;
 
                             case SpecialTokenType.BlockEnd:
-                                message = Texts.MissingBlockStart;
+                                message = ApplicationTextResolver.Instance.Resolve(ApplicationTexts.MissingBlockStart);
                                 break;
 
                             default:
-                                message = string.Format(Texts.UnexpectedToken, specialToken.Type);
+                                message = ApplicationTextResolver.Instance.ResolveAndFormat(ApplicationTexts.UnexpectedToken, specialToken.Type);
                                 break;
                         }
                     }
@@ -191,7 +191,7 @@ namespace Chel.Parsing
         private SourceValueCommandParameter ParseBlock(Token token)
         {
             if(!(token is SpecialToken specialTokenGuard) || specialTokenGuard.Type != SpecialTokenType.BlockStart)
-                throw new ParseException(_lastTokenLocation, Texts.MissingBlockStart);
+                throw new ParseException(_lastTokenLocation, ApplicationTextResolver.Instance.Resolve(ApplicationTexts.MissingBlockStart));
 
             _buffer.Clear();
             var blockStartCount = 1;
@@ -202,7 +202,7 @@ namespace Chel.Parsing
                 token = GetNextToken();
 
                 if(token == null)
-                    throw new ParseException(_lastTokenLocation, Texts.MissingBlockEnd);
+                    throw new ParseException(_lastTokenLocation, ApplicationTextResolver.Instance.Resolve(ApplicationTexts.MissingBlockEnd));
 
                 if(token is SpecialToken specialToken)
                 {
@@ -245,7 +245,10 @@ namespace Chel.Parsing
                         default:
                             // todo: Change SpecialTokenType to be a class which we can call ToString() on to get the token.
                             // This would avoid all the cases above.
-                            throw new ParseException(specialToken.Location, string.Format(Texts.UnexpectedToken, specialToken.Type));
+                            throw new ParseException(
+                                specialToken.Location, 
+                                ApplicationTextResolver.Instance.ResolveAndFormat(ApplicationTexts.UnexpectedToken, specialToken.Type)
+                            );
                     }
                 }
                 else if(token is LiteralToken literalToken)
@@ -261,17 +264,17 @@ namespace Chel.Parsing
         private ParameterNameCommandParameter ParseParameterName(Token token)
         {
             if(!(token is SpecialToken specialTokenGuard) || specialTokenGuard.Type != SpecialTokenType.ParameterName)
-                throw new ParseException(_lastTokenLocation, string.Format(Texts.UnexpectedToken, token));
+                throw new ParseException(_lastTokenLocation, ApplicationTextResolver.Instance.ResolveAndFormat(ApplicationTexts.UnexpectedToken, token));
 
             var locationStart = _lastTokenLocation;
 
             token = GetNextToken();
             if(token == null)
-                throw new ParseException(_lastTokenLocation, Texts.MissingParameterName);
+                throw new ParseException(_lastTokenLocation, ApplicationTextResolver.Instance.Resolve(ApplicationTexts.MissingParameterName));
 
             var name = ParseName(token);
             if(name == null)
-                throw new ParseException(_lastTokenLocation, Texts.MissingParameterName);
+                throw new ParseException(_lastTokenLocation, ApplicationTextResolver.Instance.Resolve(ApplicationTexts.MissingParameterName));
 
             return new ParameterNameCommandParameter(locationStart, name.Name);
         }
@@ -298,15 +301,15 @@ namespace Chel.Parsing
                         return ParseSubcommand();
 
                     case SpecialTokenType.MapEnd:
-                        throw new ParseException(_lastTokenLocation, Texts.MissingMapEntryValue);
+                        throw new ParseException(_lastTokenLocation, ApplicationTextResolver.Instance.Resolve(ApplicationTexts.MissingMapEntryValue));
 
                     case SpecialTokenType.BlockEnd:
                     case SpecialTokenType.ParameterName:
                     case SpecialTokenType.ListEnd:
-                        throw new ParseException(_lastTokenLocation, string.Format(Texts.UnexpectedToken, token));
+                        throw new ParseException(_lastTokenLocation, ApplicationTextResolver.Instance.ResolveAndFormat(ApplicationTexts.UnexpectedToken, token));
 
                     default:
-                        throw new ParseException(specialToken.Location, string.Format(Texts.UnexpectedToken, specialToken.Type));
+                        throw new ParseException(specialToken.Location, ApplicationTextResolver.Instance.ResolveAndFormat(ApplicationTexts.UnexpectedToken, specialToken.Type));
                 }
             }
 
@@ -379,7 +382,7 @@ namespace Chel.Parsing
         private VariableReference ParseVariableReference(Token token)
         {
             if(!(token is SpecialToken specialTokenGuard) || specialTokenGuard.Type != SpecialTokenType.VariableMarker)
-                throw new ParseException(_lastTokenLocation, string.Format(Texts.UnexpectedToken, token));
+                throw new ParseException(_lastTokenLocation, ApplicationTextResolver.Instance.ResolveAndFormat(ApplicationTexts.UnexpectedToken, token));
 
             _buffer.Clear();
             var locationStart = _lastTokenLocation;
@@ -402,9 +405,9 @@ namespace Chel.Parsing
                     if(name.Length == 0)
                     {
                         if(variableName == null)
-                            throw new ParseException(_lastTokenLocation, Texts.MissingVariableName);
+                            throw new ParseException(_lastTokenLocation, ApplicationTextResolver.Instance.Resolve(ApplicationTexts.MissingVariableName));
                         else
-                            throw new ParseException(token.Location, string.Format(Texts.MissingSubreferenceForVariable, variableName));
+                            throw new ParseException(token.Location, ApplicationTextResolver.Instance.ResolveAndFormat(ApplicationTexts.MissingSubreferenceForVariable, variableName));
                     }
 
                     if(variableName == null)
@@ -418,11 +421,11 @@ namespace Chel.Parsing
                         break;
                 }
                 else if(specialToken != null)
-                    throw new ParseException(locationStart, Texts.UnpairedVariableToken);
+                    throw new ParseException(locationStart, ApplicationTextResolver.Instance.Resolve(ApplicationTexts.UnpairedVariableToken));
                 else if(literalToken != null)
                 {
                     if(literalToken.Value == Newline || char.IsWhiteSpace(literalToken.Value))
-                        throw new ParseException(locationStart, Texts.UnpairedVariableToken);
+                        throw new ParseException(locationStart, ApplicationTextResolver.Instance.Resolve(ApplicationTexts.UnpairedVariableToken));
                     else
                         _buffer.Append(literalToken.Value);
                 }
@@ -431,7 +434,7 @@ namespace Chel.Parsing
             }
 
             if(variableName == null)
-                throw new ParseException(locationStart, Texts.UnpairedVariableToken);
+                throw new ParseException(locationStart, ApplicationTextResolver.Instance.Resolve(ApplicationTexts.UnpairedVariableToken));
 
             return new VariableReference(variableName, subreferences);
         }
@@ -442,7 +445,7 @@ namespace Chel.Parsing
                 return null;
 
             if(!(token is SpecialToken specialTokenGuard) || specialTokenGuard.Type != SpecialTokenType.ListStart)
-                throw new ParseException(_lastTokenLocation, string.Format(Texts.MissingListStart, token));
+                throw new ParseException(_lastTokenLocation, ApplicationTextResolver.Instance.ResolveAndFormat(ApplicationTexts.MissingListStart, token));
 
             var startLocation = _lastTokenLocation;
             token = GetNextToken();
@@ -466,7 +469,7 @@ namespace Chel.Parsing
             }
 
             if(!listCompleted)
-                throw new ParseException(startLocation, Texts.MissingListEnd);
+                throw new ParseException(startLocation, ApplicationTextResolver.Instance.Resolve(ApplicationTexts.MissingListEnd));
 
             var parameter = new List(listValues);
             return new SourceValueCommandParameter(startLocation, parameter);
@@ -478,7 +481,7 @@ namespace Chel.Parsing
                 return null;
 
             if(!(token is SpecialToken specialTokenGuard) || specialTokenGuard.Type != SpecialTokenType.MapStart)
-                throw new ParseException(_lastTokenLocation, string.Format(Texts.MissingMapStart, token));
+                throw new ParseException(_lastTokenLocation, ApplicationTextResolver.Instance.ResolveAndFormat(ApplicationTexts.MissingMapStart, token));
 
             var startLocation = _lastTokenLocation;
             token = SkipWhiteSpace();
@@ -501,21 +504,21 @@ namespace Chel.Parsing
                 {
                     token = SkipWhiteSpace();
                     if(!(token is LiteralToken literalToken && literalToken.Value == Symbol.SubName))
-                            throw new ParseException(token.Location, Texts.MissingMapEntryName);
+                            throw new ParseException(token.Location, ApplicationTextResolver.Instance.Resolve(ApplicationTexts.MissingMapEntryName));
 
                     var key = keyBlock.Name;
 
                     if(string.IsNullOrEmpty(key))
-                        throw new ParseException(token.Location, Texts.MissingMapEntryName);
+                        throw new ParseException(token.Location, ApplicationTextResolver.Instance.Resolve(ApplicationTexts.MissingMapEntryName));
 
                     if(!_nameValidator.IsValid(key))
-                        throw new ParseException(token.Location, string.Format(Texts.InvalidCharacterInMapEntryName, key));
+                        throw new ParseException(token.Location, ApplicationTextResolver.Instance.ResolveAndFormat(ApplicationTexts.InvalidCharacterInMapEntryName, key));
 
                     token = SkipWhiteSpace();
 
                     var valueBlock = ParseParameterValue(token);
                     if(valueBlock == null)
-                        throw new ParseException(token.Location, Texts.MissingMapEntryValue);
+                        throw new ParseException(token.Location, ApplicationTextResolver.Instance.Resolve(ApplicationTexts.MissingMapEntryValue));
 
                     mapEntries.Add(key, valueBlock);
                 }
@@ -523,11 +526,11 @@ namespace Chel.Parsing
                 token = SkipWhiteSpace(ignoreNewlines: true);
 
                 if(token == currentToken)
-                    throw new ParseException(token.Location, Texts.MissingMapEntryName);
+                    throw new ParseException(token.Location, ApplicationTextResolver.Instance.Resolve(ApplicationTexts.MissingMapEntryName));
             }
 
             if(!mapCompleted)
-                throw new ParseException(startLocation, Texts.MissingMapEnd);
+                throw new ParseException(startLocation, ApplicationTextResolver.Instance.Resolve(ApplicationTexts.MissingMapEnd));
 
             var parameter = new Map(mapEntries);
             return new SourceValueCommandParameter(startLocation, parameter);
@@ -559,7 +562,7 @@ namespace Chel.Parsing
             }
 
             if(subcommand == null)
-                throw new ParseException(startLocation, Texts.MissingSubcommand);
+                throw new ParseException(startLocation, ApplicationTextResolver.Instance.Resolve(ApplicationTexts.MissingSubcommand));
 
             var block = subcommand;
 
@@ -569,7 +572,7 @@ namespace Chel.Parsing
                 if(token is SpecialToken specialToken2 && specialToken2.Type == SpecialTokenType.BlockEnd)
                     return block;
                 else
-                    throw new ParseException(startLocation, Texts.MissingBlockEnd);
+                    throw new ParseException(startLocation, ApplicationTextResolver.Instance.Resolve(ApplicationTexts.MissingBlockEnd));
             }
 
             return block;

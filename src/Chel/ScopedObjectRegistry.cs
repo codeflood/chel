@@ -21,7 +21,7 @@ namespace Chel
 
             var constructor = type.GetConstructor(new Type[0]);
             if(constructor == null)
-                throw new InvalidOperationException(string.Format(Texts.TypeRequiresParameterlessConstructor, type.FullName));
+                throw new InvalidOperationException(ApplicationTextResolver.Instance.ResolveAndFormat(ApplicationTexts.TypeRequiresParameterlessConstructor, type.FullName));
 
             if(!_types.Contains(type))
                 _types.Add(type);

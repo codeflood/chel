@@ -98,7 +98,10 @@ namespace Chel
                     {
                         var typeName = type.FullName;
                         var propertyPath = $"{typeName}.{property.Name}";
-                        throw new InvalidParameterDefinitionException(property, string.Format(Texts.FlagParametersCannotBeRequired, propertyPath));
+                        throw new InvalidParameterDefinitionException(
+                            property,
+                            ApplicationTextResolver.Instance.ResolveAndFormat(ApplicationTexts.FlagParametersCannotBeRequired, propertyPath)
+                        );
                     }
 
                     var flagParameterAttribute = attribute as FlagParameterAttribute;

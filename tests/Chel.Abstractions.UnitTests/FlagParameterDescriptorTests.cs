@@ -50,7 +50,7 @@ namespace Chel.Abstractions.UnitTests
             // act, assert
             var ex = Assert.Throws<ArgumentException>(sutAction);
             Assert.Equal("required", ex.ParamName);
-            Assert.Contains("Flag parameters cannot be required", ex.Message);
+            Assert.Contains("Flag parameters cannot be marked as required (name)", ex.Message);
         }
 
         [Fact]

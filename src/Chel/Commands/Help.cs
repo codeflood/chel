@@ -7,12 +7,11 @@ using Chel.Abstractions.Types;
 
 namespace Chel.Commands
 {
-	[Command("help")]
+    [Command("help")]
     [Description("Lists available commands and displays help for commands.")]
     public class Help : ICommand
     {
         private ICommandRegistry _commandRegistry;
-        private IPhraseDictionary _phraseDictionary;
 
         private string _executionCultureName = string.Empty;
 
@@ -20,16 +19,9 @@ namespace Chel.Commands
         [Description("The name of the command the display help for.")]
         public string CommandName { get; set; }
 
-        public Help(ICommandRegistry commandRegistry, IPhraseDictionary phraseDictionary)
+        public Help(ICommandRegistry commandRegistry)
         {
-            if(commandRegistry == null)
-                throw new ArgumentNullException(nameof(commandRegistry));
-
-            if(phraseDictionary == null)
-                throw new ArgumentNullException(nameof(phraseDictionary));
-
-            _commandRegistry = commandRegistry;
-            _phraseDictionary = phraseDictionary;
+            _commandRegistry = commandRegistry ?? throw new ArgumentNullException(nameof(commandRegistry));
         }
 
         public CommandResult Execute()
@@ -45,7 +37,7 @@ namespace Chel.Commands
             {
                 var successful = DetailCommand(output);
                 if(!successful)
-                    return new FailureResult(string.Format(Texts.CannotDisplayHelpUnknownCommnad, CommandName));
+                    return new FailureResult(ApplicationTextResolver.Instance.ResolveAndFormat(ApplicationTexts.CannotDisplayHelpUnknownCommnad, CommandName));
             }
 
             return new ValueResult(new Literal(output.ToString()));
@@ -53,7 +45,7 @@ namespace Chel.Commands
 
         private void ListCommands(StringBuilder output)
         {
-            output.Append(_phraseDictionary.GetPhrase(Texts.PhraseKeys.AvailableCommands, _executionCultureName));
+            output.Append(ApplicationTextResolver.Instance.Resolve(ApplicationTexts.AvailableCommands));
             output.Append(":");
             output.Append(Environment.NewLine);
 
@@ -72,7 +64,7 @@ namespace Chel.Commands
             if(command == null)
                 return false;
 
-            output.Append(_phraseDictionary.GetPhrase(Texts.PhraseKeys.Usage, _executionCultureName));
+            output.Append(ApplicationTextResolver.Instance.Resolve(ApplicationTexts.Usage));
             output.Append(": ");
             output.Append(command.CommandName);
 
@@ -101,20 +93,20 @@ namespace Chel.Commands
             foreach(var numberedParameter in command.NumberedParameters)
             {
                 var description = numberedParameter.GetDescription(_executionCultureName);
-                AppendParameterDetail(numberedParameter.PlaceholderText, description, numberedParameter.Required, _executionCultureName, output);
+                AppendParameterDetail(numberedParameter.PlaceholderText, description, numberedParameter.Required, output);
             }
 
             foreach(var namedParameter in command.NamedParameters)
             {
                 var description = namedParameter.Value.GetDescription(_executionCultureName);
                 var segment = $"-{namedParameter.Value.Name} <{namedParameter.Value.ValuePlaceholderText}>";
-                AppendParameterDetail(segment, description, namedParameter.Value.Required, _executionCultureName, output);
+                AppendParameterDetail(segment, description, namedParameter.Value.Required, output);
             }
 
             foreach(var flagParameter in command.FlagParameters)
             {
                 var description = flagParameter.GetDescription(_executionCultureName);
-                AppendParameterDetail($"-{flagParameter.Name}", description, false, _executionCultureName, output);
+                AppendParameterDetail($"-{flagParameter.Name}", description, false, output);
             }
 
             return true;
@@ -137,13 +129,13 @@ namespace Chel.Commands
             AppendParameterUsage(segment, required, output);
         }
 
-        private void AppendParameterDetail(string name, string description, bool required, string cultureName, StringBuilder output)
+        private void AppendParameterDetail(string name, string description, bool required, StringBuilder output)
         {
             output.Append($"{name, Constants.FirstColumnWidth}");
 
             if(required)
             {
-                output.Append(_phraseDictionary.GetPhrase(Texts.PhraseKeys.Required, cultureName));
+                output.Append(ApplicationTextResolver.Instance.Resolve(ApplicationTexts.Required));
                 output.Append(". ");
             }
                 

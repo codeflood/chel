@@ -55,7 +55,7 @@ namespace Chel.Parsing
 
 				case Symbol.Comment:
 					if(PeekNext() == Symbol.BlockEnd)
-						throw new ParseException(CurrentLocation, Texts.MissingCommentBlockStart);
+						throw new ParseException(CurrentLocation, ApplicationTextResolver.Instance.Resolve(ApplicationTexts.MissingCommentBlockStart));
 
 					return SkipToEndOfLine();
 
@@ -150,7 +150,7 @@ namespace Chel.Parsing
 			}
 
 			if(nextChar == -1)
-				throw new ParseException(startLocation, Texts.MissingCommentBlockEnd);
+				throw new ParseException(startLocation, ApplicationTextResolver.Instance.Resolve(ApplicationTexts.MissingCommentBlockEnd));
 		}
 
 		private void HandleEndOfStream()
@@ -189,7 +189,7 @@ namespace Chel.Parsing
 			// Report the error location as the escape character
 			var currentLocation = CurrentLocation;
 			var location = new SourceLocation(currentLocation.LineNumber, currentLocation.CharacterNumber - 1);
-			throw new ParseException(location, string.Format(Texts.UnknownEscapedCharacter, (char)nextChar));
+			throw new ParseException(location, ApplicationTextResolver.Instance.ResolveAndFormat(ApplicationTexts.UnknownEscapedCharacter, (char)nextChar));
 		}
 
 		private Token HandleLiteral(char nextChar)

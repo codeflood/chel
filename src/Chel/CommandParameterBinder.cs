@@ -55,7 +55,7 @@ namespace Chel
 
             var descriptor = _commandRegistry.Resolve(input.CommandName);
             if(descriptor == null)
-                throw new InvalidOperationException(string.Format(Texts.DescriptorForCommandCouldNotBeResolved, input.CommandName));
+                throw ExceptionFactory.CreateInvalidOperationException(ApplicationTexts.DescriptorForCommandCouldNotBeResolved, input.CommandName);
 
             var parameters = ExtractParameterValues(input.Parameters, result, input.SourceLocation);
 
@@ -76,7 +76,12 @@ namespace Chel
                 if(parameter is SourceValueCommandParameter sourceValueCommandParameter)
                     reportValue = sourceValueCommandParameter.Value.ToString();
 
-                result.AddError(new SourceError(parameter.SourceLocation, string.Format(Texts.UnexpectedNumberedParameter, reportValue)));
+                result.AddError(
+                    new SourceError(
+                        parameter.SourceLocation,
+                        ApplicationTextResolver.Instance.ResolveAndFormat(ApplicationTexts.UnexpectedNumberedParameter, reportValue)
+                    )
+                );
             }
 
             return result;
@@ -96,7 +101,7 @@ namespace Chel
                 if(parameter is CommandInput commandInput)
                 {
                     if(commandInput.SubstituteValue == null)
-                        throw new InvalidOperationException(Texts.CannotBindCommandInputWithoutSubstituteValue);
+                        throw ExceptionFactory.CreateInvalidOperationException(ApplicationTexts.CannotBindCommandInputWithoutSubstituteValue);
 
                     output.Add(new SourceValueCommandParameter(commandInput.SourceLocation, commandInput.SubstituteValue));
                 }
@@ -132,13 +137,23 @@ namespace Chel
                                     if(entryValue is SourceValueCommandParameter sourceValueCommandParameter)
                                         output.Add(new SourceValueCommandParameter(valueParameter.SourceLocation, sourceValueCommandParameter.Value));
                                     else
-                                        result.AddError(new SourceError(location, string.Format(Texts.ValueOfMapEntryNotValue, variableName, entry.Key)));
+                                        result.AddError(
+                                            new SourceError(
+                                                location,
+                                                ApplicationTextResolver.Instance.ResolveAndFormat(ApplicationTexts.ValueOfMapEntryNotValue, variableName, entry.Key)
+                                            )
+                                        );
                                 }
                             }
                         }
                         else
                         {
-                            result.AddError(new SourceError(location, string.Format(Texts.VariableIsNotMap, variableName)));
+                            result.AddError(
+                                new SourceError(
+                                    location,
+                                    ApplicationTextResolver.Instance.ResolveAndFormat(ApplicationTexts.VariableIsNotMap, variableName)
+                                )
+                            );
                         }
                     }
                     else if(value is ChelType plainValue)
@@ -177,7 +192,7 @@ namespace Chel
                     {
                         result.AddError(new SourceError(
                             parameters[markerIndex].SourceLocation,
-                            string.Format(Texts.CannotRepeatFlagParameter, describedParameter.Name)
+                            ApplicationTextResolver.Instance.ResolveAndFormat(ApplicationTexts.CannotRepeatFlagParameter, describedParameter.Name)
                         ));
                     }
                 }
@@ -196,7 +211,7 @@ namespace Chel
                     {
                         result.AddError(new SourceError(
                             parameters[markerIndex].SourceLocation,
-                            string.Format(Texts.MissingValueForNamedParameter, describedParameter.Name)
+                            ApplicationTextResolver.Instance.ResolveAndFormat(ApplicationTexts.MissingValueForNamedParameter, describedParameter.Name)
                         ));
 
                         parameters.RemoveAt(markerIndex);
@@ -209,7 +224,7 @@ namespace Chel
                         // This is a parameter name, which cannot be a value.
                         result.AddError(new SourceError(
                             commandParameter.SourceLocation,
-                            string.Format(Texts.MissingValueForNamedParameter, describedParameter.Name)
+                            ApplicationTextResolver.Instance.ResolveAndFormat(ApplicationTexts.MissingValueForNamedParameter, describedParameter.Name)
                         ));
 
                         parameters.RemoveAt(markerIndex);
@@ -234,7 +249,7 @@ namespace Chel
 
                         result.AddError(new SourceError(
                             value.SourceLocation,
-                            string.Format(Texts.InvalidParameterValueForNamedParameter, reportValue, describedParameter.Name, ex.Message)
+                            ApplicationTextResolver.Instance.ResolveAndFormat(ApplicationTexts.InvalidParameterValueForNamedParameter, reportValue, describedParameter.Name, ex.Message)
                         ));
                     }
 
@@ -250,7 +265,7 @@ namespace Chel
                         {
                             result.AddError(new SourceError(
                                 parameters[markerIndex].SourceLocation,
-                                string.Format(Texts.CannotRepeatNamedParameter, describedParameter.Name)
+                                ApplicationTextResolver.Instance.ResolveAndFormat(ApplicationTexts.CannotRepeatNamedParameter, describedParameter.Name)
                             ));
                         }
                     }
@@ -261,7 +276,7 @@ namespace Chel
                     {
                         result.AddError(new SourceError(
                             sourceLocation,
-                            string.Format(Texts.MissingRequiredNamedParameter, describedParameter.Name)
+                            ApplicationTextResolver.Instance.ResolveAndFormat(ApplicationTexts.MissingRequiredNamedParameter, describedParameter.Name)
                         ));
                     }
                 }
@@ -297,7 +312,7 @@ namespace Chel
 
                         result.AddError(new SourceError(
                             value.SourceLocation,
-                            string.Format(Texts.InvalidParameterValueForNumberedParameter, reportValue, describedParameter.PlaceholderText, ex.Message)
+                            ApplicationTextResolver.Instance.ResolveAndFormat(ApplicationTexts.InvalidParameterValueForNumberedParameter, reportValue, describedParameter.PlaceholderText, ex.Message)
                         ));
                     }
 
@@ -309,7 +324,7 @@ namespace Chel
                     {
                         result.AddError(new SourceError(
                             sourceLocation,
-                            string.Format(Texts.MissingRequiredNumberedParameter, describedParameter.PlaceholderText)
+                            ApplicationTextResolver.Instance.ResolveAndFormat(ApplicationTexts.MissingRequiredNumberedParameter, describedParameter.PlaceholderText)
                         ));
                     }
                 }
@@ -331,14 +346,14 @@ namespace Chel
                     {
                         result.AddError(new SourceError(                            
                             commandParameter.SourceLocation,
-                            string.Format(Texts.UnknownNamedParameter, commandParameter.ParameterName)
+                            ApplicationTextResolver.Instance.ResolveAndFormat(ApplicationTexts.UnknownNamedParameter, commandParameter.ParameterName)
                         ));
                         parameters.RemoveAt(i + 1);
                     }
                     else
                         result.AddError(new SourceError(
                             commandParameter.SourceLocation,
-                            string.Format(Texts.UnknownFlagParameter, commandParameter.ParameterName)
+                            ApplicationTextResolver.Instance.ResolveAndFormat(ApplicationTexts.UnknownFlagParameter, commandParameter.ParameterName)
                         ));
 
                     parameters.RemoveAt(i);
@@ -359,7 +374,7 @@ namespace Chel
         private void AssertWritableProperty(ParameterDescriptor descriptor, object instance)
         {
             if(!descriptor.Property.Property.CanWrite)
-                throw new InvalidOperationException(string.Format(Texts.PropertyMissingSetter, descriptor.Property.Property.Name, instance.GetType().FullName));
+                throw ExceptionFactory.CreateInvalidOperationException(ApplicationTexts.PropertyMissingSetter, descriptor.Property.Property.Name, instance.GetType().FullName);
         }
 
         private void BindProperty(ICommand instance, Abstractions.PropertyDescriptor propertyDescriptor, string parameterIdentifier, SourceValueCommandParameter value, ParameterBindResult result)
@@ -388,14 +403,14 @@ namespace Chel
             {
                 result.AddError(new SourceError(
                     value.SourceLocation,
-                    string.Format(Texts.CannotBindNonListToListParameter, parameterIdentifier)
+                    ApplicationTextResolver.Instance.ResolveAndFormat(ApplicationTexts.CannotBindNonListToListParameter, parameterIdentifier)
                 ));
             }
             else if(propertyDescriptor.IsTypeMapCompatible)
             {
                 result.AddError(new SourceError(
                     value.SourceLocation,
-                    string.Format(Texts.CannotBindNonMapToMapParameter, parameterIdentifier)
+                    ApplicationTextResolver.Instance.ResolveAndFormat(ApplicationTexts.CannotBindNonMapToMapParameter, parameterIdentifier)
                 ));
             }
 
@@ -412,7 +427,7 @@ namespace Chel
             {
                 result.AddError(new SourceError(
                     sourceLocation,
-                    string.Format(Texts.CannotBindListToNonListParameter, parameterIdentifier)
+                    ApplicationTextResolver.Instance.ResolveAndFormat(ApplicationTexts.CannotBindListToNonListParameter, parameterIdentifier)
                 ));
                 return;
             }
@@ -421,7 +436,7 @@ namespace Chel
             var values = Activator.CreateInstance(valuesType) as IList;
             foreach(var listValue in value.Values)
             {
-                var convertedValue = GetValue(listValue, Texts.ListValuesMustBeChelType, listElementType, property, result, sourceLocation);
+                var convertedValue = GetValue(listValue, ApplicationTextResolver.Instance.Resolve(ApplicationTexts.ListValuesMustBeChelType), listElementType, property, result, sourceLocation);
                 if(convertedValue != null)
                     values.Add(convertedValue);
             }
@@ -442,7 +457,7 @@ namespace Chel
             {
                 result.AddError(new SourceError(
                     sourceLocation,
-                    string.Format(Texts.CannotBindMapToNonMapParameter, parameterIdentifier)
+                    ApplicationTextResolver.Instance.ResolveAndFormat(ApplicationTexts.CannotBindMapToNonMapParameter, parameterIdentifier)
                 ));
                 return;
             }
@@ -451,7 +466,7 @@ namespace Chel
             {
                 result.AddError(new SourceError(
                     sourceLocation,
-                    string.Format(Texts.KeyTypeMustBeString, property.DeclaringType.FullName + "." + property.Name)
+                    ApplicationTextResolver.Instance.ResolveAndFormat(ApplicationTexts.KeyTypeMustBeString, property.DeclaringType.FullName + "." + property.Name)
                 ));
                 return;
             }
@@ -460,7 +475,7 @@ namespace Chel
             var elements = Activator.CreateInstance(elementType) as IDictionary;
             foreach(var entry in value.Entries)
             {
-                var convertedValue = GetValue(entry.Value, Texts.MapValuesMustBeChelType, valueType, property, result, sourceLocation);
+                var convertedValue = GetValue(entry.Value, ApplicationTextResolver.Instance.Resolve(ApplicationTexts.MapValuesMustBeChelType), valueType, property, result, sourceLocation);
                 if(convertedValue != null)
                     elements.Add(entry.Key, convertedValue);
             }

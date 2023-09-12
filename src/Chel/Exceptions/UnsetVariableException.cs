@@ -18,7 +18,7 @@ namespace Chel.Exceptions
         /// </summary>
         /// <param name="variableName">The name of the variable that is not set.</param>
         public UnsetVariableException(string variableName)
-            : base(string.Format(Texts.VariableIsUnset, variableName))
+            : base(string.Format(ApplicationTextResolver.Instance.Resolve(ApplicationTexts.VariableIsUnset), variableName))
         {
             if(variableName == null)
                 throw new ArgumentNullException(nameof(variableName));
