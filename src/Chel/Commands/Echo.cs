@@ -5,7 +5,7 @@ using Chel.Abstractions.Types;
 namespace Chel.Commands
 {
     [Command("echo")]
-    [Description("Output the supplied parameters.")]
+    [Description("Output the supplied parameter.")]
     public class Echo : ICommand
     {
         [NumberedParameter(1, "message")]

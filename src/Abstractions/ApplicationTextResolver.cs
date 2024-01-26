@@ -100,6 +100,7 @@ namespace Chel.Abstractions
                 { ApplicationTexts.PropertyMissingSetter, "Property {0} on command type {1} requires a setter" },
                 { ApplicationTexts.Required, "Required" },
                 { ApplicationTexts.ServiceTypeAlreadyRegistered, "The service type {0} has already been registered" },
+                { ApplicationTexts.SpecificCommandHelp, "For help on a specific command pass the name of the command to the 'help' command." },
                 { ApplicationTexts.SubcommandResultMustBeChelType, "Subcommand result must be of type ChelType" },
                 { ApplicationTexts.TextForCultureAlreadyAdded, "Text for culture '{0}' has already been added" },
                 { ApplicationTexts.TypeIsNotACommand, "{0} is not a command" },

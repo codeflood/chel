@@ -56,7 +56,8 @@ namespace Chel.Commands
                 output.Append(Environment.NewLine);
             }
 
-            output.Remove(output.Length - 1, 1);
+            output.Append(Environment.NewLine);
+            output.Append(ApplicationTextResolver.Instance.Resolve(ApplicationTexts.SpecificCommandHelp));
         }
 
         private bool DetailCommand(StringBuilder output)
