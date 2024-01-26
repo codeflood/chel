@@ -14,6 +14,7 @@ namespace Chel.UnitTests.Commands.Conditions
             // arrange
             var sut = CreateEqualsCommand();
             sut.FirstOperand = null;
+            sut.SecondOperand = new Literal("a");
 
             // act
             var result = sut.Execute();
