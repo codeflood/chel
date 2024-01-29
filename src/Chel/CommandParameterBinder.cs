@@ -181,7 +181,7 @@ namespace Chel
                     continue;
                 
                 AssertWritableProperty(describedParameter, instance);
-                BindProperty(instance, describedParameter.Property, describedParameter.Name, new SourceValueCommandParameter(parameters[markerIndex].SourceLocation, new Literal("True")), result);
+                BindProperty(instance, describedParameter.Property, describedParameter.Name, new SourceValueCommandParameter(parameters[markerIndex].SourceLocation, new Literal(Constants.TrueLiteral)), result);
 
                 // Make sure there's no duplicates
                 while(markerIndex >= 0)

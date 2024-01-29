@@ -21,7 +21,7 @@ namespace Chel.UnitTests.Commands.Conditions
             // assert
             var valueResult = Assert.IsType<ValueResult>(result);
             var literalResult = Assert.IsType<Literal>(valueResult.Value);
-            Assert.Equal("false", literalResult.Value);
+            Assert.Equal(Constants.FalseLiteral, literalResult.Value);
         }
 
         [Fact]
@@ -37,7 +37,7 @@ namespace Chel.UnitTests.Commands.Conditions
             // assert
             var valueResult = Assert.IsType<ValueResult>(result);
             var literalResult = Assert.IsType<Literal>(valueResult.Value);
-            Assert.Equal("true", literalResult.Value);
+            Assert.Equal(Constants.TrueLiteral, literalResult.Value);
         }
     }
 }

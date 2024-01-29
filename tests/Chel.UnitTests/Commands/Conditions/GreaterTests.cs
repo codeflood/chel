@@ -95,7 +95,7 @@ namespace Chel.UnitTests.Commands.Conditions
             // assert
             var valueResult = Assert.IsType<ValueResult>(result);
             var literalValue = Assert.IsType<Literal>(valueResult.Value);
-            Assert.Equal("true", literalValue.Value);
+            Assert.Equal(Constants.TrueLiteral, literalValue.Value);
         }
 
         [Theory]
@@ -116,7 +116,7 @@ namespace Chel.UnitTests.Commands.Conditions
             // assert
             var valueResult = Assert.IsType<ValueResult>(result);
             var literalValue = Assert.IsType<Literal>(valueResult.Value);
-            Assert.Equal("false", literalValue.Value);
+            Assert.Equal(Constants.FalseLiteral, literalValue.Value);
         }
 
         [Theory]
@@ -136,7 +136,7 @@ namespace Chel.UnitTests.Commands.Conditions
             // assert
             var valueResult = Assert.IsType<ValueResult>(result);
             var literalValue = Assert.IsType<Literal>(valueResult.Value);
-            Assert.Equal("true", literalValue.Value);
+            Assert.Equal(Constants.TrueLiteral, literalValue.Value);
         }
 
         [Theory]
@@ -156,7 +156,7 @@ namespace Chel.UnitTests.Commands.Conditions
             // assert
             var valueResult = Assert.IsType<ValueResult>(result);
             var literalValue = Assert.IsType<Literal>(valueResult.Value);
-            Assert.Equal("false", literalValue.Value);
+            Assert.Equal(Constants.FalseLiteral, literalValue.Value);
         }
 
         private Greater CreateGreaterCommand()
