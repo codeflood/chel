@@ -1,6 +1,8 @@
 ﻿using System;
+using Chel.Abstractions.Parsing;
 using Chel.Commands;
 using Chel.Commands.Conditions;
+using Chel.Parsing;
 using Chel.Sandbox.Commands;
 using Chel.Sandbox.Results;
 
@@ -14,6 +16,9 @@ namespace Chel.Sandbox
             Console.WriteLine($"Chel sandbox {version}");
 
             var runtime = new Runtime();
+
+            runtime.RegisterCommandService<IParameterParser>(new ParameterParser());
+
             runtime.RegisterCommandType(typeof(Echo));
             runtime.RegisterCommandType(typeof(If));
             runtime.RegisterCommandType(typeof(Equals));

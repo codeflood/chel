@@ -1,13 +1,23 @@
+using System;
 using System.Collections.Generic;
 using Chel.Abstractions.Results;
 using Chel.Abstractions.Types;
 using Chel.Commands.Conditions;
+using Chel.Parsing;
 using Xunit;
 
 namespace Chel.UnitTests.Commands.Conditions
 {
     public class EqualsTests
     {
+        [Fact]
+        public void Ctor_ParameterParserIsNull_Throws()
+        {
+            // act, assert
+            var ex = Assert.Throws<ArgumentNullException>(() => new Equals(null));
+            Assert.Equal("parameterParser", ex.ParamName);
+        }
+
         [Fact]
         public void Execute_FirstOperandIsNull_ReturnsFailure()
         {
@@ -216,34 +226,34 @@ namespace Chel.UnitTests.Commands.Conditions
 
         public static IEnumerable<object[]> Execute_MultipleTreatmentsSet_ReturnsFalse_DataSource()
         {
-            yield return new[] { 
-                new Equals()
-                {
-                    FirstOperand = new Literal("1"),
-                    SecondOperand = new Literal("2"),
-                    IsNumeric = true,
-                    IsDate = true
-                } 
-            };
-            
-            yield return new[] { 
-                new Equals()
-                {
-                    FirstOperand = new Literal("1"),
-                    SecondOperand = new Literal("2"),
-                    IsNumeric = true,
-                    IsGuid = true
-                } 
-            };
+            var numericAndDateEquals = CreateEqualsCommand();
+            numericAndDateEquals.FirstOperand = new Literal("1");
+            numericAndDateEquals.SecondOperand = new Literal("2");
+            numericAndDateEquals.IsNumeric = true;
+            numericAndDateEquals.IsDate = true;
 
             yield return new[] { 
-                new Equals()
-                {
-                    FirstOperand = new Literal("2023-05-04"),
-                    SecondOperand = new Literal("2023-05-04"),
-                    IsDate = true,
-                    IsGuid = true
-                } 
+                numericAndDateEquals
+            };
+
+            var numericAndGuidEquals = CreateEqualsCommand();
+            numericAndGuidEquals.FirstOperand = new Literal("1");
+            numericAndGuidEquals.SecondOperand = new Literal("2");
+            numericAndGuidEquals.IsNumeric = true;
+            numericAndGuidEquals.IsGuid = true;
+            
+            yield return new[] { 
+                numericAndGuidEquals
+            };
+
+            var dateAndGuidEquals = CreateEqualsCommand();
+            dateAndGuidEquals.FirstOperand = new Literal("2023-05-04");
+            dateAndGuidEquals.SecondOperand = new Literal("2023-05-04");
+            dateAndGuidEquals.IsDate = true;
+            dateAndGuidEquals.IsGuid = true;
+
+            yield return new[] { 
+                dateAndGuidEquals
             };
         }
 
@@ -383,9 +393,9 @@ namespace Chel.UnitTests.Commands.Conditions
             Assert.Equal("false", literalValue.Value);
         }
 
-        private Equals CreateEqualsCommand()
+        private static Equals CreateEqualsCommand()
         {
-            return new Equals();
+            return new Equals(new ParameterParser());
         }
     }
 }

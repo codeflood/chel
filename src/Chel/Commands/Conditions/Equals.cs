@@ -1,5 +1,6 @@
 using System;
 using Chel.Abstractions;
+using Chel.Abstractions.Parsing;
 using Chel.Abstractions.Results;
 using Chel.Abstractions.Types;
 
@@ -30,6 +31,16 @@ namespace Chel.Commands.Conditions
         [FlagParameter("guid")]
         [Description("Treat the values as GUIDs.")]
         public bool IsGuid { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="IParameterParser"/> used to parse typed values from the input.
+        /// </summary>
+        protected IParameterParser ParameterParser { get; set; }
+
+        public Equals(IParameterParser parameterParser)
+        {
+            ParameterParser = parameterParser ?? throw new ArgumentNullException(nameof(parameterParser));
+        }
 
         public CommandResult Execute()
         {
@@ -70,85 +81,49 @@ namespace Chel.Commands.Conditions
 
         private CommandResult CompareNormal()
         {
-            var value = FirstOperand.Equals(SecondOperand) ? "true" : "false";
+            var value = FirstOperand.Equals(SecondOperand) ? Constants.TrueLiteral : Constants.FalseLiteral;
             return new ValueResult(new Literal(value));
         }
 
         private CommandResult CompareNumeric()
         {
-            var message = ApplicationTextResolver.Instance.Resolve(ApplicationTexts.CouldNotParseNumber);
+            var op1Result = ParameterParser.ParseDouble(FirstOperand, "first");
+            if(op1Result.HasError)
+                return new FailureResult(op1Result.ErrorMessage);
 
-            var op1 = 0.0;
-            if(FirstOperand is Literal literalFirstOperand)
-            {
-                if(!double.TryParse(literalFirstOperand.Value, out op1))
-                    return new FailureResult(string.Format(message, FirstOperand));
-            }
-            else
-                return new FailureResult(string.Format(message, "first"));
+            var op2Result = ParameterParser.ParseDouble(SecondOperand, "second");
+            if(op2Result.HasError)
+                return new FailureResult(op2Result.ErrorMessage);
 
-            var op2 = 0.0;
-            if(SecondOperand is Literal literalSecondOperand)
-            {
-                if(!double.TryParse(literalSecondOperand.Value, out op2))
-                    return new FailureResult(string.Format(message, SecondOperand));
-            }
-            else
-                return new FailureResult(string.Format(message, "second"));
-
-            var value = op1 == op2 ? "true" : "false";
+            var value = op1Result.Value == op2Result.Value ? Constants.TrueLiteral : Constants.FalseLiteral;
             return new ValueResult(new Literal(value));
         }
 
         private CommandResult CompareDates()
         {
-            var message = ApplicationTextResolver.Instance.Resolve(ApplicationTexts.CouldNotParseDate);
+            var op1Result = ParameterParser.ParseDateTime(FirstOperand, "first");
+            if(op1Result.HasError)
+                return new FailureResult(op1Result.ErrorMessage);
 
-            var op1 = DateTime.Now;
-            if(FirstOperand is Literal literalFirstOperand)
-            {
-                if(!DateTime.TryParse(literalFirstOperand.Value, out op1))
-                    return new FailureResult(string.Format(message, FirstOperand));
-            }
-            else
-                return new FailureResult(string.Format(message, "first"));
+            var op2Result = ParameterParser.ParseDateTime(SecondOperand, "second");
+            if(op2Result.HasError)
+                return new FailureResult(op2Result.ErrorMessage);
 
-            var op2 = DateTime.Now;
-            if(SecondOperand is Literal literalSecondOperand)
-            {
-                if(!DateTime.TryParse(literalSecondOperand.Value, out op2))
-                    return new FailureResult(string.Format(message, SecondOperand));
-            }
-            else
-                return new FailureResult(string.Format(message, "second"));
-
-            var value = op1 == op2 ? "true" : "false";
+            var value = op1Result.Value == op2Result.Value ? Constants.TrueLiteral : Constants.FalseLiteral;
             return new ValueResult(new Literal(value));
         }
 
         private CommandResult CompareGuids()
         {
-            var message = ApplicationTextResolver.Instance.Resolve(ApplicationTexts.CouldNotParseGuid);
+            var op1Result = ParameterParser.ParseGuid(FirstOperand, "first");
+            if(op1Result.HasError)
+                return new FailureResult(op1Result.ErrorMessage);
 
-            var op1 = Guid.Empty;
-            if(FirstOperand is Literal literalFirstOperand)
-            {
-                if(!Guid.TryParse(literalFirstOperand.Value, out op1))
-                    return new FailureResult(string.Format(message, FirstOperand));
-            }
-            else
-                return new FailureResult(string.Format(message, "first"));
+            var op2Result = ParameterParser.ParseGuid(SecondOperand, "second");
+            if(op2Result.HasError)
+                return new FailureResult(op2Result.ErrorMessage);
 
-            var op2 = Guid.Empty;
-            if(SecondOperand is Literal literalSecondOperand)
-            {
-                if(!Guid.TryParse(literalSecondOperand.Value, out op2))
-                    return new FailureResult(string.Format(message, SecondOperand));
-            }
-            else
-                return new FailureResult(string.Format(message, "second"));
-
-            var value = op1 == op2 ? "true" : "false";
+            var value = op1Result.Value == op2Result.Value ? Constants.TrueLiteral : Constants.FalseLiteral;
             return new ValueResult(new Literal(value));
         }
     }

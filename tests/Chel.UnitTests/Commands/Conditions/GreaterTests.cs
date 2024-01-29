@@ -1,13 +1,22 @@
+using System;
 using Chel.Abstractions.Results;
 using Chel.Abstractions.Types;
 using Chel.Commands.Conditions;
+using Chel.Parsing;
 using Xunit;
-using Xunit.Sdk;
 
 namespace Chel.UnitTests.Commands.Conditions
 {
     public class GreaterTests
     {
+        [Fact]
+        public void Ctor_ParameterParserIsNull_Throws()
+        {
+            // act, assert
+            var ex = Assert.Throws<ArgumentNullException>(() => new Greater(null));
+            Assert.Equal("parameterParser", ex.ParamName);
+        }
+
         [Fact]
         public void Execute_FirstOperandIsNull_ReturnsFailure()
         {
@@ -152,7 +161,7 @@ namespace Chel.UnitTests.Commands.Conditions
 
         private Greater CreateGreaterCommand()
         {
-            return new Greater();
+            return new Greater(new ParameterParser());
         }
     }
 }

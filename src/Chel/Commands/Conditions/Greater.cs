@@ -1,5 +1,6 @@
 using System;
 using Chel.Abstractions;
+using Chel.Abstractions.Parsing;
 using Chel.Abstractions.Results;
 using Chel.Abstractions.Types;
 
@@ -22,6 +23,16 @@ namespace Chel.Commands.Conditions
         [FlagParameter("date")]
         [Description("Treat the values as dates.")]
         public bool IsDate { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="IParameterParser"/> used to parse typed values from the input.
+        /// </summary>
+        protected IParameterParser ParameterParser { get; set; }
+
+        public Greater(IParameterParser parameterParser)
+        {
+            ParameterParser = parameterParser ?? throw new ArgumentNullException(nameof(parameterParser));
+        }
         
         public CommandResult Execute()
         {
@@ -45,53 +56,29 @@ namespace Chel.Commands.Conditions
 
         private CommandResult CompareNumeric()
         {
-            var message = ApplicationTextResolver.Instance.Resolve(ApplicationTexts.CouldNotParseNumber);
+            var op1Result = ParameterParser.ParseDouble(Base, "base");
+            if(op1Result.HasError)
+                return new FailureResult(op1Result.ErrorMessage);
 
-            var op1 = 0.0;
-            if(Base is Literal literalFirstOperand)
-            {
-                if(!double.TryParse(literalFirstOperand.Value, out op1))
-                    return new FailureResult(string.Format(message, Base));
-            }
-            else
-                return new FailureResult(string.Format(message, "first"));
+            var op2Result = ParameterParser.ParseDouble(Value, "value");
+            if(op2Result.HasError)
+                return new FailureResult(op2Result.ErrorMessage);
 
-            var op2 = 0.0;
-            if(Value is Literal literalSecondOperand)
-            {
-                if(!double.TryParse(literalSecondOperand.Value, out op2))
-                    return new FailureResult(string.Format(message, Value));
-            }
-            else
-                return new FailureResult(string.Format(message, "second"));
-
-            var value = op2 > op1 ? "true" : "false";
+            var value = op2Result.Value > op1Result.Value ? Constants.TrueLiteral : Constants.FalseLiteral;
             return new ValueResult(new Literal(value));
         }
 
         private CommandResult CompareDates()
         {
-            var message = ApplicationTextResolver.Instance.Resolve(ApplicationTexts.CouldNotParseDate);
+            var op1Result = ParameterParser.ParseDateTime(Base, "base");
+            if(op1Result.HasError)
+                return new FailureResult(op1Result.ErrorMessage);
 
-            var op1 = DateTime.Now;
-            if(Base is Literal literalFirstOperand)
-            {
-                if(!DateTime.TryParse(literalFirstOperand.Value, out op1))
-                    return new FailureResult(string.Format(message, Base));
-            }
-            else
-                return new FailureResult(string.Format(message, "first"));
+            var op2Result = ParameterParser.ParseDateTime(Value, "value");
+            if(op2Result.HasError)
+                return new FailureResult(op2Result.ErrorMessage);
 
-            var op2 = DateTime.Now;
-            if(Value is Literal literalSecondOperand)
-            {
-                if(!DateTime.TryParse(literalSecondOperand.Value, out op2))
-                    return new FailureResult(string.Format(message, Value));
-            }
-            else
-                return new FailureResult(string.Format(message, "second"));
-
-            var value = op2 > op1 ? "true" : "false";
+            var value = op2Result.Value > op1Result.Value ? Constants.TrueLiteral : Constants.FalseLiteral;
             return new ValueResult(new Literal(value));
         }
     }
