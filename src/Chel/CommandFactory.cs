@@ -46,7 +46,7 @@ namespace Chel
             if(commandInput == null)
                 throw new ArgumentNullException(nameof(commandInput));
 
-            var descriptor = _commandRegistry.Resolve(commandInput.CommandName);
+            var descriptor = _commandRegistry.Resolve(commandInput.CommandIdentifier);
 
             if(descriptor == null)
                 return null;

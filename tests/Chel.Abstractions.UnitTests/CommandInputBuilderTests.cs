@@ -7,29 +7,19 @@ namespace Chel.Abstractions.UnitTests
 {
     public class CommandInputBuilderTests
     {
-        [Fact]
-        public void Ctor_CommandNameIsNull_ThrowsException()
-        {
-            // arrange
-            var location = new SourceLocation(1, 1);
-            Action sutAction = () => new CommandInput.Builder(location, null);
-
-            // act, assert
-            var ex = Assert.Throws<ArgumentNullException>(sutAction);
-            Assert.Equal("commandName", ex.ParamName);
-        }
+        private readonly static ExecutionTargetIdentifier SampleCommandIdentifier = new ExecutionTargetIdentifier(null, "command");
 
         [Fact]
         public void Ctor_CommandNameIsEmpty_ThrowsException()
         {
             // arrange
             var location = new SourceLocation(1, 1);
-            Action sutAction = () => new CommandInput.Builder(location, "");
+            Action sutAction = () => new CommandInput.Builder(location, new ExecutionTargetIdentifier(null, ""));
 
             // act, assert
             var ex = Assert.Throws<ArgumentException>(sutAction);
-            Assert.Equal("commandName", ex.ParamName);
-            Assert.Contains("'commandName' cannot be empty", ex.Message);
+            Assert.Equal("Name", ex.ParamName);
+            Assert.Contains("'Name' cannot be empty", ex.Message);
         }
 
         [Fact]
@@ -37,7 +27,7 @@ namespace Chel.Abstractions.UnitTests
         {
             // arrange
             var location = new SourceLocation(1, 1);
-            var sut = new CommandInput.Builder(location, "command");
+            var sut = new CommandInput.Builder(location, SampleCommandIdentifier);
             Action sutAction = () => sut.AddParameter(null);
 
             // act, assert
@@ -50,14 +40,14 @@ namespace Chel.Abstractions.UnitTests
         {
             // arrange
             var location = new SourceLocation(2, 6);
-            var sut = new CommandInput.Builder(location, "command");
+            var sut = new CommandInput.Builder(location, SampleCommandIdentifier);
 
             // act
             var commandInput = sut.Build();
 
             // assert
             Assert.Equal(location, commandInput.SourceLocation);
-            Assert.Equal("command", commandInput.CommandName);
+            Assert.Equal("command", commandInput.CommandIdentifier.Name);
         }
 
         [Fact]
@@ -65,7 +55,7 @@ namespace Chel.Abstractions.UnitTests
         {
             // arrange
             var location = new SourceLocation(1, 1);
-            var sut = new CommandInput.Builder(location, "command");
+            var sut = new CommandInput.Builder(location, SampleCommandIdentifier);
             sut.AddParameter(new SourceValueCommandParameter(new SourceLocation(1, 1), new Literal("value1")));
             sut.AddParameter(new SourceValueCommandParameter(new SourceLocation(2, 1), new Literal("value2")));
 
@@ -86,7 +76,7 @@ namespace Chel.Abstractions.UnitTests
         {
             // arrange
             var location = new SourceLocation(1, 1);
-            var sut = new CommandInput.Builder(location, "command");
+            var sut = new CommandInput.Builder(location, SampleCommandIdentifier);
             sut.AddParameter(new SourceValueCommandParameter(new SourceLocation(1, 1), new Literal(value)));
 
             // act

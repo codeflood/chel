@@ -7,14 +7,17 @@ namespace Chel.UnitTests.Comparers
     {
         public bool Equals(CommandDescriptor x, CommandDescriptor y)
         {
+            if(x == null || y == null)
+                return false;
+
             return
                 x.ImplementingType.Equals(y.ImplementingType) &&
-                string.Compare(x.CommandName, y.CommandName, true) == 0;
+                x.CommandIdentifier.Equals(y.CommandIdentifier);
         }
 
         public int GetHashCode(CommandDescriptor obj)
         {
-            return obj.ImplementingType.GetHashCode() + obj.CommandName.ToLower().GetHashCode();
+            return obj.ImplementingType.GetHashCode() + obj.CommandIdentifier.GetHashCode();
         }
     }
 }

@@ -13,7 +13,7 @@ namespace Chel
         private readonly Type _commandInterfaceType = typeof(ICommand);
         private readonly INameValidator _nameValidator = null;
         private readonly ICommandDescriptorGenerator _commandDescriptorGenerator = null;
-        private readonly Dictionary<string, CommandDescriptor> _registeredTypes = null;
+        private readonly Dictionary<ExecutionTargetIdentifier, CommandDescriptor> _registeredTypes = null;
 
         /// <summary>
         /// Create a new instance.
@@ -30,7 +30,7 @@ namespace Chel
 
             _nameValidator = nameValidator;
             _commandDescriptorGenerator = commandDescriptorGenerator;
-            _registeredTypes = new Dictionary<string, CommandDescriptor>(StringComparer.OrdinalIgnoreCase);
+            _registeredTypes = new Dictionary<ExecutionTargetIdentifier, CommandDescriptor>();
         }
 
         /// <summary>
@@ -50,18 +50,25 @@ namespace Chel
             if(descriptor == null)
                 throw ExceptionFactory.CreateInvalidOperationException(ApplicationTexts.DescriptorCouldNotBeGenerated, type.FullName);
 
-            var validCommandName = _nameValidator.IsValid(descriptor.CommandName);
+            var validCommandName = _nameValidator.IsValid(descriptor.CommandIdentifier.Name);
             if(!validCommandName)
-                throw new InvalidCommandNameException(descriptor.CommandName);
+                throw new InvalidNameException(descriptor.CommandIdentifier.Name);
 
-            if(_registeredTypes.ContainsKey(descriptor.CommandName))
+            if(descriptor.CommandIdentifier.Module != null)
             {
-                var existing = _registeredTypes[descriptor.CommandName];
+                var validModuleName = _nameValidator.IsValid(descriptor.CommandIdentifier.Module);
+                if(!validModuleName)
+                    throw new InvalidNameException(descriptor.CommandIdentifier.Module);
+            }
+
+            if(_registeredTypes.ContainsKey(descriptor.CommandIdentifier))
+            {
+                var existing = _registeredTypes[descriptor.CommandIdentifier];
                 if(existing.ImplementingType != type)
-                    throw new CommandNameAlreadyUsedException(descriptor.CommandName, type, _registeredTypes[descriptor.CommandName].ImplementingType);
+                    throw new CommandNameAlreadyUsedException(descriptor.CommandIdentifier, type, _registeredTypes[descriptor.CommandIdentifier].ImplementingType);
             }
             else
-                _registeredTypes.Add(descriptor.CommandName, descriptor);
+                _registeredTypes.Add(descriptor.CommandIdentifier, descriptor);
         }
 
         private bool DoesImplementICommand(Type type)
@@ -87,13 +94,10 @@ namespace Chel
         /// Resolve a <see cref="CommandDescriptor" /> for a given command name.
         /// </summary>
         /// <param name="commandName">The name of the command to resolve.</param>
-        public CommandDescriptor Resolve(string commandName)
+        public CommandDescriptor Resolve(ExecutionTargetIdentifier commandIdentifier)
         {
-            if(commandName == null)
-                throw new ArgumentNullException(nameof(commandName));
-
-            if(_registeredTypes.ContainsKey(commandName))
-                return _registeredTypes[commandName];
+            if(_registeredTypes.ContainsKey(commandIdentifier))
+                return _registeredTypes[commandIdentifier];
 
             return null;
         }

@@ -395,7 +395,7 @@ namespace Chel.UnitTests
             // arrange
             var sut = new VariableReplacer();
             var variables = new VariableCollection();
-            var subcommand = new CommandInput.Builder(new SourceLocation(1, 1), "cmd").Build();
+            var subcommand = new CommandInput.Builder(new SourceLocation(1, 1), new ExecutionTargetIdentifier(null, "cmd")).Build();
             var input = new List(new[] { subcommand });
 
             // act

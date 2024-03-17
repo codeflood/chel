@@ -12,12 +12,14 @@ namespace Chel.Abstractions
         public const string ArgumentMustBeGreaterThanZero = "ArgumentMustBeGreaterThanZero";
         public const string ArgumentCannotBeNullOrEmpty = "ArgumentCannotBeNullOrEmpty";
         public const string AvailableCommands = "AvailableCommands";
+        public const string AvailableModules = "AvailableModules";
         public const string CannotBindCommandInputWithoutSubstituteValue = "CannotBindCommandInputWithoutSubstituteValue";
         public const string CannotBindListToNonListParameter = "CannotBindListToNonListParameter";
         public const string CannotBindMapToNonMapParameter = "CannotBindMapToNonMapParameter";
         public const string CannotBindNonListToListParameter = "CannotBindNonListToListParameter";
         public const string CannotBindNonMapToMapParameter = "CannotBindNonMapToMapParameter";
-        public const string CannotDisplayHelpUnknownCommnad = "CannotDisplayHelpUnknownCommnad";
+        public const string CannotDisplayHelpUnknownCommand = "CannotDisplayHelpUnknownCommand";
+        public const string CannotDisplayHelpUnknownModule = "CannotDisplayHelpUnknownModule";
         public const string CannotRepeatFlagParameter = "CannotRepeatFlagParameter";
         public const string CannotRepeatNamedParameter = "CannotRepeatNamedParameter";
         public const string CannotSetMultipleFlags = "CannotSetMultipleFlags";
@@ -37,8 +39,8 @@ namespace Chel.Abstractions
         public const string InternalErrorUnknownChelType = "InternalErrorUnknownChelType";
         public const string InvalidCharacterInMapEntryName = "InvalidCharacterInMapEntryName";
         public const string InvalidCharacterInVariableName = "InvalidCharacterInVariableName";
-        public const string InvalidCommandNameNull = "InvalidCommandNameNull";
-        public const string InvalidCommandNameWithParameter = "InvalidCommandNameWithParameter";
+        public const string InvalidNameNull = "InvalidNameNull";
+        public const string InvalidNameWithParameter = "InvalidNameWithParameter";
         public const string InvalidParameterValueForNamedParameter = "InvalidParameterValueForNamedParameter";
         public const string InvalidParameterValueForNumberedParameter = "InvalidParameterValueForNumberedParameter";
         public const string KeyTypeMustBeString = "KeyTypeMustBeString";

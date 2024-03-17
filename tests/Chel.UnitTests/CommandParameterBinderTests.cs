@@ -1591,7 +1591,7 @@ namespace Chel.UnitTests
                 new Literal("val")
             );
 
-            var input = new CommandInput.Builder(new(1, 1), "nam");
+            var input = new CommandInput.Builder(new(1, 1), new ExecutionTargetIdentifier(null, "nam"));
             input.AddParameter(new ParameterNameCommandParameter(new(1, 1), "param1"));
             input.AddParameter(subcommand);
 
@@ -1615,7 +1615,7 @@ namespace Chel.UnitTests
             );
             subcommand.SubstituteValue = new Literal("subbed");
 
-            var input = new CommandInput.Builder(new(1, 1), "nam");
+            var input = new CommandInput.Builder(new(1, 1), new ExecutionTargetIdentifier(null, "nam"));
             input.AddParameter(new ParameterNameCommandParameter(new(1, 1), "param1"));
             input.AddParameter(subcommand);
 
@@ -2055,7 +2055,7 @@ namespace Chel.UnitTests
         private CommandInput CreateCommandInput(string commandName, params ICommandParameter[] parameters)
         {
             var location = new SourceLocation(1, 1);
-            var builder = new CommandInput.Builder(location, commandName);
+            var builder = new CommandInput.Builder(location, new ExecutionTargetIdentifier(null, commandName));
 
             foreach(var parameter in parameters)
                 builder.AddParameter(parameter);

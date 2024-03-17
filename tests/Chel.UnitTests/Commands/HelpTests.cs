@@ -1,4 +1,5 @@
 using System;
+using Chel.Abstractions.Parsing;
 using Chel.Abstractions.Results;
 using Chel.Abstractions.Types;
 using Chel.Commands;
@@ -13,11 +14,25 @@ namespace Chel.UnitTests.Commands
         public void Ctor_CommandRegistryIsNull_ThrowsException()
         {
             // arrange
-            Action sutAction = () => new Help(null);
+            Action sutAction = () => new Help(null, new ExecutionTargetIdentifierParser());
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
             Assert.Equal("commandRegistry", ex.ParamName);
+        }
+
+        [Fact]
+        public void Ctor_ParserIsNull_ThrowsException()
+        {
+            // arrange
+            var nameValidator = new NameValidator();
+            var descriptorGenerator = new CommandAttributeInspector();
+            var registry = new CommandRegistry(nameValidator, descriptorGenerator);
+            Action sutAction = () => new Help(registry, null);
+
+            // act, assert
+            var ex = Assert.Throws<ArgumentNullException>(sutAction);
+            Assert.Equal("executionTargetIdentifierParser", ex.ParamName);
         }
 
         [Fact]
@@ -33,6 +48,36 @@ namespace Chel.UnitTests.Commands
             var commands = Assert.IsType<Literal>(result.Value);
             Assert.Contains("help", commands.Value);
             Assert.Contains("num", commands.Value);
+        }
+
+        [Fact]
+        public void Execute_NoParametersSet_ListsAllModules()
+        {
+            // arrange
+            var sut = CreateSut(typeof(Help), typeof(NumberedParameterModuleCommand), typeof(DuplicateSampleCommandDifferentModule));
+
+            // act
+            var result = sut.Execute() as ValueResult;
+
+            // assert
+            var commands = Assert.IsType<Literal>(result.Value);
+            Assert.Contains("help", commands.Value);
+            Assert.Contains("diffmod, mod", commands.Value);
+        }
+
+        [Fact]
+        public void Execute_SameModuleDifferentCasing_ShowsDeduplicatedModules()
+        {
+            // arrange
+            var sut = CreateSut(typeof(Help), typeof(AnotherCommandDifferentModuleUppercase), typeof(NumberedParameterModuleCommand), typeof(DuplicateSampleCommandDifferentModule));
+
+            // act
+            var result = sut.Execute() as ValueResult;
+
+            // assert
+            var commands = Assert.IsType<Literal>(result.Value);
+            Assert.Contains("help", commands.Value);
+            Assert.Contains("diffmod, mod", commands.Value);
         }
 
         [Fact]
@@ -77,7 +122,7 @@ namespace Chel.UnitTests.Commands
             var registry = new CommandRegistry(nameValidator, descriptorGenerator);
             registry.Register(typeof(SampleCommand2));
 
-            var sut = new Help(registry);
+            var sut = new Help(registry, new ExecutionTargetIdentifierParser());
 
             // act
             var result = sut.Execute() as ValueResult;
@@ -87,11 +132,11 @@ namespace Chel.UnitTests.Commands
         }
 
         [Fact]
-        public void Execute_CommandNameParameterSet_DisplaysDetailsForCommand()
+        public void Execute_CommandIdentifierSet_DisplaysDetailsForCommand()
         {
             // arrange
             var sut = CreateSut(typeof(Help), typeof(NumberedParameterCommand));
-            sut.CommandName = "num";
+            sut.CommandIdentifier = "num";
 
             // act
             var result = sut.Execute() as ValueResult;
@@ -103,12 +148,63 @@ namespace Chel.UnitTests.Commands
             Assert.Matches(@"param2\s+The second parameter", result.Value.ToString());
         }
 
+        [Theory]
+        [InlineData("mod:")]
+        [InlineData("MOD:")]
+        public void Execute_CommandIdentifierHasExistingModule_ListsCommandInModuleOnly(string commandIdentifier)
+        {
+            // arrange
+            var sut = CreateSut(typeof(Help), typeof(NamedParameterCommand), typeof(NumberedParameterModuleCommand));
+            sut.CommandIdentifier = commandIdentifier;
+
+            // act
+            var result = sut.Execute() as ValueResult;
+
+            // assert
+            var commands = Assert.IsType<Literal>(result.Value);
+            var commandLines = (result.Value as Literal).Value.Split(Environment.NewLine);
+
+            Assert.Contains(commandLines, x => x.StartsWith("num"));
+            Assert.DoesNotContain(commandLines, x => x.StartsWith("nam"));
+        }
+
+        [Fact]
+        public void Execute_CommandIdentifierHasUnknownModule_ReturnsError()
+        {
+            // arrange
+            var sut = CreateSut(typeof(Help), typeof(NamedParameterCommand), typeof(NumberedParameterModuleCommand));
+            sut.CommandIdentifier = "bad:";
+
+            // act
+            var result = sut.Execute() as FailureResult;
+
+            // assert
+        Assert.Equal("Cannot display help for unknown module 'bad'", result.Message);
+        }
+
+        [Fact]
+        public void Execute_CommandIdentifierSetWithModuleAndCommand_DisplaysDetailsForCommand()
+        {
+            // arrange
+            var sut = CreateSut(typeof(Help), typeof(NumberedParameterModuleCommand), typeof(NamedParameterCommand));
+            sut.CommandIdentifier = "mod:num";
+
+            // act
+            var result = sut.Execute() as ValueResult;
+
+            // assert
+            Assert.Contains("usage: mod:num [param1] [param2]", result.Value.ToString());
+            Assert.Contains("A sample command with numbered parameters.", result.Value.ToString());
+            Assert.Matches(@"param1\s+The first parameter", result.Value.ToString());
+            Assert.Matches(@"param2\s+The second parameter", result.Value.ToString());
+        }
+
         [Fact]
         public void Execute_CommandNameParameterSetUppercase_DisplaysDetailsForCommand()
         {
             // arrange
             var sut = CreateSut(typeof(Help), typeof(NumberedParameterCommand));
-            sut.CommandName = "NUM";
+            sut.CommandIdentifier = "NUM";
 
             // act
             var result = sut.Execute() as ValueResult;
@@ -125,7 +221,7 @@ namespace Chel.UnitTests.Commands
         {
             // arrange
             var sut = CreateSut(typeof(Help), typeof(NumberedParameterCommand));
-            sut.CommandName = "boo";
+            sut.CommandIdentifier = "boo";
 
             // act
             var result = sut.Execute() as FailureResult;
@@ -139,7 +235,7 @@ namespace Chel.UnitTests.Commands
         {
             // arrange
             var sut = CreateSut(typeof(RequiredParameterCommand));
-            sut.CommandName = "command";
+            sut.CommandIdentifier = "command";
 
             // act
             var result = sut.Execute() as ValueResult;
@@ -154,7 +250,7 @@ namespace Chel.UnitTests.Commands
         {
             // arrange
             var sut = CreateSut(typeof(RequiredNamedParameterCommand));
-            sut.CommandName = "command";
+            sut.CommandIdentifier = "command";
 
             // act
             var result = sut.Execute() as ValueResult;
@@ -169,7 +265,7 @@ namespace Chel.UnitTests.Commands
         {
             // arrange
             var sut = CreateSut(typeof(NamedParameterCommand));
-            sut.CommandName = "nam";
+            sut.CommandIdentifier = "nam";
 
             // act
             var result = sut.Execute() as ValueResult;
@@ -185,7 +281,7 @@ namespace Chel.UnitTests.Commands
         {
             // arrange
             var sut = CreateSut(typeof(FlagParameterCommand));
-            sut.CommandName = "command";
+            sut.CommandIdentifier = "command";
 
             // act
             var result = sut.Execute() as ValueResult;
@@ -207,7 +303,8 @@ namespace Chel.UnitTests.Commands
                 registry.Register(type);
             }
 
-            return new Help(registry);
+            var executionTargetIdentifierParser = new ExecutionTargetIdentifierParser();
+            return new Help(registry, executionTargetIdentifierParser);
         }
     }
 }

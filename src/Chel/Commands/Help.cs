@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using Chel.Abstractions;
+using Chel.Abstractions.Parsing;
 using Chel.Abstractions.Results;
 using Chel.Abstractions.Types;
 
@@ -12,17 +13,19 @@ namespace Chel.Commands
     [Description("Lists available commands and displays help for commands.")]
     public class Help : ICommand
     {
-        private ICommandRegistry _commandRegistry;
+        private readonly ICommandRegistry _commandRegistry;
+        private readonly IExecutionTargetIdentifierParser _executionTargetIdentifierParser;
 
         private string _executionCultureName = string.Empty;
 
         [NumberedParameter(1, "command")]
-        [Description("The name of the command the display help for.")]
-        public string CommandName { get; set; }
+        [Description("The identifier of the command or module the display help for.")]
+        public string CommandIdentifier { get; set; }
 
-        public Help(ICommandRegistry commandRegistry)
+        public Help(ICommandRegistry commandRegistry, IExecutionTargetIdentifierParser executionTargetIdentifierParser)
         {
             _commandRegistry = commandRegistry ?? throw new ArgumentNullException(nameof(commandRegistry));
+            _executionTargetIdentifierParser = executionTargetIdentifierParser ?? throw new ArgumentNullException(nameof(executionTargetIdentifierParser));
         }
 
         public CommandResult Execute()
@@ -32,43 +35,89 @@ namespace Chel.Commands
 
             var output = new StringBuilder();
 
-            if(string.IsNullOrEmpty(CommandName))
-                ListCommands(output);
+            var identifier = _executionTargetIdentifierParser.Parse(CommandIdentifier);
+
+            if(!string.IsNullOrEmpty(identifier.Name))
+            {
+                var successful = DetailCommand(output, identifier);
+                if(!successful)
+                    return new FailureResult(ApplicationTextResolver.Instance.ResolveAndFormat(ApplicationTexts.CannotDisplayHelpUnknownCommand, identifier));
+            }
+            else if(!string.IsNullOrEmpty(identifier.Module))
+            {
+                var successful = ListCommands(output, identifier.Module);
+
+                if(!successful)
+                    return new FailureResult(ApplicationTextResolver.Instance.ResolveAndFormat(ApplicationTexts.CannotDisplayHelpUnknownModule, identifier.Module));
+
+                output.Append(Environment.NewLine);
+                output.Append(ApplicationTextResolver.Instance.Resolve(ApplicationTexts.SpecificCommandHelp));
+            }
             else
             {
-                var successful = DetailCommand(output);
-                if(!successful)
-                    return new FailureResult(ApplicationTextResolver.Instance.ResolveAndFormat(ApplicationTexts.CannotDisplayHelpUnknownCommnad, CommandName));
+                ListCommands(output, null);
+                output.Append(Environment.NewLine);
+                ListModules(output);
+                output.Append(Environment.NewLine);
+                output.Append(ApplicationTextResolver.Instance.Resolve(ApplicationTexts.SpecificCommandHelp));
             }
 
             return new ValueResult(new Literal(output.ToString()));
         }
 
-        private void ListCommands(StringBuilder output)
+        private bool ListCommands(StringBuilder output, string moduleName)
         {
             output.Append(ApplicationTextResolver.Instance.Resolve(ApplicationTexts.AvailableCommands));
             output.Append(":");
             output.Append(Environment.NewLine);
 
-            foreach(var descriptor in _commandRegistry.GetAllRegistrations().OrderBy(x => x.CommandName))
+            var descriptors = _commandRegistry.GetAllRegistrations();
+
+            if(moduleName == null)
+                descriptors = descriptors.Where(x => x.CommandIdentifier.Module == null);
+            else
             {
-                output.Append($"{descriptor.CommandName, Constants.FirstColumnWidth}{descriptor.GetDescription(_executionCultureName)}");
+                // todo: It feels odd handling the case sensitivity here
+                descriptors = descriptors.Where(x => x.CommandIdentifier.Module != null && x.CommandIdentifier.Module.Equals(moduleName, StringComparison.OrdinalIgnoreCase));
+                if(!descriptors.Any())
+                    return false;
+            }
+
+            foreach(var descriptor in descriptors.OrderBy(x => x.CommandIdentifier.Name))
+            {
+                output.Append($"{descriptor.CommandIdentifier.Name, Constants.FirstColumnWidth}{descriptor.GetDescription(_executionCultureName)}");
                 output.Append(Environment.NewLine);
             }
 
-            output.Append(Environment.NewLine);
-            output.Append(ApplicationTextResolver.Instance.Resolve(ApplicationTexts.SpecificCommandHelp));
+            return true;
         }
 
-        private bool DetailCommand(StringBuilder output)
+        private void ListModules(StringBuilder output)
         {
-            var command = _commandRegistry.Resolve(CommandName);
+            output.Append(ApplicationTextResolver.Instance.Resolve(ApplicationTexts.AvailableModules));
+            output.Append(":");
+            output.Append(Environment.NewLine);
+
+            var descriptors = _commandRegistry.GetAllRegistrations().Where(x => x.CommandIdentifier.Module != null).OrderBy(x => x.CommandIdentifier.Name);
+
+            foreach(var descriptorGroup in descriptors.GroupBy(x => x.CommandIdentifier.Module).OrderBy(x => x.Key.ToLower()))
+            {
+                output.Append(descriptorGroup.Key);
+                output.Append(", ");
+            }
+
+            output.Remove(output.Length - 2, 2);
+        }
+
+        private bool DetailCommand(StringBuilder output, ExecutionTargetIdentifier commandIdentifier)
+        {
+            var command = _commandRegistry.Resolve(commandIdentifier);
             if(command == null)
                 return false;
 
             output.Append(ApplicationTextResolver.Instance.Resolve(ApplicationTexts.Usage));
             output.Append(": ");
-            output.Append(command.CommandName);
+            output.Append(command.CommandIdentifier);
 
             foreach(var numberedParameter in command.NumberedParameters)
             {

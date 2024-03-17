@@ -13,7 +13,7 @@ namespace Chel.Abstractions.UnitTests
             var texts = Substitute.For<ITextResolver>();
             texts.GetText("en").Returns("text");
 
-            var builder = new CommandDescriptor.Builder("command", GetType(), texts);
+            var builder = new CommandDescriptor.Builder(new ExecutionTargetIdentifier(string.Empty, "command"), GetType(), texts);
             var sut = builder.Build();
             Action sutAction = () => sut.GetDescription(null);
 
@@ -29,7 +29,7 @@ namespace Chel.Abstractions.UnitTests
             var texts = Substitute.For<ITextResolver>();
             texts.GetText("en").Returns("text");
 
-            var builder = new CommandDescriptor.Builder("command", GetType(), texts);
+            var builder = new CommandDescriptor.Builder(new ExecutionTargetIdentifier(string.Empty, "command"), GetType(), texts);
             var sut = builder.Build();
 
             // act

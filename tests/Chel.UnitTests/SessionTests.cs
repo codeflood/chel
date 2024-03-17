@@ -188,7 +188,7 @@ namespace Chel.UnitTests
         public void Execute_FactoryThrowsException_FailureResultReturned()
         {
             // arrange
-            var commandBuilder = new CommandInput.Builder(new SourceLocation(1, 1), "command");
+            var commandBuilder = new CommandInput.Builder(new SourceLocation(1, 1), new ExecutionTargetIdentifier(null, "command"));
             var commandInput = commandBuilder.Build();
 
             var parser = Substitute.For<IParser>();

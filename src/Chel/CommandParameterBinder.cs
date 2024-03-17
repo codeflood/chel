@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Reflection;
 using Chel.Abstractions;
 using Chel.Abstractions.Parsing;
@@ -53,9 +52,9 @@ namespace Chel
 
             var result = new ParameterBindResult();
 
-            var descriptor = _commandRegistry.Resolve(input.CommandName);
+            var descriptor = _commandRegistry.Resolve(input.CommandIdentifier);
             if(descriptor == null)
-                throw ExceptionFactory.CreateInvalidOperationException(ApplicationTexts.DescriptorForCommandCouldNotBeResolved, input.CommandName);
+                throw ExceptionFactory.CreateInvalidOperationException(ApplicationTexts.DescriptorForCommandCouldNotBeResolved, input.CommandIdentifier);
 
             var parameters = ExtractParameterValues(input.Parameters, result, input.SourceLocation);
 

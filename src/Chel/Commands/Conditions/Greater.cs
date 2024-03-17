@@ -6,7 +6,7 @@ using Chel.Abstractions.Types;
 
 namespace Chel.Commands.Conditions
 {
-    [Command("gt")]
+    [Command("gt", "cond")]
     [Description("Compare if value is greater than base.")]
     public class Greater : ICommand
     {

@@ -40,6 +40,7 @@ namespace Chel
 
             _commandServices.Register(_commandRegistry);
             _commandServices.Register<INameValidator>(nameValidator);
+            _commandServices.Register<IExecutionTargetIdentifierParser>(new ExecutionTargetIdentifierParser());
         }
 
         /// <summary>

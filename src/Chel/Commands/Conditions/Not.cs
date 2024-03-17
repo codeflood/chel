@@ -5,7 +5,7 @@ using Chel.Abstractions.Types;
 
 namespace Chel.Commands.Conditions
 {
-    [Command("not")]
+    [Command("not", "cond")]
     [Description("Inverse a boolean value.")]
     public class Not : ICommand
     {

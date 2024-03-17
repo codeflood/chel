@@ -6,7 +6,7 @@ using Chel.Abstractions.Types;
 
 namespace Chel.Commands.Conditions
 {
-    [Command("eq")]
+    [Command("eq", "cond")]
     [Description("Compare 2 values for equality.")]
     public class Equals : ICommand
     {

@@ -98,7 +98,7 @@ namespace Chel
                     }
                 }
                 else
-                    commandResult = new FailureResult(commandInput.SourceLocation, ApplicationTextResolver.Instance.ResolveAndFormat(ApplicationTexts.UnknownCommand, commandInput.CommandName));
+                    commandResult = new FailureResult(commandInput.SourceLocation, ApplicationTextResolver.Instance.ResolveAndFormat(ApplicationTexts.UnknownCommand, commandInput.CommandIdentifier));
             }
             catch(Exception ex)
             {

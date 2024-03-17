@@ -8,36 +8,36 @@ namespace Chel.Abstractions
     /// </summary>
     public class CommandDescriptor
     {
-        private ITextResolver _descriptions = null;
+        private readonly ITextResolver _descriptions;
 
         /// <summary>
         /// Gets the <see cref="Type"/> implementing the command.
         /// </summary>
-        public Type ImplementingType { get; private set; }
+        public Type ImplementingType { get; }
 
         /// <summary>
-        /// Gets the name of the command.
+        /// Gets the identifier of the command.
         /// </summary>
-        public string CommandName { get; private set; }
+        public ExecutionTargetIdentifier CommandIdentifier { get; }
 
         /// <summary>
         /// Gets the numbered parameters of the command.
         /// </summary>
-        public IReadOnlyList<NumberedParameterDescriptor> NumberedParameters { get; private set; }
+        public IReadOnlyList<NumberedParameterDescriptor> NumberedParameters { get; private init; }
 
         /// <summary>
         /// Gets the named parameters of the command.
         /// </summary>
-        public IReadOnlyDictionary<string, NamedParameterDescriptor> NamedParameters { get; private set; }
+        public IReadOnlyDictionary<string, NamedParameterDescriptor> NamedParameters { get; private init; }
 
         /// <summary>
         /// Gets the flag parameters of the command.
         /// </summary>
-        public IReadOnlyList<FlagParameterDescriptor> FlagParameters { get; private set; }
+        public IReadOnlyList<FlagParameterDescriptor> FlagParameters { get; private init; }
 
-        private CommandDescriptor(string commandName, Type implementingType, ITextResolver descriptions)
+        private CommandDescriptor(ExecutionTargetIdentifier commandIdentifier, Type implementingType, ITextResolver descriptions)
         {
-            CommandName = commandName;
+            CommandIdentifier = commandIdentifier;
             ImplementingType = implementingType;
             _descriptions = descriptions;
         }
@@ -61,9 +61,9 @@ namespace Chel.Abstractions
         /// </summary>
         public class Builder
         {
-            private string _commandName = null;
-            private Type _implementingType = null;
-            private ITextResolver _descriptions = null;
+            private readonly ExecutionTargetIdentifier _commandIdentifier;
+            private readonly Type _implementingType;
+            private readonly ITextResolver _descriptions;
             private List<NumberedParameterDescriptor> _numberedParameters = new List<NumberedParameterDescriptor>();
             private Dictionary<string, NamedParameterDescriptor> _namedParameters = new Dictionary<string, NamedParameterDescriptor>(StringComparer.OrdinalIgnoreCase);
             private List<FlagParameterDescriptor> _flagParameters = new List<FlagParameterDescriptor>();
@@ -74,21 +74,15 @@ namespace Chel.Abstractions
             /// <param name="commandName">The name of the command.</param>
             /// <param name="implementingType">The <see cref="Type"/> implementing the command.</param>
             /// <param name="descriptions">The localised descriptions for the command.</param>
-            public Builder(string commandName, Type implementingType, ITextResolver descriptions)
+            public Builder(ExecutionTargetIdentifier commandIdentifier, Type implementingType, ITextResolver descriptions)
             {
-                if(commandName == null)
-                    throw new ArgumentNullException(nameof(commandName));
-
-                if(commandName == string.Empty)
-                    throw ExceptionFactory.CreateArgumentException(ApplicationTexts.ArgumentCannotBeEmpty, nameof(commandName), nameof(commandName));
-
                 if(implementingType == null)
                     throw new ArgumentNullException(nameof(implementingType));
 
                 if(descriptions == null)
                     throw new ArgumentNullException(nameof(descriptions));
 
-                _commandName = commandName;
+                _commandIdentifier = commandIdentifier;
                 _implementingType = implementingType;
                 _descriptions = descriptions;
             }
@@ -145,7 +139,7 @@ namespace Chel.Abstractions
             /// </summary>
             public CommandDescriptor Build()
             {
-                var descriptor = new CommandDescriptor(_commandName, _implementingType, _descriptions)
+                var descriptor = new CommandDescriptor(_commandIdentifier, _implementingType, _descriptions)
                 {
                     NumberedParameters = new List<NumberedParameterDescriptor>(_numberedParameters),
                     NamedParameters = new Dictionary<string, NamedParameterDescriptor>(_namedParameters),

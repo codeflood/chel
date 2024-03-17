@@ -5,6 +5,7 @@
     <DefaultNamespace>Chel.Abstractions</DefaultNamespace>
     <AssemblyName>Chel.Abstractions</AssemblyName>
     <LangVersion>10</LangVersion>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
 </Project>

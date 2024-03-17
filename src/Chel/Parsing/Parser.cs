@@ -97,7 +97,9 @@ namespace Chel.Parsing
             if(commandName == null)
                 return null;
 
-            var commandInputBuilder = new CommandInput.Builder(commandName.SourceLocation, commandName.Name);
+            // todo: parse module name using ExecutionTargetIdentifierParser
+            var executionTarget = new ExecutionTargetIdentifier(null, commandName.Name);
+            var commandInputBuilder = new CommandInput.Builder(commandName.SourceLocation, executionTarget);
 
             if(parseParameters)
             {

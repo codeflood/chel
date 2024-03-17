@@ -1,4 +1,5 @@
 using System;
+using Chel.Abstractions;
 using Chel.Abstractions.UnitTests.SampleCommands;
 using Chel.UnitTests.SampleCommands;
 using Xunit;
@@ -8,21 +9,10 @@ namespace Chel.UnitTests.Exceptions
     public class CommandNameAlreadyUsedExceptionTests
     {
         [Fact]
-        public void Ctor_CommandNameIsNull_ThrowsException()
-        {
-            // arrange
-            Action sutAction = () => new CommandNameAlreadyUsedException(null, typeof(SampleCommand), typeof(SampleCommand));
-
-            // act, assert
-            var ex = Assert.Throws<ArgumentNullException>(sutAction);
-            Assert.Equal("commandName", ex.ParamName);
-        }
-
-        [Fact]
         public void Ctor_CommandTypeIsNull_ThrowsException()
         {
             // arrange
-            Action sutAction = () => new CommandNameAlreadyUsedException("command", null, typeof(SampleCommand));
+            Action sutAction = () => new CommandNameAlreadyUsedException(new ExecutionTargetIdentifier("module", "command"), null, typeof(SampleCommand));
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -33,7 +23,7 @@ namespace Chel.UnitTests.Exceptions
         public void Ctor_OtherCommandTypeIsNull_ThrowsException()
         {
             // arrange
-            Action sutAction = () => new CommandNameAlreadyUsedException("command", typeof(SampleCommand), null);
+            Action sutAction = () => new CommandNameAlreadyUsedException(new ExecutionTargetIdentifier("module", "command"), typeof(SampleCommand), null);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -46,10 +36,11 @@ namespace Chel.UnitTests.Exceptions
             // arrange, act
             var otherCommandType = typeof(SampleCommand);
             var commandType = typeof(DuplicateSampleCommand);
-            var sut = new CommandNameAlreadyUsedException("sample", commandType, otherCommandType);
+            var sut = new CommandNameAlreadyUsedException(new ExecutionTargetIdentifier("module", "sample"), commandType, otherCommandType);
 
             // assert
-            Assert.Equal("sample", sut.CommandName);
+            Assert.Equal("sample", sut.CommandIdentifier.Name);
+            Assert.Equal("module", sut.CommandIdentifier.Module);
             Assert.Equal(otherCommandType, sut.OtherCommandType);
             Assert.Equal(commandType, sut.CommandType);
         }
@@ -60,7 +51,22 @@ namespace Chel.UnitTests.Exceptions
             // arrange
             var otherCommandType = typeof(SampleCommand);
             var commandType = typeof(DuplicateSampleCommand);
-            var sut = new CommandNameAlreadyUsedException("sample", commandType, otherCommandType);
+            var sut = new CommandNameAlreadyUsedException(new ExecutionTargetIdentifier("module", "sample"), commandType, otherCommandType);
+
+            // act
+            var result = sut.ToString();
+
+            // assert
+            Assert.Equal("Chel.CommandNameAlreadyUsedException: Command name 'module:sample' on command type Chel.UnitTests.SampleCommands.DuplicateSampleCommand is already used on command type Chel.Abstractions.UnitTests.SampleCommands.SampleCommand", result);
+        }
+
+        [Fact]
+        public void ToString_WhenModuleIsNull_ReturnsMessage()
+        {
+            // arrange
+            var otherCommandType = typeof(SampleCommand);
+            var commandType = typeof(DuplicateSampleCommand);
+            var sut = new CommandNameAlreadyUsedException(new ExecutionTargetIdentifier(null, "sample"), commandType, otherCommandType);
 
             // act
             var result = sut.ToString();

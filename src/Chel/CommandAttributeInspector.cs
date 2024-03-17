@@ -23,7 +23,7 @@ namespace Chel
 
             var descriptions = ExtractDescriptions(commandType);
 
-            var builder = new CommandDescriptor.Builder(commandAttribute.CommandName, commandType, descriptions);
+            var builder = new CommandDescriptor.Builder(commandAttribute.CommandIdentifier, commandType, descriptions);
 
             AddParameters(commandType, builder);
             

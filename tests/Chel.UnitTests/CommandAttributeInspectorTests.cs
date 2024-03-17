@@ -45,7 +45,7 @@ namespace Chel.UnitTests
 
             // assert
             Assert.Equal(typeof(SampleCommand2), descriptor.ImplementingType);
-            Assert.Equal("sample2", descriptor.CommandName);
+            Assert.Equal("sample2", descriptor.CommandIdentifier.Name);
 
             var description = descriptor.GetDescription(CultureInfo.InvariantCulture.Name);
             Assert.Null(description);
@@ -62,7 +62,7 @@ namespace Chel.UnitTests
 
             // assert
             Assert.Equal(typeof(SampleCommand), descriptor.ImplementingType);
-            Assert.Equal("sample", descriptor.CommandName);
+            Assert.Equal("sample", descriptor.CommandIdentifier.Name);
 
             var invariantDescription = descriptor.GetDescription(CultureInfo.InvariantCulture.Name);
             Assert.Equal("description", invariantDescription);
@@ -85,7 +85,7 @@ namespace Chel.UnitTests
 
             // assert
             Assert.Equal(typeof(NumberedParameterCommand), descriptor.ImplementingType);
-            Assert.Equal("num", descriptor.CommandName);
+            Assert.Equal("num", descriptor.CommandIdentifier.Name);
 
             var numberedParameterDescriptor1 = descriptor.NumberedParameters[0];
             Assert.Equal(1, numberedParameterDescriptor1.Number);
@@ -111,7 +111,7 @@ namespace Chel.UnitTests
 
             // assert
             Assert.Equal(typeof(NamedParameterCommand), descriptor.ImplementingType);
-            Assert.Equal("nam", descriptor.CommandName);
+            Assert.Equal("nam", descriptor.CommandIdentifier.Name);
 
             var namedParameterDescriptor1 = descriptor.NamedParameters["param1"];
             Assert.Equal("param1", namedParameterDescriptor1.Name);
@@ -163,7 +163,7 @@ namespace Chel.UnitTests
 
             // assert
             Assert.Equal(typeof(FlagParameterCommand), descriptor.ImplementingType);
-            Assert.Equal("command", descriptor.CommandName);
+            Assert.Equal("command", descriptor.CommandIdentifier.Name);
 
             var flagParameterDescriptor1 = descriptor.FlagParameters[0];
             Assert.Equal("p1", flagParameterDescriptor1.Name);

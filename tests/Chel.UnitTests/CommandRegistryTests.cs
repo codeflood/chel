@@ -94,8 +94,20 @@ namespace Chel.UnitTests
             Action sutAction = () => sut.Register(typeof(InvalidCommandNameSampleCommand));
 
             // act, assert
-            var ex = Assert.Throws<InvalidCommandNameException>(sutAction);
-            Assert.Equal("  ", ex.CommandName);
+            var ex = Assert.Throws<InvalidNameException>(sutAction);
+            Assert.Equal("  ", ex.Name);
+        }
+
+        [Fact]
+        public void Register_ModuleNameIsInvalid_ThrowsException()
+        {
+            // arrange
+            var sut = CreateCommandRegistry();
+            Action sutAction = () => sut.Register(typeof(InvalidModuleNameSampleCommand));
+
+            // act, assert
+            var ex = Assert.Throws<InvalidNameException>(sutAction);
+            Assert.Equal("  ", ex.Name);
         }
 
         [Fact]
@@ -119,21 +131,18 @@ namespace Chel.UnitTests
 
             // act, assert
             var ex = Assert.Throws<CommandNameAlreadyUsedException>(sutAction);
-            Assert.Equal("sample", ex.CommandName);
+            Assert.Equal("sample", ex.CommandIdentifier.Name);
             Assert.Equal(typeof(DuplicateSampleCommand), ex.CommandType);
             Assert.Equal(typeof(SampleCommand), ex.OtherCommandType);
         }
 
         [Fact]
-        public void Resolve_NullCommandName_ThrowsException()
+        public void Register_DuplicateCommandNameDifferentModule_DoesNotThrowException()
         {
             // arrange
             var sut = CreateCommandRegistry();
-            Action sutAction = () => sut.Resolve(null);
-
-            // act, assert
-            var ex = Assert.Throws<ArgumentNullException>(sutAction);
-            Assert.Equal("commandName", ex.ParamName);
+            sut.Register(typeof(SampleCommand));
+            sut.Register(typeof(DuplicateSampleCommandDifferentModule));
         }
 
         [Fact]
@@ -143,7 +152,7 @@ namespace Chel.UnitTests
             var sut = CreateCommandRegistry();
 
             // act
-            var command = sut.Resolve("command");
+            var command = sut.Resolve(new ExecutionTargetIdentifier(null, "command"));
 
             // assert
             Assert.Null(command);
@@ -158,7 +167,7 @@ namespace Chel.UnitTests
             var descriptor = CreateSampleCommandDescriptor();
 
             // act
-            var resolvedDescriptor = sut.Resolve("sample");
+            var resolvedDescriptor = sut.Resolve(new ExecutionTargetIdentifier(null, "sample"));
 
             // assert
             Assert.Equal(descriptor, resolvedDescriptor, new CommandDescriptorEqualityComparer());
@@ -173,7 +182,7 @@ namespace Chel.UnitTests
             var descriptor = CreateSampleCommandDescriptor();
 
             // act
-            var resolvedDescriptor = sut.Resolve("SAmPLE");
+            var resolvedDescriptor = sut.Resolve(new ExecutionTargetIdentifier(null, "SAmPLE"));
 
             // assert
             Assert.Equal(descriptor, resolvedDescriptor, new CommandDescriptorEqualityComparer());
@@ -221,7 +230,7 @@ namespace Chel.UnitTests
             var descriptions = new LocalisedTexts();
             descriptions.AddText("description", "en");
 
-            var builder =  new CommandDescriptor.Builder("sample", typeof(SampleCommand), descriptions);
+            var builder =  new CommandDescriptor.Builder(new ExecutionTargetIdentifier(null, "sample"), typeof(SampleCommand), descriptions);
             return builder.Build();
         }
 
@@ -230,7 +239,7 @@ namespace Chel.UnitTests
             var descriptions = new LocalisedTexts();
             descriptions.AddText("description", "en");
 
-            var builder = new CommandDescriptor.Builder("sample2", typeof(SampleCommand2), descriptions);
+            var builder = new CommandDescriptor.Builder(new ExecutionTargetIdentifier(null, "sample2"), typeof(SampleCommand2), descriptions);
             return builder.Build();
         }
     }

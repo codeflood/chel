@@ -10,9 +10,9 @@ namespace Chel.Abstractions.Parsing
     public class CommandInput : SourceCommandParameter
     {
         /// <summary>
-        /// Gets the name of the command to execute.
+        /// Gets the identifier of the command to execute.
         /// </summary>
-        public string CommandName { get; private set; }
+        public ExecutionTargetIdentifier CommandIdentifier { get; private set; }
 
         /// <summary>
         /// Gets or sets a value to substitute in place of this command input.
@@ -50,16 +50,14 @@ namespace Chel.Abstractions.Parsing
             }
 
             return
-                CommandName.Equals(other.CommandName) &&
+                CommandIdentifier.Equals(other.CommandIdentifier) &&
                 SourceLocation.Equals(other.SourceLocation) &&
                 parametersEqual;
         }
 
-        
-
         public override int GetHashCode()
         {
-            var hashCode = (CommandName, SourceLocation).GetHashCode();
+            var hashCode = (CommandIdentifier, SourceLocation).GetHashCode();
 
             unchecked
             {
@@ -75,25 +73,22 @@ namespace Chel.Abstractions.Parsing
         /// </summary>
         public class Builder
         {
-            private SourceLocation _sourceLocation;
-            private string _commandName = null;
-            private List<ICommandParameter> _parameters = null;
+            private readonly SourceLocation _sourceLocation;
+            private readonly ExecutionTargetIdentifier _commandIdentifier;
+            private readonly List<ICommandParameter> _parameters;
 
             /// <summary>
             /// Create a new instance.
             /// </summary>
             /// <param name="sourceLocation">The location the command was parsed from.</param>
-            /// <param name="commandName">The name of the command to execute.</param>
-            public Builder(SourceLocation sourceLocation, string commandName)
+            /// <param name="commandIdentifier">The identifier of the command to execute.</param>
+            public Builder(SourceLocation sourceLocation, ExecutionTargetIdentifier commandIdentifier)
             {
-                if(commandName == null)
-                    throw new ArgumentNullException(nameof(commandName));
-
-                if(commandName.Equals(string.Empty))
-                    throw ExceptionFactory.CreateArgumentException(ApplicationTexts.ArgumentCannotBeEmpty, nameof(commandName), nameof(commandName));
+                if(commandIdentifier.Name.Equals(string.Empty))
+                    throw ExceptionFactory.CreateArgumentException(ApplicationTexts.ArgumentCannotBeEmpty, nameof(commandIdentifier.Name), nameof(commandIdentifier.Name));
 
                 _sourceLocation = sourceLocation;
-                _commandName = commandName;
+                _commandIdentifier = commandIdentifier;
 
                 _parameters = new List<ICommandParameter>();
             }
@@ -117,7 +112,7 @@ namespace Chel.Abstractions.Parsing
             {
                 var commandInput = new CommandInput(_sourceLocation)
                 {
-                    CommandName = _commandName,
+                    CommandIdentifier = _commandIdentifier,
                     Parameters = new List<ICommandParameter>(_parameters),
                 };
 
