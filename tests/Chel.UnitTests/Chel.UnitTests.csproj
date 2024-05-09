@@ -16,4 +16,14 @@
     <ProjectReference Include="../Chel.Abstractions.UnitTests/Chel.Abstractions.UnitTests.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="scripts/**/*;*.chel">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <Target Name="duplicate-script" AfterTargets="AfterBuild" Condition="!$(RuntimeIdentifier.StartsWith('win'))">
+    <Move SourceFiles="$(OutDir)scripts/Test1.chel.d" DestinationFiles="$(OutDir)scripts/Test1.chel" />
+  </Target>
+
 </Project>
