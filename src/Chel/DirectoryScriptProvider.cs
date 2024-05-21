@@ -6,6 +6,9 @@ using Chel.Abstractions;
 
 namespace Chel;
 
+/// <summary>
+/// A script provider that reads script files from a local directory.
+/// </summary>
 public class DirectoryScriptProvider : IScriptProvider
 {
     public const string ScriptFileExtension = "chel";

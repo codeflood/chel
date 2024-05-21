@@ -17,6 +17,7 @@ namespace Chel
         private readonly IParser _parser = null;
         private readonly ICommandFactory _commandFactory = null;
         private readonly ICommandParameterBinder _parameterBinder = null;
+        private readonly IScriptProvider _scriptProvider = null;
         private readonly Action<CommandResult> _resultHandler = null;
 
         /// <summary>
@@ -26,11 +27,17 @@ namespace Chel
         /// <param name="commandFactory">The <see cref="ICommandFactory" /> used to instantiate commands.</param>
         /// <param name="parameterBinder">The binder used to bind parameters to command properties.</summary>
         /// <param name="resultHandler">The handler to execute for the results of the input.</param>
-        public Session(IParser parser, ICommandFactory commandFactory, ICommandParameterBinder parameterBinder, Action<CommandResult> resultHandler)
+        public Session(
+            IParser parser,
+            ICommandFactory commandFactory,
+            ICommandParameterBinder parameterBinder,
+            IScriptProvider scriptProvider,
+            Action<CommandResult> resultHandler)
         {   
             _parser = parser ?? throw new ArgumentNullException(nameof(parser));
             _commandFactory = commandFactory ?? throw new ArgumentNullException(nameof(commandFactory));
             _parameterBinder = parameterBinder ?? throw new ArgumentNullException(nameof(parameterBinder));
+            _scriptProvider = scriptProvider ?? throw new ArgumentNullException(nameof(scriptProvider));
             _resultHandler = resultHandler ?? throw new ArgumentNullException(nameof(resultHandler));
         }
 
@@ -64,7 +71,7 @@ namespace Chel
                         _resultHandler(result);
                     }
                 }
-                else
+                else if(commandResult != null)
                     _resultHandler(commandResult);
             }
         }
@@ -98,7 +105,15 @@ namespace Chel
                     }
                 }
                 else
-                    commandResult = new FailureResult(commandInput.SourceLocation, ApplicationTextResolver.Instance.ResolveAndFormat(ApplicationTexts.UnknownCommand, commandInput.CommandIdentifier));
+                {
+                    var script = _scriptProvider.GetScriptSource(commandInput.CommandIdentifier.Module, commandInput.CommandIdentifier.Name);
+                    if(script != null)
+                    {
+                        Execute(script);
+                    }
+                    else
+                        commandResult = new FailureResult(commandInput.SourceLocation, ApplicationTextResolver.Instance.ResolveAndFormat(ApplicationTexts.UnknownCommand, commandInput.CommandIdentifier));
+                }
             }
             catch(Exception ex)
             {

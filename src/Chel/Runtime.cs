@@ -5,6 +5,7 @@ using Chel.Abstractions.Parsing;
 using Chel.Abstractions.Variables;
 using Chel.Commands;
 using Chel.Parsing;
+using System.Collections.Generic;
 
 namespace Chel
 {
@@ -13,11 +14,13 @@ namespace Chel
     /// </summary>
     public class Runtime
     {
-        private ICommandRegistry _commandRegistry = null;
-        private ICommandServices _commandServices = null;
-        private IParser _parser = null;
-        private IVariableReplacer _variableReplacer = null;
-        private IScopedObjectRegistry _sessionObjectTypes = null;
+        private readonly ICommandRegistry _commandRegistry = null;
+        private readonly ICommandServices _commandServices = null;
+        private readonly IParser _parser = null;
+        private readonly IVariableReplacer _variableReplacer = null;
+        private readonly IScopedObjectRegistry _sessionObjectTypes = null;
+        private readonly List<IScriptProvider> _scriptProviders = null;
+        private readonly ScriptProviderCollection _scriptProvidersCollection = null;
 
         /// <summary>
         /// Create a new instance.
@@ -35,12 +38,16 @@ namespace Chel
             _sessionObjectTypes = new ScopedObjectRegistry();
             _sessionObjectTypes.Register<VariableCollection>();
 
+            _scriptProviders = new List<IScriptProvider>();
+            _scriptProvidersCollection = new ScriptProviderCollection(_scriptProviders);
+
             _commandRegistry.Register(typeof(Help));
             _commandRegistry.Register(typeof(Var));
 
             _commandServices.Register(_commandRegistry);
             _commandServices.Register<INameValidator>(nameValidator);
             _commandServices.Register<IExecutionTargetIdentifierParser>(new ExecutionTargetIdentifierParser());
+            _commandServices.Register<IScriptProvider>(_scriptProvidersCollection);
         }
 
         /// <summary>
@@ -78,6 +85,18 @@ namespace Chel
         }
 
         /// <summary>
+        /// Register a new script provider.
+        /// </summary>
+        /// <param name="provider">The provider to register.</param>
+        public void RegisterScriptProvider(IScriptProvider provider)
+        {
+            if(provider == null)
+                throw new ArgumentNullException(nameof(provider));
+            
+            _scriptProviders.Add(provider);
+        }
+
+        /// <summary>
         /// Creates a new <see cref="ISession" />.
         /// </summary>
         public ISession NewSession(Action<CommandResult> resultHandler)
@@ -88,7 +107,7 @@ namespace Chel
             var variables = sessionObjects.Resolve(typeof(VariableCollection)) as VariableCollection;
             var parameterBinder = new CommandParameterBinder(_commandRegistry, _variableReplacer, variables);
             
-            var session = new Session(_parser, factory, parameterBinder, resultHandler);
+            var session = new Session(_parser, factory, parameterBinder, _scriptProvidersCollection, resultHandler);
             sessionObjects.RegisterInstance<ISession>(session);
 
             return session;

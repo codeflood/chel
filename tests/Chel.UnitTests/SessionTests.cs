@@ -5,6 +5,7 @@ using Chel.Abstractions.Results;
 using Chel.Abstractions.Types;
 using Chel.Abstractions.UnitTests.SampleCommands;
 using Chel.Abstractions.Variables;
+using Chel.Commands;
 using Chel.Exceptions;
 using Chel.Parsing;
 using Chel.UnitTests.SampleCommands;
@@ -23,6 +24,7 @@ namespace Chel.UnitTests
                     null,
                     Substitute.For<ICommandFactory>(),
                     Substitute.For<ICommandParameterBinder>(),
+                    Substitute.For<IScriptProvider>(),
                     _ => { }
                 );
 
@@ -39,6 +41,7 @@ namespace Chel.UnitTests
                     Substitute.For<IParser>(),
                     null,
                     Substitute.For<ICommandParameterBinder>(),
+                    Substitute.For<IScriptProvider>(),
                     _ => { }
                 );
 
@@ -55,12 +58,30 @@ namespace Chel.UnitTests
                     Substitute.For<IParser>(),
                     Substitute.For<ICommandFactory>(),
                     null,
+                    Substitute.For<IScriptProvider>(),
                     _ => { }
                 );
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
             Assert.Equal("parameterBinder", ex.ParamName);
+        }
+
+        [Fact]
+        public void Ctor_ScriptProvidersIsNull_ThrowsException()
+        {
+            // arrange
+            Action sutAction = () => new Session(
+                    Substitute.For<IParser>(),
+                    Substitute.For<ICommandFactory>(),
+                    Substitute.For<ICommandParameterBinder>(),
+                    null,
+                    _ => { }
+                );
+
+            // act, assert
+            var ex = Assert.Throws<ArgumentNullException>(sutAction);
+            Assert.Equal("scriptProvider", ex.ParamName);
         }
 
         [Fact]
@@ -71,6 +92,7 @@ namespace Chel.UnitTests
                     Substitute.For<IParser>(),
                     Substitute.For<ICommandFactory>(),
                     Substitute.For<ICommandParameterBinder>(),
+                    Substitute.For<IScriptProvider>(),
                     null
                 );
 
@@ -90,7 +112,7 @@ namespace Chel.UnitTests
         }
 
         [Fact]
-        private void Execute_SingleCommandNotRegistered_PassesCommandNotFoundResultToHandler()
+        public void Execute_SingleCommandNotRegistered_PassesCommandNotFoundResultToHandler()
         {
             // arrange
             CommandResult executionResult = null;
@@ -106,7 +128,7 @@ namespace Chel.UnitTests
         }
 
         [Fact]
-        private void Execute_ErrorOnLine2_ReportsFailureOnLine2()
+        public void Execute_ErrorOnLine2_ReportsFailureOnLine2()
         {
             // arrange
             CommandResult executionResult = null;
@@ -122,7 +144,51 @@ namespace Chel.UnitTests
         }
 
         [Fact]
-        private void Execute_SingleCommand_PassesCommandResultToHandler()
+        public void Execute_CommandIsScript_ExecutesScript()
+        {
+            // arrange
+            var scriptProvider = Substitute.For<IScriptProvider>();
+            scriptProvider.GetScriptSource(null, "script").Returns("echo hi");
+
+            CommandResult executionResult = null;
+            var sut = CreateSession(
+                result => executionResult = result,
+                null,
+                scriptProvider,
+                typeof(Echo));
+
+            // act
+            sut.Execute("script");
+
+            // assert
+            var valueResult = Assert.IsType<ValueResult>(executionResult);
+            Assert.Equal("hi", valueResult.Value.ToString());
+        }
+
+        [Fact]
+        public void Execute_ScriptNameSameAsCommandName_ExecutesCommand()
+        {
+            // arrange
+            var scriptProvider = Substitute.For<IScriptProvider>();
+            scriptProvider.GetScriptSource(null, "echo").Returns("echo hi");
+
+            CommandResult executionResult = null;
+            var sut = CreateSession(
+                result => executionResult = result,
+                null,
+                scriptProvider,
+                typeof(Echo));
+
+            // act
+            sut.Execute("echo");
+
+            // assert
+            var valueResult = Assert.IsType<ValueResult>(executionResult);
+            Assert.Empty(valueResult.Value.ToString());
+        }
+
+        [Fact]
+        public void Execute_Script_PassesCommandResultToHandler()
         {
             // arrange
             CommandResult executionResult = null;
@@ -173,9 +239,10 @@ namespace Chel.UnitTests
 
             var factory = Substitute.For<ICommandFactory>();
             var binder = Substitute.For<ICommandParameterBinder>();
+            var scriptProvider = Substitute.For<IScriptProvider>();
 
             FailureResult executionResult = null;
-            var sut = new Session(parser, factory, binder, result => executionResult = result as FailureResult);
+            var sut = new Session(parser, factory, binder, scriptProvider, result => executionResult = result as FailureResult);
 
             // act
             sut.Execute("command");
@@ -198,9 +265,10 @@ namespace Chel.UnitTests
             factory.Create(Arg.Any<CommandInput>()).Returns(x => { throw new Exception(); });
 
             var binder = Substitute.For<ICommandParameterBinder>();
+            var scriptProvider = Substitute.For<IScriptProvider>();
 
             FailureResult executionResult = null;
-            var sut = new Session(parser, factory, binder, result => executionResult = result as FailureResult);
+            var sut = new Session(parser, factory, binder, scriptProvider, result => executionResult = result as FailureResult);
 
             // act
             sut.Execute("command");
@@ -248,6 +316,7 @@ namespace Chel.UnitTests
                     x.Register<VariableCollection>();
                     ((VariableCollection)x.Resolve(typeof(VariableCollection))).Set(new Variable("foo", new Literal("lorem")));
                 },
+                null,
                 typeof(NamedParameterCommand));
 
             // act
@@ -417,12 +486,13 @@ namespace Chel.UnitTests
 
         private Session CreateSession(Action<CommandResult> resultHandler, params Type[] commandTypes)
         {
-            return CreateSession(resultHandler, null, commandTypes);
+            return CreateSession(resultHandler, null, null, commandTypes);
         }
 
         private Session CreateSession(
             Action<CommandResult> resultHandler,
             Action<ScopedObjectRegistry> sessionObjectsConfigurator = null,
+            IScriptProvider scriptProvider = null,
             params Type[] commandTypes)
         {
             var nameValidator = new NameValidator();
@@ -444,7 +514,13 @@ namespace Chel.UnitTests
             var replacer = new VariableReplacer();
             var binder = new CommandParameterBinder(registry, replacer, variables);
 
-            return new Session(parser, factory, binder, resultHandler);
+            if(scriptProvider == null)
+            {
+                scriptProvider = Substitute.For<IScriptProvider>();
+                scriptProvider.GetScriptSource(Arg.Any<string>(), Arg.Any<string>()).Returns((string)null);
+            }
+
+            return new Session(parser, factory, binder, scriptProvider, resultHandler);
         }
     }
 }

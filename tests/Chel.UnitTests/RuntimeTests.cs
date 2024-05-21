@@ -4,7 +4,6 @@ using Chel.Abstractions.Results;
 using Chel.Abstractions.Types;
 using Chel.Commands;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace Chel.UnitTests
 {
@@ -87,6 +86,22 @@ namespace Chel.UnitTests
         }
 
         [Fact]
+        public void NewSession_WhenCalled_CommandServicesAreAvailable()
+        {
+            // arrange
+            var sut = new Runtime();
+            sut.RegisterCommandType(typeof(StandardCommandServicesDependencyCommand));
+            CommandResult commandResult = null;
+
+            // act
+            var session = sut.NewSession(result => commandResult = result);
+            session.Execute("cmd");
+
+            // assert
+            Assert.IsType<SuccessResult>(commandResult);
+        }
+
+        [Fact]
         public void RegisterCommandService_ServiceIsNull_ThrowsException()
         {
             // arrange
@@ -96,6 +111,18 @@ namespace Chel.UnitTests
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
             Assert.Equal("service", ex.ParamName);
+        }
+
+        [Fact]
+        public void RegisterScriptProvider_ProviderIsNull_Throws()
+        {
+            // arrange
+            var sut = new Runtime();
+            Action sutAction = () => sut.RegisterScriptProvider(null);
+
+            // act, assert
+            var ex = Assert.Throws<ArgumentNullException>(sutAction);
+            Assert.Equal("provider", ex.ParamName);
         }
     }
 }

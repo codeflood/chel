@@ -19,6 +19,7 @@ namespace Chel.Sandbox
 
             runtime.RegisterCommandService<IParameterParser>(new ParameterParser());
 
+            runtime.RegisterCommandType(typeof(Scripts));
             runtime.RegisterCommandType(typeof(Echo));
             runtime.RegisterCommandType(typeof(If));
             runtime.RegisterCommandType(typeof(Equals));
@@ -26,6 +27,8 @@ namespace Chel.Sandbox
             runtime.RegisterCommandType(typeof(Not));
             runtime.RegisterCommandType(typeof(Chel.Sandbox.Commands.Random));
             runtime.RegisterCommandType(typeof(Exit));
+
+            runtime.RegisterScriptProvider(new DirectoryScriptProvider("scripts"));
 
             var exit = false;
             var session = runtime.NewSession(result => 
