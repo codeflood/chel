@@ -9,7 +9,7 @@ namespace Chel.Abstractions
     public class ApplicationTextResolver
     {
         private static object _instanceCreationLock = new();
-        private static ApplicationTextResolver _instance;
+        private static ApplicationTextResolver? _instance;
 
         private Dictionary<string, string> _defaultTexts;
 
@@ -103,6 +103,7 @@ namespace Chel.Abstractions
                 { ApplicationTexts.Required, "Required" },
                 { ApplicationTexts.ServiceTypeAlreadyRegistered, "The service type {0} has already been registered" },
                 { ApplicationTexts.SpecificCommandHelp, "For help on a specific command pass the name of the command to the 'help' command." },
+                { ApplicationTexts.SpecificModuleHelp, "For help on a specific module pass the name of the module followed by ':' to the 'help' command." },
                 { ApplicationTexts.SubcommandResultMustBeChelType, "Subcommand result must be of type ChelType" },
                 { ApplicationTexts.TextForCultureAlreadyAdded, "Text for culture '{0}' has already been added" },
                 { ApplicationTexts.TypeIsNotACommand, "{0} is not a command" },

@@ -9,6 +9,8 @@ namespace Chel.Abstractions.Parsing
     /// </summary>
     public class CommandInput : SourceCommandParameter
     {
+        internal List<ICommandParameter> _parameters = new();
+
         /// <summary>
         /// Gets the identifier of the command to execute.
         /// </summary>
@@ -17,12 +19,12 @@ namespace Chel.Abstractions.Parsing
         /// <summary>
         /// Gets or sets a value to substitute in place of this command input.
         /// </summary>
-        public ChelType SubstituteValue { get; set; }
+        public ChelType? SubstituteValue { get; set; }
 
         /// <summary>
         /// Gets the parameters for the command.
         /// </summary>
-        public IReadOnlyList<ICommandParameter> Parameters { get; private set; }
+        public IReadOnlyList<ICommandParameter> Parameters => _parameters;
 
         private CommandInput(SourceLocation sourceLocation)
             : base(sourceLocation)
@@ -73,9 +75,7 @@ namespace Chel.Abstractions.Parsing
         /// </summary>
         public class Builder
         {
-            private readonly SourceLocation _sourceLocation;
-            private readonly ExecutionTargetIdentifier _commandIdentifier;
-            private readonly List<ICommandParameter> _parameters;
+            private readonly CommandInput _commandInput;
 
             /// <summary>
             /// Create a new instance.
@@ -87,10 +87,10 @@ namespace Chel.Abstractions.Parsing
                 if(commandIdentifier.Name.Equals(string.Empty))
                     throw ExceptionFactory.CreateArgumentException(ApplicationTexts.ArgumentCannotBeEmpty, nameof(commandIdentifier.Name), nameof(commandIdentifier.Name));
 
-                _sourceLocation = sourceLocation;
-                _commandIdentifier = commandIdentifier;
-
-                _parameters = new List<ICommandParameter>();
+                _commandInput = new CommandInput(sourceLocation)
+                {
+                    CommandIdentifier = commandIdentifier
+                };
             }
 
             /// <summary>
@@ -102,7 +102,7 @@ namespace Chel.Abstractions.Parsing
                 if(value == null)
                     throw new ArgumentNullException(nameof(value));
 
-                _parameters.Add(value);
+                _commandInput._parameters.Add(value);
             }
 
             /// <summary>
@@ -110,13 +110,7 @@ namespace Chel.Abstractions.Parsing
             /// </summary>
             public CommandInput Build()
             {
-                var commandInput = new CommandInput(_sourceLocation)
-                {
-                    CommandIdentifier = _commandIdentifier,
-                    Parameters = new List<ICommandParameter>(_parameters),
-                };
-
-                return commandInput;
+                return _commandInput;
             }
         }
     }

@@ -1,53 +1,52 @@
 using System;
 using System.Reflection;
 
-namespace Chel.Abstractions
+namespace Chel.Abstractions;
+
+/// <summary>
+/// A descriptor for a command parameter.
+/// </summary>
+public abstract class ParameterDescriptor
 {
+    private ITextResolver _descriptions;
+
     /// <summary>
-    /// A descriptor for a command parameter.
+    /// Gets the property the parameter will be bound to.
     /// </summary>
-    public abstract class ParameterDescriptor
+    public PropertyDescriptor Property { get; }
+
+    /// <summary>
+    /// Gets whether the parameter is required or not.
+    /// </summary>
+    public bool Required { get; }
+
+    /// <summary>
+    /// Create a new instance.
+    /// </summary>
+    /// <param name="property">The property the parameter will be bound to.</param>
+    /// <param name="descriptions">The descriptions for the parameter.</param>
+    /// <param name="required">Indicates whether the parameter is required or not.</param>
+    protected ParameterDescriptor(PropertyInfo property, ITextResolver descriptions, bool required)
     {
-        private ITextResolver _descriptions = null;
+        if(property == null)
+            throw new ArgumentNullException(nameof(property));
 
-        /// <summary>
-        /// Gets the property the parameter will be bound to.
-        /// </summary>
-        public PropertyDescriptor Property { get; }
+        if(descriptions == null)
+            throw new ArgumentNullException(nameof(descriptions));
 
-        /// <summary>
-        /// Gets whether the parameter is required or not.
-        /// </summary>
-        public bool Required { get; }
+        Property = new PropertyDescriptor(property);
+        _descriptions = descriptions;
+        Required = required;
+    }
 
-        /// <summary>
-        /// Create a new instance.
-        /// </summary>
-        /// <param name="property">The property the parameter will be bound to.</param>
-        /// <param name="descriptions">The descriptions for the parameter.</param>
-        /// <param name="required">Indicates whether the parameter is required or not.</param>
-        protected ParameterDescriptor(PropertyInfo property, ITextResolver descriptions, bool required)
-        {
-            if(property == null)
-                throw new ArgumentNullException(nameof(property));
+    /// <summary>
+    /// Gets a description in the specified culture.
+    /// </summary>
+    public string? GetDescription(string cultureName)
+    {
+        if(cultureName == null)
+            throw new ArgumentNullException(nameof(cultureName));
 
-            if(descriptions == null)
-                throw new ArgumentNullException(nameof(descriptions));
-
-            Property = new PropertyDescriptor(property);
-            _descriptions = descriptions;
-            Required = required;
-        }
-
-        /// <summary>
-        /// Gets a description in the specified culture.
-        /// </summary>
-        public string GetDescription(string cultureName)
-        {
-            if(cultureName == null)
-                throw new ArgumentNullException(nameof(cultureName));
-
-            return _descriptions.GetText(cultureName);
-        }
+        return _descriptions.GetText(cultureName);
     }
 }

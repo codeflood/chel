@@ -24,12 +24,12 @@ namespace Chel.Abstractions
         /// <summary>
         /// Gets the type of the generic value, or null if the type is not generic.
         /// </summary>
-        public Type GenericValueType { get; private set; } = null;
+        public Type? GenericValueType { get; private set; } = null;
 
         /// <summary>
         /// Gets the type of the generic key, or null if the type is not generic.
         /// </summary>
-        public Type GenericKeyType { get; private set; } = null;
+        public Type? GenericKeyType { get; private set; } = null;
 
         /// <summary>
         /// Creates a new instance.

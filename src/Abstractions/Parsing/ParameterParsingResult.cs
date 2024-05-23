@@ -11,12 +11,12 @@ namespace Chel.Abstractions.Parsing
         /// <summary>
         /// Gets the error message for the result, if it was not successful.
         /// </summary>
-        public string ErrorMessage { get; } = null;
+        public string? ErrorMessage { get; } = null;
 
         /// <summary>
         /// Gets the value of the result, if it was successful.
         /// </summary>
-        public T Value { get; }
+        public T? Value { get; }
 
         /// <summary>
         /// Indicates whether the result is successful.

@@ -3,59 +3,58 @@ using System.Collections.Generic;
 using System.Globalization;
 using Chel.Abstractions;
 
-namespace Chel
+namespace Chel;
+
+/// <summary>
+/// A collection of localised text.
+/// </summary>
+public class LocalisedTexts : ITextResolver
 {
-    /// <summary>
-    /// A collection of localised text.
-    /// </summary>
-    public class LocalisedTexts : ITextResolver
+    private Dictionary<string, string> _descriptions = new Dictionary<string, string>();
+    
+    public string? GetText(string cultureName)
     {
-        private Dictionary<string, string> _descriptions = new Dictionary<string, string>();
-        
-        public string GetText(string cultureName)
+        if(cultureName == null)
+            throw new ArgumentNullException(nameof(cultureName));
+
+        if(_descriptions.ContainsKey(cultureName))
+            return _descriptions[cultureName];
+
+        // Try for a less specific culture
+        var culture = new CultureInfo(cultureName);
+
+        while(culture != null)
         {
-            if(cultureName == null)
-                throw new ArgumentNullException(nameof(cultureName));
+            culture = culture.Parent;
 
-            if(_descriptions.ContainsKey(cultureName))
-                return _descriptions[cultureName];
+            if(_descriptions.ContainsKey(culture.Name))
+                return _descriptions[culture.Name];
 
-            // Try for a less specific culture
-            var culture = new CultureInfo(cultureName);
-
-            while(culture != null)
-            {
-                culture = culture.Parent;
-
-                if(_descriptions.ContainsKey(culture.Name))
-                    return _descriptions[culture.Name];
-
-                if(culture == culture.Parent)
-                    culture = null;
-            }
-
-            return null;
+            if(culture == culture.Parent)
+                culture = null;
         }
 
-        /// <summary>
-        /// Adds the text for a specific culture.
-        /// </summary>
-        /// <param name="text">The text to add.</param>
-        /// <param name="cultureName">The name of the culture the text is for.</param>
-        public void AddText(string text, string cultureName)
-        {
-            if(text == null)
-                throw new ArgumentNullException(nameof(text));
+        return null;
+    }
 
-            if(string.IsNullOrEmpty(text))
-                throw ExceptionFactory.CreateArgumentException(ApplicationTexts.ParameterCannotBeEmpty, nameof(text), nameof(text));
+    /// <summary>
+    /// Adds the text for a specific culture.
+    /// </summary>
+    /// <param name="text">The text to add.</param>
+    /// <param name="cultureName">The name of the culture the text is for.</param>
+    public void AddText(string text, string cultureName)
+    {
+        if(text == null)
+            throw new ArgumentNullException(nameof(text));
 
-            var key = cultureName ?? CultureInfo.InvariantCulture.Name;
+        if(string.IsNullOrEmpty(text))
+            throw ExceptionFactory.CreateArgumentException(ApplicationTexts.ParameterCannotBeEmpty, nameof(text), nameof(text));
 
-            if(_descriptions.ContainsKey(key))
-                throw ExceptionFactory.CreateInvalidOperationException(ApplicationTexts.TextForCultureAlreadyAdded, key);
+        var key = cultureName ?? CultureInfo.InvariantCulture.Name;
 
-            _descriptions.Add(key, text);
-        }
+        if(_descriptions.ContainsKey(key))
+            throw ExceptionFactory.CreateInvalidOperationException(ApplicationTexts.TextForCultureAlreadyAdded, key);
+
+        _descriptions.Add(key, text);
     }
 }

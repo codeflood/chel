@@ -71,6 +71,7 @@ namespace Chel.Abstractions
         public const string Required = "Required";
         public const string ServiceTypeAlreadyRegistered = "ServiceTypeAlreadyRegistered";
         public const string SpecificCommandHelp = "SpecificCommandHelp";
+        public const string SpecificModuleHelp = "SpecificModuleHelp";
         public const string SubcommandResultMustBeChelType = "SubcommandResultMustBeChelType";
         public const string TextForCultureAlreadyAdded = "TextForCultureAlreadyAdded";
         public const string TypeIsNotACommand = "TypeIsNotACommand";

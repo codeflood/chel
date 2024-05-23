@@ -60,6 +60,8 @@ namespace Chel.Commands
                 ListModules(output);
                 output.Append(Environment.NewLine);
                 output.Append(ApplicationTextResolver.Instance.Resolve(ApplicationTexts.SpecificCommandHelp));
+                output.Append(Environment.NewLine);
+                output.Append(ApplicationTextResolver.Instance.Resolve(ApplicationTexts.SpecificModuleHelp));
             }
 
             return new ValueResult(new Literal(output.ToString()));
@@ -107,6 +109,7 @@ namespace Chel.Commands
             }
 
             output.Remove(output.Length - 2, 2);
+            output.Append(Environment.NewLine);
         }
 
         private bool DetailCommand(StringBuilder output, ExecutionTargetIdentifier commandIdentifier)

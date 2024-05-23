@@ -55,7 +55,7 @@ namespace Chel.Abstractions.Variables
         /// <summary>
         /// Gets a variable from the collection.
         /// </summary>
-        public Variable Get(string name)
+        public Variable? Get(string name)
         {
             if(name == null)
                 throw new ArgumentNullException(nameof(name));
