@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Chel.Abstractions.Results;
 using Chel.Abstractions.Types;
 using Chel.Commands;
+using Chel.UnitTests.SampleCommands;
 using Xunit;
 
 namespace Chel.UnitTests
