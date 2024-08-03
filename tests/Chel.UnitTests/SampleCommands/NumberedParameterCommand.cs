@@ -10,11 +10,11 @@ namespace Chel.UnitTests.SampleCommands
     {
         [NumberedParameter(1, "param1")]
         [Description("The first parameter")]
-        public string NumberedParameter1 { get; set; }
+        public string? NumberedParameter1 { get; set; }
 
         [NumberedParameter(2, "param2")]
         [Description("The second parameter")]
-        public string NumberedParameter2 { get; set; }
+        public string? NumberedParameter2 { get; set; }
 
         public NumberedParameterCommand()
         {

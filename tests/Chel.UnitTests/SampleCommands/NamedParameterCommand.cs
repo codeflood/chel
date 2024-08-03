@@ -10,11 +10,11 @@ namespace Chel.UnitTests.SampleCommands
     {
         [NamedParameter("param1", "value1")]
         [Description("The param1 parameter.")]
-        public string NamedParameter1 { get; set; }
+        public string? NamedParameter1 { get; set; }
 
         [NamedParameter("param2", "value2")]
         [Description("The param2 parameter.")]
-        public string NamedParameter2 { get; set; }
+        public string? NamedParameter2 { get; set; }
 
         public NamedParameterCommand()
         {

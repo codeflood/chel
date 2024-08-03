@@ -12,7 +12,7 @@ namespace Chel.UnitTests.Exceptions
         public void Ctor_CommandTypeIsNull_ThrowsException()
         {
             // arrange
-            Action sutAction = () => new CommandNameAlreadyUsedException(new ExecutionTargetIdentifier("module", "command"), null, typeof(SampleCommand));
+            Action sutAction = () => new CommandNameAlreadyUsedException(new ExecutionTargetIdentifier("module", "command"), null!, typeof(SampleCommand));
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -23,7 +23,7 @@ namespace Chel.UnitTests.Exceptions
         public void Ctor_OtherCommandTypeIsNull_ThrowsException()
         {
             // arrange
-            Action sutAction = () => new CommandNameAlreadyUsedException(new ExecutionTargetIdentifier("module", "command"), typeof(SampleCommand), null);
+            Action sutAction = () => new CommandNameAlreadyUsedException(new ExecutionTargetIdentifier("module", "command"), typeof(SampleCommand), null!);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);

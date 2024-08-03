@@ -14,7 +14,7 @@ namespace Chel.UnitTests.Commands
         public void Ctor_CommandRegistryIsNull_ThrowsException()
         {
             // arrange
-            Action sutAction = () => new Help(null, new ExecutionTargetIdentifierParser());
+            Action sutAction = () => new Help(null!, new ExecutionTargetIdentifierParser());
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -28,7 +28,7 @@ namespace Chel.UnitTests.Commands
             var nameValidator = new NameValidator();
             var descriptorGenerator = new CommandAttributeInspector();
             var registry = new CommandRegistry(nameValidator, descriptorGenerator);
-            Action sutAction = () => new Help(registry, null);
+            Action sutAction = () => new Help(registry, null!);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -42,7 +42,7 @@ namespace Chel.UnitTests.Commands
             var sut = CreateSut(typeof(Help), typeof(NumberedParameterCommand));
 
             // act
-            var result = sut.Execute() as ValueResult;
+            var result = (ValueResult)sut.Execute();
 
             // assert
             var commands = Assert.IsType<Literal>(result.Value);
@@ -57,7 +57,7 @@ namespace Chel.UnitTests.Commands
             var sut = CreateSut(typeof(Help), typeof(NumberedParameterModuleCommand), typeof(DuplicateSampleCommandDifferentModule));
 
             // act
-            var result = sut.Execute() as ValueResult;
+            var result = (ValueResult)sut.Execute();
 
             // assert
             var commands = Assert.IsType<Literal>(result.Value);
@@ -72,7 +72,7 @@ namespace Chel.UnitTests.Commands
             var sut = CreateSut(typeof(Help), typeof(AnotherCommandDifferentModuleUppercase), typeof(NumberedParameterModuleCommand), typeof(DuplicateSampleCommandDifferentModule));
 
             // act
-            var result = sut.Execute() as ValueResult;
+            var result = (ValueResult)sut.Execute();
 
             // assert
             var commands = Assert.IsType<Literal>(result.Value);
@@ -87,7 +87,7 @@ namespace Chel.UnitTests.Commands
             var sut = CreateSut(typeof(Help), typeof(NumberedParameterCommand));
 
             // act
-            var result = sut.Execute() as ValueResult;
+            var result = (ValueResult)sut.Execute();
 
             // assert
             var commands = Assert.IsType<Literal>(result.Value);
@@ -102,7 +102,7 @@ namespace Chel.UnitTests.Commands
             var sut = CreateSut(typeof(Var), typeof(NumberedParameterCommand), typeof(Help));
 
             // act
-            var result = sut.Execute() as ValueResult;
+            var result = (ValueResult)sut.Execute();
 
             // assert
             var commands = Assert.IsType<Literal>(result.Value);
@@ -125,7 +125,7 @@ namespace Chel.UnitTests.Commands
             var sut = new Help(registry, new ExecutionTargetIdentifierParser());
 
             // act
-            var result = sut.Execute() as ValueResult;
+            var result = (ValueResult)sut.Execute();
 
             // assert
             Assert.Contains("sample2", result.Value.ToString());
@@ -139,7 +139,7 @@ namespace Chel.UnitTests.Commands
             sut.CommandIdentifier = "num";
 
             // act
-            var result = sut.Execute() as ValueResult;
+            var result = (ValueResult)sut.Execute();
 
             // assert
             Assert.Contains("usage: num [param1] [param2]", result.Value.ToString());
@@ -158,11 +158,11 @@ namespace Chel.UnitTests.Commands
             sut.CommandIdentifier = commandIdentifier;
 
             // act
-            var result = sut.Execute() as ValueResult;
+            var result = (ValueResult)sut.Execute();
 
             // assert
             var commands = Assert.IsType<Literal>(result.Value);
-            var commandLines = (result.Value as Literal).Value.Split(Environment.NewLine);
+            var commandLines = ((Literal)result.Value).Value.Split(Environment.NewLine);
 
             Assert.Contains(commandLines, x => x.StartsWith("num"));
             Assert.DoesNotContain(commandLines, x => x.StartsWith("nam"));
@@ -176,7 +176,7 @@ namespace Chel.UnitTests.Commands
             sut.CommandIdentifier = "bad:";
 
             // act
-            var result = sut.Execute() as FailureResult;
+            var result = (FailureResult)sut.Execute();
 
             // assert
         Assert.Equal("Cannot display help for unknown module 'bad'", result.Message);
@@ -190,7 +190,7 @@ namespace Chel.UnitTests.Commands
             sut.CommandIdentifier = "mod:num";
 
             // act
-            var result = sut.Execute() as ValueResult;
+            var result = (ValueResult)sut.Execute();
 
             // assert
             Assert.Contains("usage: mod:num [param1] [param2]", result.Value.ToString());
@@ -207,7 +207,7 @@ namespace Chel.UnitTests.Commands
             sut.CommandIdentifier = "NUM";
 
             // act
-            var result = sut.Execute() as ValueResult;
+            var result = (ValueResult)sut.Execute();
 
             // assert
             Assert.Contains("usage: num [param1] [param2]", result.Value.ToString());
@@ -224,7 +224,7 @@ namespace Chel.UnitTests.Commands
             sut.CommandIdentifier = "boo";
 
             // act
-            var result = sut.Execute() as FailureResult;
+            var result = (FailureResult)sut.Execute();
 
             // assert
             Assert.Equal("Cannot display help for unknown command 'boo'", result.Message);
@@ -238,7 +238,7 @@ namespace Chel.UnitTests.Commands
             sut.CommandIdentifier = "command";
 
             // act
-            var result = sut.Execute() as ValueResult;
+            var result = (ValueResult)sut.Execute();
 
             // assert
             Assert.Contains("usage: command param", result.Value.ToString());
@@ -253,7 +253,7 @@ namespace Chel.UnitTests.Commands
             sut.CommandIdentifier = "command";
 
             // act
-            var result = sut.Execute() as ValueResult;
+            var result = (ValueResult)sut.Execute();
 
             // assert
             Assert.Contains("usage: command -param <value>", result.Value.ToString());
@@ -268,7 +268,7 @@ namespace Chel.UnitTests.Commands
             sut.CommandIdentifier = "nam";
 
             // act
-            var result = sut.Execute() as ValueResult;
+            var result = (ValueResult)sut.Execute();
 
             // assert
             Assert.Contains("usage: nam [-param1 <value1>] [-param2 <value2>]", result.Value.ToString());
@@ -284,7 +284,7 @@ namespace Chel.UnitTests.Commands
             sut.CommandIdentifier = "command";
 
             // act
-            var result = sut.Execute() as ValueResult;
+            var result = (ValueResult)sut.Execute();
 
             // assert
             Assert.Contains("usage: command [-p1] [-p2]", result.Value.ToString());

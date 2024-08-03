@@ -8,10 +8,10 @@ namespace Chel.UnitTests.SampleCommands
     public class NamedAndNumberedParameterCommand : ICommand
     {
         [NamedParameter("named", "named")]
-        public string NamedParameter { get; set; }
+        public string? NamedParameter { get; set; }
 
         [NumberedParameter(1, "num")]
-        public string NumberedParameter { get; set; }
+        public string? NumberedParameter { get; set; }
 
         public CommandResult Execute()
         {

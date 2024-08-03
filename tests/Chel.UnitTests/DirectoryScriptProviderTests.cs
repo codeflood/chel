@@ -10,7 +10,7 @@ public class DirectoryScriptProviderTests
     public void Ctor_PathIsNull_Throws()
     {
         // arrange
-        Action sutAction = () => new DirectoryScriptProvider(null);
+        Action sutAction = () => new DirectoryScriptProvider(null!);
 
         // act
         var ex = Assert.Throws<ArgumentNullException>(sutAction);

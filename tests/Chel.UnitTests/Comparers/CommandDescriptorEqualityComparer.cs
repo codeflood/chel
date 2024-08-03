@@ -3,9 +3,9 @@ using Chel.Abstractions;
 
 namespace Chel.UnitTests.Comparers
 {
-    public class CommandDescriptorEqualityComparer : IEqualityComparer<CommandDescriptor>
+    public class CommandDescriptorEqualityComparer : IEqualityComparer<CommandDescriptor?>
     {
-        public bool Equals(CommandDescriptor x, CommandDescriptor y)
+        public bool Equals(CommandDescriptor? x, CommandDescriptor? y)
         {
             if(x == null || y == null)
                 return false;

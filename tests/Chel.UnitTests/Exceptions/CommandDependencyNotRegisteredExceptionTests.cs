@@ -10,7 +10,7 @@ namespace Chel.UnitTests.Exceptions
         public void Ctor_TypeIsNull_ThrowsException()
         {
             // arrange
-            Action sutAction = () => new CommandDependencyNotRegisteredException(null);
+            Action sutAction = () => new CommandDependencyNotRegisteredException(null!);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);

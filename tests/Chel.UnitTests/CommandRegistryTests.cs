@@ -16,7 +16,7 @@ namespace Chel.UnitTests
         {
             // arrange
             var descriptorGenerator = new CommandAttributeInspector();
-            Action sutAction = () => new CommandRegistry(null, descriptorGenerator);
+            Action sutAction = () => new CommandRegistry(null!, descriptorGenerator);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -28,7 +28,7 @@ namespace Chel.UnitTests
         {
             // arrange
             var nameValidator = new NameValidator();
-            Action sutAction = () => new CommandRegistry(nameValidator, null);
+            Action sutAction = () => new CommandRegistry(nameValidator, null!);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -40,7 +40,7 @@ namespace Chel.UnitTests
         {
             // arrange
             var sut = CreateCommandRegistry();
-            Action sutAction = () => sut.Register(null);
+            Action sutAction = () => sut.Register(null!);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);

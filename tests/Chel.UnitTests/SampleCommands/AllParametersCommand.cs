@@ -9,10 +9,10 @@ namespace Chel.UnitTests.SampleCommands
     public class AllParametersCommand : ICommand
     {
         [NumberedParameter(1, "num")]
-        public string NumberedParameter { get; set; }
+        public string? NumberedParameter { get; set; }
 
         [NamedParameter("named", "value")]
-        public string NamedParameter { get; set; }
+        public string? NamedParameter { get; set; }
 
         [FlagParameter("flag")]
         public bool FlagParameter { get; set; }

@@ -10,7 +10,7 @@ namespace Chel.UnitTests.Exceptions
         public void Ctor_VariableNameIsNull_ThrowsException()
         {
             // arrange
-            Action sutAction = () => new UnsetVariableException(null);
+            Action sutAction = () => new UnsetVariableException(null!);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);

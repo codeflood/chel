@@ -8,7 +8,7 @@ namespace Chel.UnitTests.SampleCommands
     [Command("alpha")]
     public class ServiceDependencyCommand : ICommand
     {
-        private ISampleService _service = null;
+        private ISampleService _service;
 
         public ServiceDependencyCommand(ISampleService service)
         {

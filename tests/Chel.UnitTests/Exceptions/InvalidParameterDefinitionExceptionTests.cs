@@ -11,7 +11,7 @@ namespace Chel.UnitTests
         public void Ctor_PropertyIsNull_ThrowsException()
         {
             // arrange
-            Action sutAction = () => new InvalidParameterDefinitionException(null, "");
+            Action sutAction = () => new InvalidParameterDefinitionException(null!, "");
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -25,7 +25,7 @@ namespace Chel.UnitTests
             var property = typeof(NumberedParameterCommand).GetProperty("NumberedParameter1");
 
             // act
-            var sut = new InvalidParameterDefinitionException(property, "message");
+            var sut = new InvalidParameterDefinitionException(property!, "message");
 
             // assert
             Assert.Equal(property, sut.Property);

@@ -13,7 +13,7 @@ namespace Chel.UnitTests.Commands
         public void Ctor_SessionIsNull_ThrowsException()
         {
             // arrange
-            Action sutAction = () => new If(null);
+            Action sutAction = () => new If(null!);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);

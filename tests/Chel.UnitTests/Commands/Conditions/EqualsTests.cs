@@ -14,7 +14,7 @@ namespace Chel.UnitTests.Commands.Conditions
         public void Ctor_ParameterParserIsNull_Throws()
         {
             // act, assert
-            var ex = Assert.Throws<ArgumentNullException>(() => new Equals(null));
+            var ex = Assert.Throws<ArgumentNullException>(() => new Equals(null!));
             Assert.Equal("parameterParser", ex.ParamName);
         }
 

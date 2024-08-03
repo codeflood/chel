@@ -11,7 +11,7 @@ namespace Chel.UnitTests
         {
             // arrange
             var sut = new CommandServices();
-            Action sutAction = () => sut.Register<object>(null);
+            Action sutAction = () => sut.Register<object>(null!);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);

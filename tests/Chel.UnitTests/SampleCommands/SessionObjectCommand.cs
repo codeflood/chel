@@ -8,7 +8,7 @@ namespace Chel.UnitTests.SampleCommands
     [Command("alpha")]
     public class SessionObjectCommand : ICommand
     {
-        private GoodObject _sessionObject = null;
+        private GoodObject _sessionObject;
 
         public SessionObjectCommand(GoodObject sessionObject)
         {

@@ -30,7 +30,7 @@ namespace Chel.UnitTests.SampleCommands
         public double Double { get; set; }
 
         [NamedParameter("string", "value")]
-        public string String { get; set; }
+        public string? String { get; set; }
 
         [NamedParameter("date", "value")]
         public DateTime Date { get; set; }
@@ -43,7 +43,7 @@ namespace Chel.UnitTests.SampleCommands
 
         [NamedParameter("complex", "value")]
         [TypeConverter(typeof(StringToComplexTypeTypeConverter))]
-        public ComplexType ComplexType { get; set; }
+        public ComplexType? ComplexType { get; set; }
 
         public CommandResult Execute()
         {

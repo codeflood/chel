@@ -17,7 +17,7 @@ namespace Chel.UnitTests
         public void Ctor_CommandRegistryIsNull_ThrowsException()
         {
             // arrange
-            Action sutAction = () => new CommandParameterBinder(null, new VariableReplacer(), new VariableCollection());
+            Action sutAction = () => new CommandParameterBinder(null!, new VariableReplacer(), new VariableCollection());
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -31,7 +31,7 @@ namespace Chel.UnitTests
             var nameValidator = new NameValidator();
             var descriptorGenerator = new CommandAttributeInspector();
             var registry = new CommandRegistry(nameValidator, descriptorGenerator);
-            Action sutAction = () => new CommandParameterBinder(registry, null, new VariableCollection());
+            Action sutAction = () => new CommandParameterBinder(registry, null!, new VariableCollection());
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -45,7 +45,7 @@ namespace Chel.UnitTests
             var nameValidator = new NameValidator();
             var descriptorGenerator = new CommandAttributeInspector();
             var registry = new CommandRegistry(nameValidator, descriptorGenerator);
-            Action sutAction = () => new CommandParameterBinder(registry, new VariableReplacer(), null);
+            Action sutAction = () => new CommandParameterBinder(registry, new VariableReplacer(), null!);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -58,7 +58,7 @@ namespace Chel.UnitTests
             // arrange
             var sut = CreateCommandParameterBinder();
             var input = CreateCommandInput("command");
-            Action sutAction = () => sut.Bind(null, input);
+            Action sutAction = () => sut.Bind(null!, input);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -71,7 +71,7 @@ namespace Chel.UnitTests
             // arrange
             var sut = CreateCommandParameterBinder();
             var command = new SampleCommand();
-            Action sutAction = () => sut.Bind(command, null);
+            Action sutAction = () => sut.Bind(command, null!);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -1118,7 +1118,7 @@ namespace Chel.UnitTests
 
             // assert
             Assert.True(result.Success);
-            Assert.Equal("name", command.ComplexType.Name);
+            Assert.Equal("name", command.ComplexType!.Name);
             Assert.Equal(42, command.ComplexType.Number);
         }
 

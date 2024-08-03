@@ -16,7 +16,7 @@ namespace Chel.UnitTests.Commands
         public void Ctor_VariablesIsNull_ThrowsException()
         {
             // arrange
-            Action sutAction = () => new Var(null, Substitute.For<INameValidator>());
+            Action sutAction = () => new Var(null!, Substitute.For<INameValidator>());
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -27,7 +27,7 @@ namespace Chel.UnitTests.Commands
         public void Ctor_NameValidatorIsNull_ThrowsException()
         {
             // arrange
-            Action sutAction = () => new Var(new VariableCollection(), null);
+            Action sutAction = () => new Var(new VariableCollection(), null!);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -41,7 +41,7 @@ namespace Chel.UnitTests.Commands
             var sut = CreateVarCommand();
 
             // act
-            var result = sut.Execute() as ValueResult;
+            var result = (ValueResult)sut.Execute();
 
             // assert
             Assert.Equal("No variables set.", result.Value.ToString());
@@ -57,13 +57,13 @@ namespace Chel.UnitTests.Commands
             });
 
             // act
-            var result = sut.Execute() as ValueResult;
+            var result = (ValueResult)sut.Execute();
 
             // assert
             var vars = Assert.IsType<Map>(result.Value);
             Assert.Equal(2, vars.Entries.Count);
-            Assert.Equal("value1", (vars.Entries["name1"] as Literal).Value);
-            Assert.Equal("value2", (vars.Entries["name2"] as Literal).Value);
+            Assert.Equal("value1", ((Literal)vars.Entries["name1"]).Value);
+            Assert.Equal("value2", ((Literal)vars.Entries["name2"]).Value);
         }
 
         [Fact]
@@ -74,7 +74,7 @@ namespace Chel.UnitTests.Commands
             sut.Name = "name";
 
             // act
-            var result = sut.Execute() as ValueResult;
+            var result = (ValueResult)sut.Execute();
 
             // assert
             Assert.Equal("Variable 'name' is not set.", result.Value.ToString());
@@ -90,7 +90,7 @@ namespace Chel.UnitTests.Commands
             sut.Name = "name";
 
             // act
-            var result = sut.Execute() as ValueResult;
+            var result = (ValueResult)sut.Execute();
 
             // assert
             Assert.Equal("value", result.Value.ToString());
@@ -126,7 +126,7 @@ namespace Chel.UnitTests.Commands
             sut.Name = "name";
 
             // act
-            var result = sut.Execute() as ValueResult;
+            var result = (ValueResult)sut.Execute();
 
             // assert
             Assert.Equal("[ val1 val2 ]", result.Value.ToString());
@@ -136,26 +136,26 @@ namespace Chel.UnitTests.Commands
         public void Execute_ValueProvided_SetsVariable()
         {
             // arrange
-            VariableCollection variables = null;
+            VariableCollection variables = null!;
             var sut = CreateVarCommand(x => variables = x);
             sut.Name = "name";
             sut.Value = new Literal("value");
 
             // act
-            var result = sut.Execute() as ValueResult;
+            var result = (ValueResult)sut.Execute();
 
             // assert
             Assert.Equal("value", result.Value.ToString());
 
             var variable = variables.Get("name");
-            Assert.Equal("value", variable.Value.ToString());
+            Assert.Equal("value", variable!.Value.ToString());
         }
 
         [Fact]
         public void Execute_ListProvided_SetsVariableAsList()
         {
             // arrange
-            VariableCollection variables = null;
+            VariableCollection variables = null!;
             var sut = CreateVarCommand(x => variables = x);
             sut.Name = "name";
             sut.Value = new List(new[] {
@@ -196,7 +196,7 @@ namespace Chel.UnitTests.Commands
             sut.Clear = true;
 
             // act
-            var result = sut.Execute() as ValueResult;
+            var result = (ValueResult)sut.Execute();
 
             // assert
             Assert.Equal("Variable 'name' is not set.", result.Value.ToString());
@@ -206,7 +206,7 @@ namespace Chel.UnitTests.Commands
         public void Execute_ClearVariableIsSet_RemovesVariable()
         {
             // arrange
-            VariableCollection variables = null;
+            VariableCollection variables = null!;
             var sut = CreateVarCommand(x => {
                 variables = x;
                 x.Set(new Variable("name", new Literal("value")));
@@ -215,7 +215,7 @@ namespace Chel.UnitTests.Commands
             sut.Clear = true;
 
             // act
-            var result = sut.Execute() as ValueResult;
+            var result = (ValueResult)sut.Execute();
 
             // assert
             Assert.Equal("Variable 'name' has been cleared.", result.Value.ToString());
@@ -223,7 +223,7 @@ namespace Chel.UnitTests.Commands
             Assert.Null(found);
         }
 
-        private Var CreateVarCommand(Action<VariableCollection> variableConfigurator = null)
+        private Var CreateVarCommand(Action<VariableCollection>? variableConfigurator = null)
         {
             var variables = new VariableCollection();
 

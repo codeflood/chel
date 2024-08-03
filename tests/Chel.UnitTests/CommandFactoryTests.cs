@@ -20,7 +20,7 @@ namespace Chel.UnitTests
             // arrange
             var services = new CommandServices();
             var scopedObjects = new ScopedObjectRegistry();
-            Action sutAction = () => new CommandFactory(null, services, scopedObjects);
+            Action sutAction = () => new CommandFactory(null!, services, scopedObjects);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -33,7 +33,7 @@ namespace Chel.UnitTests
             // arrange
             var registry = Substitute.For<ICommandRegistry>();
             var scopedObjects = new ScopedObjectRegistry();
-            Action sutAction = () => new CommandFactory(registry, null, scopedObjects);
+            Action sutAction = () => new CommandFactory(registry, null!, scopedObjects);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -46,7 +46,7 @@ namespace Chel.UnitTests
             // arrange
             var registry = Substitute.For<ICommandRegistry>();
             var services = new CommandServices();
-            Action sutAction = () => new CommandFactory(registry, services, null);
+            Action sutAction = () => new CommandFactory(registry, services, null!);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -58,7 +58,7 @@ namespace Chel.UnitTests
         {
             // arrange
             var sut = CreateCommandFactory();
-            Action sutAction = () => sut.Create(null);
+            Action sutAction = () => sut.Create(null!);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -125,7 +125,7 @@ namespace Chel.UnitTests
 
             // act
             var command = sut.Create(input);
-            var result = command.Execute();
+            var result = command!.Execute();
 
             // assert
             Assert.IsType<SuccessResult>(result);
@@ -158,7 +158,7 @@ namespace Chel.UnitTests
 
             // act
             var command = sut.Create(input);
-            var result = command.Execute();
+            var result = command!.Execute();
 
             // assert
             Assert.IsType<SuccessResult>(result);
@@ -177,16 +177,16 @@ namespace Chel.UnitTests
 
             // act
             var command = sut.Create(input);
-            var result = command.Execute();
+            var result = command!.Execute();
 
             // assert
             Assert.IsType<SuccessResult>(result);
         }
 
         private CommandFactory CreateCommandFactory(
-            Action<CommandRegistry> commandRegistryConfigurator = null,
-            Action<CommandServices> commandServicesConfigurator = null,
-            Action<ScopedObjectRegistry> scopedObjectRegistryConfigurator = null)
+            Action<CommandRegistry>? commandRegistryConfigurator = null,
+            Action<CommandServices>? commandServicesConfigurator = null,
+            Action<ScopedObjectRegistry>? scopedObjectRegistryConfigurator = null)
         {
             var nameValidator = new NameValidator();
             var descriptorGenerator = new CommandAttributeInspector();

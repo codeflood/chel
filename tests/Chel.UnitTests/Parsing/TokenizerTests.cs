@@ -12,10 +12,10 @@ namespace Chel.UnitTests.Parsing
         [Theory]
         [InlineData(null)]
         [InlineData("")]
-        public void HasMore_InputIsNullOrEmpty_ReturnsFalse(string input)
+        public void HasMore_InputIsNullOrEmpty_ReturnsFalse(string? input)
         {
             // arrange
-            var sut = new Tokenizer(input);
+            var sut = new Tokenizer(input!);
 
             // act
             var result = sut.HasMore;
@@ -57,10 +57,10 @@ namespace Chel.UnitTests.Parsing
         [Theory]
         [InlineData(null)]
         [InlineData("")]
-        public void GetNextToken_InputIsNullOrEmpty_ReturnsNull(string input)
+        public void GetNextToken_InputIsNullOrEmpty_ReturnsNull(string? input)
         {
             // arrange
-            var sut = new Tokenizer(input);
+            var sut = new Tokenizer(input!);
 
             // act
             var result = sut.GetNextToken();

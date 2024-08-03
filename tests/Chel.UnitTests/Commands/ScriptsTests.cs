@@ -14,7 +14,7 @@ public class ScriptsTests
     public void Ctor_ScriptProviderIsNull_ThrowsException()
     {
         // arrange
-        Action sutAction = () => new Scripts(null);
+        Action sutAction = () => new Scripts(null!);
 
         // act, assert
         var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -31,7 +31,7 @@ public class ScriptsTests
         var sut = new Scripts(scriptProvider);
 
         // act
-        var result = sut.Execute() as ValueResult;
+        var result = (ValueResult)sut.Execute();
 
         // assert
         var commands = Assert.IsType<List>(result.Value);

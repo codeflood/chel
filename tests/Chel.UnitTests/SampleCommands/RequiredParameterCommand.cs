@@ -11,11 +11,11 @@ namespace Chel.UnitTests.SampleCommands
         [NumberedParameter(1, "param")]
         [Description("The first parameter")]
         [Required]
-        public string NumberedParameter { get; set; }
+        public string? NumberedParameter { get; set; }
 
         public CommandResult Execute()
         {
-            return new ValueResult(new Literal(NumberedParameter));
+            return new ValueResult(new Literal(NumberedParameter ?? string.Empty));
         }
     }
 }

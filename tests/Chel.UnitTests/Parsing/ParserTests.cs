@@ -17,7 +17,7 @@ namespace Chel.UnitTests.Parsing
         public void Ctor_NameValidatorIsNull_ThrowsException()
         {
             // arrange
-            Action sutAction = () => new Parser(null);
+            Action sutAction = () => new Parser(null!);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -31,13 +31,13 @@ namespace Chel.UnitTests.Parsing
         [InlineData("\n")]
         [InlineData("\t")]
         [InlineData("   ")]
-        public void Parse_EmptyInput_ReturnsEmptyCommandInputList(string input)
+        public void Parse_EmptyInput_ReturnsEmptyCommandInputList(string? input)
         {
             // arrange
             var sut = CreateParser();
 
             // act
-            var result = sut.Parse(input);
+            var result = sut.Parse(input!);
 
             // assert
             Assert.Empty(result);

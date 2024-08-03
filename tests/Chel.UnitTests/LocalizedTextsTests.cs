@@ -11,7 +11,7 @@ namespace Chel.UnitTests
         {
             // arrange
             var sut = new LocalisedTexts();
-            Action sutAction = () => sut.AddText(null, "en-AU");
+            Action sutAction = () => sut.AddText(null!, "en-AU");
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -64,7 +64,7 @@ namespace Chel.UnitTests
             // arrange
             var sut = new LocalisedTexts();
             sut.AddText("text", "en");
-            Action sutAction = () => sut.GetText(null);
+            Action sutAction = () => sut.GetText(null!);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -120,7 +120,7 @@ namespace Chel.UnitTests
         {
             // arrange
             var sut = new LocalisedTexts();
-            sut.AddText("text", null);
+            sut.AddText("text", null!);
 
             // act
             var result = sut.GetText(cultureName);

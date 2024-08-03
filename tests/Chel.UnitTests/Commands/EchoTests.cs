@@ -15,7 +15,7 @@ namespace Chel.UnitTests.Commands
             sut.Message = null;
 
             // act
-            var result = sut.Execute() as ValueResult;
+            var result = (ValueResult)sut.Execute();
 
             // assert
             Assert.True(result.Success);
@@ -30,7 +30,7 @@ namespace Chel.UnitTests.Commands
             sut.Message = new Literal("message");
 
             // act
-            var result = sut.Execute() as ValueResult;
+            var result = (ValueResult)sut.Execute();
 
             // assert
             Assert.True(result.Success);

@@ -7,7 +7,7 @@ namespace Chel.UnitTests.SampleCommands
     public class ParameterNoSetterCommand : ICommand
     {
         [NumberedParameter(1, "noset")]
-        public string NoSet { get; }
+        public string? NoSet { get; }
 
         public CommandResult Execute()
         {

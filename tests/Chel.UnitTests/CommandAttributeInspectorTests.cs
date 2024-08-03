@@ -14,7 +14,7 @@ namespace Chel.UnitTests
         {
             // arrange
             var sut = new CommandAttributeInspector();
-            Action sutAction = () => sut.DescribeCommand(null);
+            Action sutAction = () => sut.DescribeCommand(null!);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
