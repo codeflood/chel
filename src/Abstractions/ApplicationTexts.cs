@@ -3,7 +3,7 @@ namespace Chel.Abstractions
     /// <summary>
     /// Application text keys.
     /// </summary>
-    internal static class ApplicationTexts
+internal static class ApplicationTexts
     {
         public const string ArgumentCannotBeEmpty = "ArgumentCannotBeEmpty";
         public const string ArgumentCannotBeEmptyOrWhitespace = "ArgumentCannotBeEmptyOrWhitespace";
@@ -74,6 +74,7 @@ namespace Chel.Abstractions
         public const string SpecificModuleHelp = "SpecificModuleHelp";
         public const string SubcommandResultMustBeChelType = "SubcommandResultMustBeChelType";
         public const string TextForCultureAlreadyAdded = "TextForCultureAlreadyAdded";
+        public const string TokenWasNull = "TokenWasNull";
         public const string TypeIsNotACommand = "TypeIsNotACommand";
         public const string TypeRequiresParameterlessConstructor = "TypeRequiresParameterlessConstructor";
         public const string UnexpectedNumberedParameter = "UnexpectedNumberedParameter";

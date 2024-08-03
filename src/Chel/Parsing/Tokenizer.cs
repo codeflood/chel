@@ -9,197 +9,203 @@ namespace Chel.Parsing
     /// <summary>
     /// Input text processor which emits tokens.
     /// </summary>
-	/// <remarks>
-	/// The tokenizer is context free. It can emit tokens with local look aheads.
-	/// It will handle blocks and comments.
-	/// Whitespace in Chel is sometimes significant and other times not. The tokenizer lacks the context to interpret whitespace properly,
-	/// so it treats whitespace as literal.
-	/// </remarks>
-	public class Tokenizer : ITokenizer, IDisposable
-	{
-		private const char NewLine = '\n';
+    /// <remarks>
+    /// The tokenizer is context free. It can emit tokens with local look aheads.
+    /// It will handle blocks and comments.
+    /// Whitespace in Chel is sometimes significant and other times not. The tokenizer lacks the context to interpret whitespace properly,
+    /// so it treats whitespace as literal.
+    /// </remarks>
+    public class Tokenizer : ITokenizer, IDisposable
+    {
+        private const char NewLine = '\n';
 
-		private StringReader _reader = null;
-		private int _currentLineNumber = 1;
-		private int _currentCharacterNumber = 0;
+        private StringReader? _reader = null;
+        private int _currentLineNumber = 1;
+        private int _currentCharacterNumber = 0;
 
-		public bool HasMore => _reader != null;
+        public bool HasMore => _reader != null;
 
-		private SourceLocation CurrentLocation => new SourceLocation(_currentLineNumber, _currentCharacterNumber);
+        private SourceLocation CurrentLocation => new SourceLocation(_currentLineNumber, _currentCharacterNumber);
 
         public Tokenizer(string input)
         {
             if(!string.IsNullOrEmpty(input))
-				_reader = new StringReader(input);
+                _reader = new StringReader(input);
         }
 
-		public void Dispose()
-		{
-			_reader?.Dispose();
-		}
+        public void Dispose()
+        {
+            _reader?.Dispose();
+        }
 
-		public Token GetNextToken()
-		{
-			if(_reader == null)
-				return null;
+        public Token? GetNextToken()
+        {
+            if(_reader == null)
+                return null;
 
-			var nextChar = ReadNext();
+            var nextChar = ReadNext();
 
-			switch(nextChar)
-			{
-				case NewLine:
-					return HandleNewLine();
-				
-				case Symbol.Escape:
-					return HandleEscaped();
+            switch(nextChar)
+            {
+                case NewLine:
+                    return HandleNewLine();
+                
+                case Symbol.Escape:
+                    return HandleEscaped();
 
-				case Symbol.Comment:
-					if(PeekNext() == Symbol.BlockEnd)
-						throw new ParseException(CurrentLocation, ApplicationTextResolver.Instance.Resolve(ApplicationTexts.MissingCommentBlockStart));
+                case Symbol.Comment:
+                    if(PeekNext() == Symbol.BlockEnd)
+                        throw new ParseException(CurrentLocation, ApplicationTextResolver.Instance.Resolve(ApplicationTexts.MissingCommentBlockStart));
 
-					return SkipToEndOfLine();
+                    return SkipToEndOfLine();
 
-				case Symbol.BlockStart:
-					if(PeekNext() == Symbol.Comment)
-					{
-						ReadNext();
-						SkipToEndOfCommentBlock();
-						return GetNextToken();
-					}
+                case Symbol.BlockStart:
+                    if(PeekNext() == Symbol.Comment)
+                    {
+                        ReadNext();
+                        SkipToEndOfCommentBlock();
+                        return GetNextToken();
+                    }
 
-					return HandleSpecial(SpecialTokenType.BlockStart, CurrentLocation);
+                    return HandleSpecial(SpecialTokenType.BlockStart, CurrentLocation);
 
-				case Symbol.BlockEnd:
-					return HandleSpecial(SpecialTokenType.BlockEnd, CurrentLocation);
+                case Symbol.BlockEnd:
+                    return HandleSpecial(SpecialTokenType.BlockEnd, CurrentLocation);
 
-				case Symbol.Variable:
-					return HandleSpecial(SpecialTokenType.VariableMarker, CurrentLocation);
+                case Symbol.Variable:
+                    return HandleSpecial(SpecialTokenType.VariableMarker, CurrentLocation);
 
-				case Symbol.ParameterName:
-					return HandleSpecial(SpecialTokenType.ParameterName, CurrentLocation);
+                case Symbol.ParameterName:
+                    return HandleSpecial(SpecialTokenType.ParameterName, CurrentLocation);
 
-				case Symbol.ListStart:
-					return HandleSpecial(SpecialTokenType.ListStart, CurrentLocation);
+                case Symbol.ListStart:
+                    return HandleSpecial(SpecialTokenType.ListStart, CurrentLocation);
 
-				case Symbol.ListEnd:
-					return HandleSpecial(SpecialTokenType.ListEnd, CurrentLocation);
+                case Symbol.ListEnd:
+                    return HandleSpecial(SpecialTokenType.ListEnd, CurrentLocation);
 
-				case Symbol.MapStart:
-					return HandleSpecial(SpecialTokenType.MapStart, CurrentLocation);
+                case Symbol.MapStart:
+                    return HandleSpecial(SpecialTokenType.MapStart, CurrentLocation);
 
-				case Symbol.MapEnd:
-					return HandleSpecial(SpecialTokenType.MapEnd, CurrentLocation);
+                case Symbol.MapEnd:
+                    return HandleSpecial(SpecialTokenType.MapEnd, CurrentLocation);
 
-				case Symbol.SubcommandElement:
-					if(PeekNext() == Symbol.SubcommandElement)
-					{
-						var sourceLocation = CurrentLocation;
-						ReadNext();
-						return HandleSpecial(SpecialTokenType.Subcommand, sourceLocation);
-					}
+                case Symbol.SubcommandElement:
+                    if(PeekNext() == Symbol.SubcommandElement)
+                    {
+                        var sourceLocation = CurrentLocation;
+                        ReadNext();
+                        return HandleSpecial(SpecialTokenType.Subcommand, sourceLocation);
+                    }
 
-					return HandleLiteral((char)nextChar);
+                    return HandleLiteral((char)nextChar);
 
-				case -1:
-					HandleEndOfStream();
-					return null;
+                case -1:
+                    HandleEndOfStream();
+                    return null;
 
-				default:
-					return HandleLiteral((char)nextChar);
-			}
-		}
+                default:
+                    return HandleLiteral((char)nextChar);
+            }
+        }
 
-		private int ReadNext()
-		{
-			_currentCharacterNumber++;
-			return _reader.Read();
-		}
+        private int ReadNext()
+        {
+            if(_reader == null)
+                return -1;
 
-		private int PeekNext()
-		{
-			return _reader.Peek();
-		}
+            _currentCharacterNumber++;
+            return _reader.Read();
+        }
 
-		private Token SkipToEndOfLine()
-		{
-			var nextChar = ReadNext();
+        private int PeekNext()
+        {
+            if(_reader == null)
+                return -1;
 
-			while(nextChar != -1 && nextChar != NewLine)
-			{
-				nextChar = ReadNext();
-			}
+            return _reader.Peek();
+        }
 
-			if(nextChar == -1)
-				return null;
+        private Token? SkipToEndOfLine()
+        {
+            var nextChar = ReadNext();
 
-			return HandleNewLine();
-		}
+            while(nextChar != -1 && nextChar != NewLine)
+            {
+                nextChar = ReadNext();
+            }
 
-		private void SkipToEndOfCommentBlock()
-		{
-			var currentLocation = CurrentLocation;
-			var startLocation = new SourceLocation(currentLocation.LineNumber, currentLocation.CharacterNumber - 1);
+            if(nextChar == -1)
+                return null;
 
-			var nextChar = ReadNext();
-			var prevChar = nextChar;
+            return HandleNewLine();
+        }
 
-			while(nextChar != -1 && prevChar != Symbol.Comment && nextChar != Symbol.BlockEnd)
-			{
-				prevChar = nextChar;
-				nextChar = ReadNext();
-			}
+        private void SkipToEndOfCommentBlock()
+        {
+            var currentLocation = CurrentLocation;
+            var startLocation = new SourceLocation(currentLocation.LineNumber, currentLocation.CharacterNumber - 1);
 
-			if(nextChar == -1)
-				throw new ParseException(startLocation, ApplicationTextResolver.Instance.Resolve(ApplicationTexts.MissingCommentBlockEnd));
-		}
+            var nextChar = ReadNext();
+            var prevChar = nextChar;
 
-		private void HandleEndOfStream()
-		{
-			_reader.Dispose();
-			_reader = null;
-		}
+            while(nextChar != -1 && prevChar != Symbol.Comment && nextChar != Symbol.BlockEnd)
+            {
+                prevChar = nextChar;
+                nextChar = ReadNext();
+            }
 
-		private Token HandleNewLine()
-		{
-			var result = HandleLiteral(NewLine);		
-			_currentLineNumber++;
-			_currentCharacterNumber = 0;
-			return result;
-		}
+            if(nextChar == -1)
+                throw new ParseException(startLocation, ApplicationTextResolver.Instance.Resolve(ApplicationTexts.MissingCommentBlockEnd));
+        }
 
-		private Token HandleEscaped()
-		{
-			var nextChar = ReadNext();
-			if(nextChar == -1)
-				return null;
+        private void HandleEndOfStream()
+        {
+            _reader?.Dispose();
+            _reader = null;
+        }
 
-			if(nextChar == Symbol.BlockStart ||
-				nextChar == Symbol.BlockEnd ||
-				nextChar == Symbol.Escape ||
-				nextChar == Symbol.Variable ||
-				nextChar == Symbol.ParameterName ||
-				nextChar == Symbol.Comment ||
-				nextChar == Symbol.ListStart ||
-				nextChar == Symbol.ListEnd ||
-				nextChar == Symbol.MapStart ||
-				nextChar == Symbol.MapEnd ||
-				nextChar == Symbol.SubcommandElement)
-				return HandleLiteral((char)nextChar);
+        private Token HandleNewLine()
+        {
+            var result = HandleLiteral(NewLine);		
+            _currentLineNumber++;
+            _currentCharacterNumber = 0;
+            return result;
+        }
 
-			// Report the error location as the escape character
-			var currentLocation = CurrentLocation;
-			var location = new SourceLocation(currentLocation.LineNumber, currentLocation.CharacterNumber - 1);
-			throw new ParseException(location, ApplicationTextResolver.Instance.ResolveAndFormat(ApplicationTexts.UnknownEscapedCharacter, (char)nextChar));
-		}
+        private Token? HandleEscaped()
+        {
+            var nextChar = ReadNext();
+            if(nextChar == -1)
+                return null;
 
-		private Token HandleLiteral(char nextChar)
-		{
-			return new LiteralToken(CurrentLocation, nextChar);
-		}
+            if(nextChar == Symbol.BlockStart ||
+                nextChar == Symbol.BlockEnd ||
+                nextChar == Symbol.Escape ||
+                nextChar == Symbol.Variable ||
+                nextChar == Symbol.ParameterName ||
+                nextChar == Symbol.Comment ||
+                nextChar == Symbol.ListStart ||
+                nextChar == Symbol.ListEnd ||
+                nextChar == Symbol.MapStart ||
+                nextChar == Symbol.MapEnd ||
+                nextChar == Symbol.SubcommandElement)
+                return HandleLiteral((char)nextChar);
 
-		private Token HandleSpecial(SpecialTokenType type, SourceLocation sourceLocation)
-		{
-			return new SpecialToken(sourceLocation, type);
-		}
-	}
+            // Report the error location as the escape character
+            var currentLocation = CurrentLocation;
+            var location = new SourceLocation(currentLocation.LineNumber, currentLocation.CharacterNumber - 1);
+            throw new ParseException(location, ApplicationTextResolver.Instance.ResolveAndFormat(ApplicationTexts.UnknownEscapedCharacter, (char)nextChar));
+        }
+
+        private Token HandleLiteral(char nextChar)
+        {
+            return new LiteralToken(CurrentLocation, nextChar);
+        }
+
+        private Token HandleSpecial(SpecialTokenType type, SourceLocation sourceLocation)
+        {
+            return new SpecialToken(sourceLocation, type);
+        }
+    }
 }

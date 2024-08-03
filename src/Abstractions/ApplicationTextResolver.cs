@@ -106,6 +106,7 @@ namespace Chel.Abstractions
                 { ApplicationTexts.SpecificModuleHelp, "For help on a specific module pass the name of the module followed by ':' to the 'help' command." },
                 { ApplicationTexts.SubcommandResultMustBeChelType, "Subcommand result must be of type ChelType" },
                 { ApplicationTexts.TextForCultureAlreadyAdded, "Text for culture '{0}' has already been added" },
+                { ApplicationTexts.TokenWasNull, "Parser error. Token was null." },
                 { ApplicationTexts.TypeIsNotACommand, "{0} is not a command" },
                 { ApplicationTexts.TypeRequiresParameterlessConstructor, "Type {0} requires a parameterless constructor" },
                 { ApplicationTexts.UnexpectedParameterType, "Unexpected parameter type" },

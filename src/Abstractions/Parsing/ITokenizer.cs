@@ -14,6 +14,6 @@ namespace Chel.Abstractions.Parsing
         /// Gets the next token available.
         /// </summary>
         /// <returns>The next token available, or null if there are no more tokens.</returns>
-        Token GetNextToken();
+        Token? GetNextToken();
     }
 }
