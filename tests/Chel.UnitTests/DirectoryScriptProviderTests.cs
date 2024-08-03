@@ -61,6 +61,19 @@ public class DirectoryScriptProviderTests
     }
 
     [Fact]
+    public void GetScriptSource_InvalidPath_ReturnsNull()
+    {
+        // arrange
+        var sut = new DirectoryScriptProvider("invalid");
+
+        // act
+        var names = sut.GetScriptSource(null, "invalid");
+
+        // assert
+        Assert.Null(names);
+    }
+
+    [Fact]
     public void GetScriptSource_InvalidScriptName_ReturnsNull()
     {
         // arrange

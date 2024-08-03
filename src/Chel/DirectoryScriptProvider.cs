@@ -41,6 +41,9 @@ public class DirectoryScriptProvider : IScriptProvider
 
     public string? GetScriptSource(string? module, string name)
     {
+        if(!Directory.Exists(_path))
+            return null;
+
         // Casing might be different. Search for a case-insensitive match.
         var path = _path;
 
