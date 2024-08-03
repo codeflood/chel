@@ -55,8 +55,8 @@ namespace Chel
 
             foreach(var subvalue in input.Values)
             {
-                var replaced = ProcessParameter(subvalue as ChelType, variables);
-                replacedValues.Add(replaced as ChelType);
+                var replaced = ProcessParameter((ChelType)subvalue, variables);
+                replacedValues.Add((ChelType)replaced);
             }
 
             return new CompoundValue(replacedValues);
@@ -102,10 +102,13 @@ namespace Chel
 
             do
             {
-                string subreference = null;
+                string? subreference = null;
                 
                 if(subreferences.Count > 0)
                     subreference = subreferences.Dequeue();
+                
+                if(subreference == null)
+                    continue;
 
                 if(value is List listValue)
                     value = ProcessListVariableReference(listValue, variableName, subreference);
@@ -154,7 +157,7 @@ namespace Chel
             if(oneBasedIndex < 1 || oneBasedIndex > listValue.Values.Count)
                 throw ExceptionFactory.CreateInvalidOperationException(ApplicationTexts.VariableSubreferenceIsInvalid, variableName, subreference);
 
-            return listValue.Values[oneBasedIndex - 1] as ChelType;
+            return (ChelType)listValue.Values[oneBasedIndex - 1];
         }
 
         private ChelType ProcessMapVariableReference(Map mapValue, string variableName, string subreference)
@@ -165,7 +168,7 @@ namespace Chel
             if(!mapValue.Entries.ContainsKey(subreference))
                 throw ExceptionFactory.CreateInvalidOperationException(ApplicationTexts.VariableSubreferenceIsInvalid, variableName, subreference);
 
-            return mapValue.Entries[subreference] as ChelType;
+            return (ChelType)mapValue.Entries[subreference];
         }
     }
 }

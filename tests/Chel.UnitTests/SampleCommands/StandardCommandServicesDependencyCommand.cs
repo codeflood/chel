@@ -2,17 +2,16 @@ using System;
 using Chel.Abstractions;
 using Chel.Abstractions.Parsing;
 using Chel.Abstractions.Results;
-using Chel.UnitTests.SampleObjects;
 
 namespace Chel.UnitTests.SampleCommands;
 
 [Command("cmd")]
 public class StandardCommandServicesDependencyCommand : ICommand
 {
-    private readonly ICommandRegistry _commandRegistry = null;
-    private readonly INameValidator _nameValidator = null;
-    private readonly IExecutionTargetIdentifierParser _executionTargetIdentifierParser = null;
-    private readonly IScriptProvider _scriptProvider = null;
+    private readonly ICommandRegistry _commandRegistry;
+    private readonly INameValidator _nameValidator;
+    private readonly IExecutionTargetIdentifierParser _executionTargetIdentifierParser;
+    private readonly IScriptProvider _scriptProvider;
 
     public StandardCommandServicesDependencyCommand(
         ICommandRegistry commandRegistry,
@@ -29,6 +28,6 @@ public class StandardCommandServicesDependencyCommand : ICommand
 
     public CommandResult Execute()
     {
-        return new SuccessResult();
+        return SuccessResult.Instance;
     }
 }

@@ -9,15 +9,7 @@ namespace Chel
     /// </summary>
     public class CommandServices : ICommandServices
     {
-        private Dictionary<Type, object> _serviceRegistrations = null;
-
-        /// <summary>
-        /// Create a new instance.
-        /// </summary>
-        public CommandServices()
-        {
-            _serviceRegistrations = new Dictionary<Type, object>();
-        }
+        private Dictionary<Type, object> _serviceRegistrations = new();
 
         /// <summary>
         /// Register a command service.
@@ -40,17 +32,17 @@ namespace Chel
         /// Resolve a command service by its type.
         /// </summary>
         /// <typeparam name="T">The type of the command service.</typeparam>
-        public T Resolve<T>()
+        public T? Resolve<T>()
         {
             var serviceType = typeof(T);
-            return (T)Resolve(serviceType);
+            return (T?)Resolve(serviceType);
         }
 
         /// <summary>
         /// Resolve a command service by its type.
         /// </summary>
         /// <param name="type">The type of the command service.</param>
-        public object Resolve(Type type)
+        public object? Resolve(Type type)
         {
             if(!_serviceRegistrations.ContainsKey(type))
                 return null;

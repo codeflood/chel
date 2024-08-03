@@ -9,7 +9,7 @@ namespace Chel;
 /// </summary>
 public class ScriptProviderCollection : IScriptProvider
 {
-    private readonly IEnumerable<IScriptProvider> _providers = null;
+    private readonly IEnumerable<IScriptProvider> _providers;
 
     public ScriptProviderCollection(IEnumerable<IScriptProvider> providers)
     {
@@ -31,7 +31,7 @@ public class ScriptProviderCollection : IScriptProvider
         return scriptNames.ToList();
     }
 
-    public string GetScriptSource(string module, string name)
+    public string? GetScriptSource(string? module, string name)
     {
         foreach(var provider in _providers.Reverse())
         {

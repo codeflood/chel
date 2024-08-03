@@ -14,13 +14,13 @@ namespace Chel
     /// </summary>
     public class Runtime
     {
-        private readonly ICommandRegistry _commandRegistry = null;
-        private readonly ICommandServices _commandServices = null;
-        private readonly IParser _parser = null;
-        private readonly IVariableReplacer _variableReplacer = null;
-        private readonly IScopedObjectRegistry _sessionObjectTypes = null;
-        private readonly List<IScriptProvider> _scriptProviders = null;
-        private readonly ScriptProviderCollection _scriptProvidersCollection = null;
+        private readonly ICommandRegistry _commandRegistry;
+        private readonly ICommandServices _commandServices;
+        private readonly IParser _parser;
+        private readonly IVariableReplacer _variableReplacer;
+        private readonly IScopedObjectRegistry _sessionObjectTypes;
+        private readonly List<IScriptProvider> _scriptProviders;
+        private readonly ScriptProviderCollection _scriptProvidersCollection;
 
         /// <summary>
         /// Create a new instance.
@@ -105,7 +105,7 @@ namespace Chel
             var factory = new CommandFactory(_commandRegistry, _commandServices, sessionObjects);
 
             var variables = sessionObjects.Resolve(typeof(VariableCollection)) as VariableCollection;
-            var parameterBinder = new CommandParameterBinder(_commandRegistry, _variableReplacer, variables);
+            var parameterBinder = new CommandParameterBinder(_commandRegistry, _variableReplacer, variables ?? new VariableCollection());
             
             var session = new Session(_parser, factory, parameterBinder, _scriptProvidersCollection, resultHandler);
             sessionObjects.RegisterInstance<ISession>(session);

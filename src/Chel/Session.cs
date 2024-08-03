@@ -14,11 +14,11 @@ namespace Chel
     /// </summary>
     public class Session : ISession
     {
-        private readonly IParser _parser = null;
-        private readonly ICommandFactory _commandFactory = null;
-        private readonly ICommandParameterBinder _parameterBinder = null;
-        private readonly IScriptProvider _scriptProvider = null;
-        private readonly Action<CommandResult> _resultHandler = null;
+        private readonly IParser _parser;
+        private readonly ICommandFactory _commandFactory;
+        private readonly ICommandParameterBinder _parameterBinder;
+        private readonly IScriptProvider _scriptProvider;
+        private readonly Action<CommandResult> _resultHandler;
 
         /// <summary>
         /// Create a new instance.
@@ -47,7 +47,7 @@ namespace Chel
         /// <param name="input">The input to execute.</param>
         public void Execute(string input)
         {
-            IList<CommandInput> commandInputs = null;
+            IList<CommandInput> commandInputs;
 
             try
             {
@@ -82,7 +82,7 @@ namespace Chel
             if(!result.Success)
                 return result;
 
-            CommandResult commandResult = null;
+            CommandResult commandResult = SuccessResult.Instance;
 
             try
             {
@@ -163,7 +163,7 @@ namespace Chel
                 }
             }
 
-            return new SuccessResult();
+            return SuccessResult.Instance;
         }
 
         private CommandResult CreateSubcommandFailureResult(CommandInput subcommand, FailureResult subcommandResult)

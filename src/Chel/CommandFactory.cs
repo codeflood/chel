@@ -11,9 +11,9 @@ namespace Chel
     /// </summary>
     public class CommandFactory : ICommandFactory
     {
-        private ICommandRegistry _commandRegistry = null;
-        private ICommandServices _commandServices = null;
-        private IScopedObjectRegistry _sessionObjects = null;
+        private ICommandRegistry _commandRegistry;
+        private ICommandServices _commandServices;
+        private IScopedObjectRegistry _sessionObjects;
 
         /// <summary>
         /// Create a new instance.
@@ -41,7 +41,7 @@ namespace Chel
         /// Create a new instance of a command.
         /// </summary>
         /// <param name="commandInput">The <see cref="CommandInput" /> containing the details of the command to instantiate.</param>
-        public ICommand Create(CommandInput commandInput)
+        public ICommand? Create(CommandInput commandInput)
         {
             if(commandInput == null)
                 throw new ArgumentNullException(nameof(commandInput));
@@ -55,13 +55,13 @@ namespace Chel
 
             var constructor = type.GetConstructors().FirstOrDefault();
             var parameters = constructor?.GetParameters();
-            object commandInstance = null;
+            object? commandInstance = null;
 
             if(constructor == null || !parameters.Any())
                 commandInstance = Activator.CreateInstance(type);
             else
             {
-                var parameterValues = ResolveParameters(parameters);
+                var parameterValues = ResolveParameters(parameters ?? Array.Empty<ParameterInfo>());
                 commandInstance = Activator.CreateInstance(type, parameterValues);
             }
             

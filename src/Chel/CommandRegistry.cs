@@ -11,9 +11,9 @@ namespace Chel
     public class CommandRegistry : ICommandRegistry
     {
         private readonly Type _commandInterfaceType = typeof(ICommand);
-        private readonly INameValidator _nameValidator = null;
-        private readonly ICommandDescriptorGenerator _commandDescriptorGenerator = null;
-        private readonly Dictionary<ExecutionTargetIdentifier, CommandDescriptor> _registeredTypes = null;
+        private readonly INameValidator _nameValidator;
+        private readonly ICommandDescriptorGenerator _commandDescriptorGenerator;
+        private readonly Dictionary<ExecutionTargetIdentifier, CommandDescriptor> _registeredTypes;
 
         /// <summary>
         /// Create a new instance.
@@ -94,7 +94,7 @@ namespace Chel
         /// Resolve a <see cref="CommandDescriptor" /> for a given command name.
         /// </summary>
         /// <param name="commandName">The name of the command to resolve.</param>
-        public CommandDescriptor Resolve(ExecutionTargetIdentifier commandIdentifier)
+        public CommandDescriptor? Resolve(ExecutionTargetIdentifier commandIdentifier)
         {
             if(_registeredTypes.ContainsKey(commandIdentifier))
                 return _registeredTypes[commandIdentifier];

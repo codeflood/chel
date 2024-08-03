@@ -16,9 +16,9 @@ namespace Chel
     /// </summary>
     internal class CommandParameterBinder : ICommandParameterBinder
     {
-        private ICommandRegistry _commandRegistry = null;
-        private VariableCollection _variables = null;
-        private IVariableReplacer _variableReplacer = null;
+        private ICommandRegistry _commandRegistry;
+        private VariableCollection _variables;
+        private IVariableReplacer _variableReplacer;
 
         /// <summary>
         /// Create a new instance.
@@ -111,7 +111,7 @@ namespace Chel
                     // Don't use an 'is' check because CompoundValue is also a list.
                     if(value.GetType() == typeof(List))
                     {
-                        var list = value as List;
+                        var list = (List)value;
                         var values = ExtractParameterValues(list.Values, result, valueParameter.SourceLocation);
                         output.Add(new SourceValueCommandParameter(valueParameter.SourceLocation, new List(values)));
 
@@ -420,7 +420,7 @@ namespace Chel
             propertyDescriptor.Property.SetValue(instance, convertedValue);
         }
 
-        private void BindListProperty(ICommand instance, PropertyInfo property, Type listElementType, string parameterIdentifier, List value, ParameterBindResult result, SourceLocation sourceLocation)
+        private void BindListProperty(ICommand instance, PropertyInfo property, Type? listElementType, string parameterIdentifier, List value, ParameterBindResult result, SourceLocation sourceLocation)
         {
             if(listElementType == null)
             {
@@ -432,7 +432,7 @@ namespace Chel
             }
             
             var valuesType = typeof(List<>).MakeGenericType(listElementType);
-            var values = Activator.CreateInstance(valuesType) as IList;
+            var values = (IList)Activator.CreateInstance(valuesType);
             foreach(var listValue in value.Values)
             {
                 var convertedValue = GetValue(listValue, ApplicationTextResolver.Instance.Resolve(ApplicationTexts.ListValuesMustBeChelType), listElementType, property, result, sourceLocation);
@@ -450,7 +450,7 @@ namespace Chel
                 property.SetValue(instance, values);
         }
 
-        private void BindDictionaryProperty(ICommand instance, PropertyInfo property, Type keyType, Type valueType, string parameterIdentifier, Map value, ParameterBindResult result, SourceLocation sourceLocation)
+        private void BindDictionaryProperty(ICommand instance, PropertyInfo property, Type? keyType, Type? valueType, string parameterIdentifier, Map value, ParameterBindResult result, SourceLocation sourceLocation)
         {
             if(keyType == null || valueType == null)
             {
@@ -471,7 +471,7 @@ namespace Chel
             }
 
             var elementType = typeof(Dictionary<,>).MakeGenericType(keyType, valueType);
-            var elements = Activator.CreateInstance(elementType) as IDictionary;
+            var elements = (IDictionary)Activator.CreateInstance(elementType);
             foreach(var entry in value.Entries)
             {
                 var convertedValue = GetValue(entry.Value, ApplicationTextResolver.Instance.Resolve(ApplicationTexts.MapValuesMustBeChelType), valueType, property, result, sourceLocation);
@@ -482,7 +482,7 @@ namespace Chel
             property.SetValue(instance, elements);
         }
 
-        private object GetValue(ICommandParameter value, string errorText, Type targetType, PropertyInfo property, ParameterBindResult result, SourceLocation sourceLocation)
+        private object? GetValue(ICommandParameter value, string errorText, Type targetType, PropertyInfo property, ParameterBindResult result, SourceLocation sourceLocation)
         {
             var wipValue = value;
 
@@ -492,14 +492,14 @@ namespace Chel
             if(!wipValue.GetType().IsSubclassOf(typeof(ChelType)))
                 throw new InvalidOperationException(errorText);
 
-            var bindingValue = ReplaceVariables(wipValue as ChelType, result, sourceLocation);
+            var bindingValue = ReplaceVariables((ChelType)wipValue, result, sourceLocation);
             if(bindingValue == null)
                 return null;
 
             return ConvertPropertyValue(bindingValue, targetType, property);
         }
 
-        private ICommandParameter ReplaceVariables(ICommandParameter value, ParameterBindResult result, SourceLocation sourceLocation)
+        private ICommandParameter? ReplaceVariables(ICommandParameter value, ParameterBindResult result, SourceLocation sourceLocation)
         {
             try
             {
@@ -521,7 +521,7 @@ namespace Chel
             return null;
         }
 
-        private object ConvertPropertyValue(object bindingValue, Type targetType, PropertyInfo property)
+        private object? ConvertPropertyValue(object bindingValue, Type targetType, PropertyInfo property)
         {
             if(bindingValue is Literal literalBindingValue)
                 bindingValue = literalBindingValue.Value;
@@ -533,13 +533,13 @@ namespace Chel
             else
             {
                 // Find an appropriate type converter.
-                TypeConverter converter = null;
+                TypeConverter? converter = null;
 
                 // First look for type converters on the property itself
                 var propertyTypeConverter = property.GetCustomAttribute(typeof(TypeConverterAttribute));
                 if (propertyTypeConverter != null)
                 {
-                    var converterType = Type.GetType((propertyTypeConverter as TypeConverterAttribute).ConverterTypeName, true, false);
+                    var converterType = Type.GetType(((TypeConverterAttribute)propertyTypeConverter).ConverterTypeName, true, false);
                     converter = Activator.CreateInstance(converterType) as TypeConverter;
                 }
                 else

@@ -48,7 +48,7 @@ namespace Chel.Commands
             else if(!string.IsNullOrWhiteSpace(ElseScriptBlock))
                 Session.Execute(ElseScriptBlock);
 
-            return new SuccessResult();
+            return SuccessResult.Instance;
         }
     }
 }

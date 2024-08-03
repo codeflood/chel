@@ -25,7 +25,7 @@ namespace Chel.Abstractions
         /// </summary>
         /// <param name="type">The type of the object to resolve.</param>
         /// <returns>An instance of the requested type.</returns>
-        object Resolve(Type type);
+        object? Resolve(Type type);
 
         /// <summary>
         /// Create a new <see cref="IScopedObjectRegistry"/> initialised from the registrations of this instance.

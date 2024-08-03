@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Chel.Abstractions;
 using Chel.Abstractions.Parsing;
 using Chel.Abstractions.Results;
@@ -150,9 +151,10 @@ namespace Chel.UnitTests
             var scriptProvider = Substitute.For<IScriptProvider>();
             scriptProvider.GetScriptSource(null, "script").Returns("echo hi");
 
-            CommandResult executionResult = null;
+            List<CommandResult> executionResults = new();
+
             var sut = CreateSession(
-                result => executionResult = result,
+                result => executionResults.Add(result),
                 null,
                 scriptProvider,
                 typeof(Echo));
@@ -161,8 +163,12 @@ namespace Chel.UnitTests
             sut.Execute("script");
 
             // assert
-            var valueResult = Assert.IsType<ValueResult>(executionResult);
+            Assert.Equal(2, executionResults.Count);
+            
+            var valueResult = Assert.IsType<ValueResult>(executionResults[0]);
             Assert.Equal("hi", valueResult.Value.ToString());
+
+            Assert.IsType<SuccessResult>(executionResults[1]);
         }
 
         [Fact]

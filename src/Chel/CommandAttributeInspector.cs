@@ -66,7 +66,7 @@ namespace Chel
                 var attribute = property.GetCustomAttribute(typeof(NumberedParameterAttribute), true);
                 if(attribute != null)
                 {
-                    var numberedParameterAttribute = attribute as NumberedParameterAttribute;
+                    var numberedParameterAttribute = (NumberedParameterAttribute)attribute;
                     var descriptor = new NumberedParameterDescriptor(
                         numberedParameterAttribute.Number,
                         numberedParameterAttribute.PlaceholderText,
@@ -80,7 +80,7 @@ namespace Chel
                 attribute = property.GetCustomAttribute(typeof(NamedParameterAttribute), true);
                 if(attribute != null)
                 {
-                    var namedParameterAttribute = attribute as NamedParameterAttribute;
+                    var namedParameterAttribute = (NamedParameterAttribute)attribute;
                     var descriptor = new NamedParameterDescriptor(
                         namedParameterAttribute.Name,
                         namedParameterAttribute.ValuePlaceholderText,
@@ -104,7 +104,7 @@ namespace Chel
                         );
                     }
 
-                    var flagParameterAttribute = attribute as FlagParameterAttribute;
+                    var flagParameterAttribute = (FlagParameterAttribute)attribute;
                     var descriptor = new FlagParameterDescriptor(
                         flagParameterAttribute.Name,
                         property,

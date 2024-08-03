@@ -73,7 +73,7 @@ public class DirectoryScriptProvider : IScriptProvider
         return null;
     }
 
-    private void AddScriptNamesFromPath(string path, string module, List<ExecutionTargetIdentifier> results)
+    private void AddScriptNamesFromPath(string path, string? module, List<ExecutionTargetIdentifier> results)
     {
         var names = new HashSet<ExecutionTargetIdentifier>();
         var files = Directory.EnumerateFiles(path, $"*.{ScriptFileExtension}");

@@ -18,7 +18,7 @@ namespace Chel.Abstractions
         /// Resolve a command by it's name.
         /// </summary>
         /// <param name="commandIdentifier">The identifier of the command to resolve.</param>
-        CommandDescriptor Resolve(ExecutionTargetIdentifier commandIdentifier);
+        CommandDescriptor? Resolve(ExecutionTargetIdentifier commandIdentifier);
 
         /// <summary>
         /// Gets all the command type registrations.

@@ -6,14 +6,8 @@ namespace Chel
 {
     public class ScopedObjectRegistry : IScopedObjectRegistry
     {
-        private List<Type> _types = null;
-        private Dictionary<Type, object> _instances = null;
-
-        public ScopedObjectRegistry()
-        {
-            _types = new List<Type>();
-            _instances = new Dictionary<Type, object>();
-        }
+        private List<Type> _types = new();
+        private Dictionary<Type, object> _instances = new();
 
         public void Register<T>()
         {
@@ -36,9 +30,9 @@ namespace Chel
             _instances.Add(type, instance);
         }
 
-        public object Resolve(Type type)
+        public object? Resolve(Type type)
         {
-            object instance = null;
+            object? instance = null;
 
             if(_instances.ContainsKey(type))
                 instance = _instances[type];

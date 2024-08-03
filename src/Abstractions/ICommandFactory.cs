@@ -10,6 +10,6 @@ namespace Chel.Abstractions
         /// <summary>
         /// Create a command from the input.
         /// </summary>
-        ICommand Create(CommandInput commandInput);
+        ICommand? Create(CommandInput commandInput);
     }
 }

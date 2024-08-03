@@ -21,7 +21,7 @@ namespace Chel.UnitTests.SampleCommands
         public CommandResult Execute()
         {
             _service.DoSomething();
-            return new SuccessResult();
+            return SuccessResult.Instance;
         }
     }
 }

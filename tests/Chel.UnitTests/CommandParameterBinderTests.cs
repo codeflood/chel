@@ -1346,7 +1346,7 @@ namespace Chel.UnitTests
 
             // assert
             Assert.False(result.Success);
-            Assert.Equal(1, result.Errors.Count);
+            Assert.Single(result.Errors);
             Assert.Equal(new SourceLocation(2, 3), result.Errors[0].SourceLocation);
             Assert.StartsWith("Invalid parameter value '[ a b ]' for named parameter 'intlist'.", result.Errors[0].Message);
         }

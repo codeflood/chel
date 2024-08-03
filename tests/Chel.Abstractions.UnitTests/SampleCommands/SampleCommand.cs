@@ -12,7 +12,7 @@ namespace Chel.Abstractions.UnitTests.SampleCommands
 
         public CommandResult Execute()
         {
-            return new SuccessResult();
+            return SuccessResult.Instance;
         }
     }
 }
