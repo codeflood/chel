@@ -18,7 +18,7 @@ namespace Chel
         /// </summary>
         /// <param name="type">The <see cref="Type" /> of the service that was not registered.</param>
         public CommandDependencyNotRegisteredException(Type type)
-            : base(ApplicationTextResolver.Instance.ResolveAndFormat(ApplicationTexts.CommandDependencyNotRegistered, type?.FullName))
+            : base(ApplicationTextResolver.Instance.ResolveAndFormat(ApplicationTexts.CommandDependencyNotRegistered, type?.FullName ?? string.Empty))
         {
             if(type == null)
                 throw new ArgumentNullException(nameof(type));

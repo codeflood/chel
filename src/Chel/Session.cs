@@ -45,8 +45,11 @@ namespace Chel
         /// Executes input.
         /// </summary>
         /// <param name="input">The input to execute.</param>
-        public void Execute(string input)
+        public void Execute(string? input)
         {
+            if(input == null)
+                return;
+                
             IList<CommandInput> commandInputs;
 
             try

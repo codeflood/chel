@@ -24,12 +24,12 @@ namespace Chel
         /// Determines whether the name is valid.
         /// </summary>
         /// <param name="name">The name to check.</param>
-        public bool IsValid(string name)
+        public bool IsValid(string? name)
         {
             if(string.IsNullOrWhiteSpace(name))
                 return false;
 
-            if(name[0] == Symbol.ParameterName || name[0] == Symbol.Expansion)
+            if(name![0] == Symbol.ParameterName || name[0] == Symbol.Expansion)
                 return false;
 
             if(name.IndexOfAny(s_invalidCharacters) >= 0)

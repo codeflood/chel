@@ -13,18 +13,18 @@ namespace Chel.Commands
     [Description("Manage variables.")]
     internal class Var : ICommand
     {
-        private VariableCollection _variables = null;
-        private INameValidator _nameValidator = null;
+        private readonly VariableCollection _variables;
+        private readonly INameValidator _nameValidator;
 
         private string _executionCultureName = string.Empty;
 
         [NumberedParameter(1, "name")]
         [Description("The name of the variable.")]
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         [NumberedParameter(2, "value")]
         [Description("The value for the variable.")]
-        public ChelType Value { get; set; }
+        public ChelType? Value { get; set; }
 
         [FlagParameter("clear")]
         [Description("Clear the variable.")]
@@ -40,11 +40,11 @@ namespace Chel.Commands
         {
             _executionCultureName = Thread.CurrentThread.CurrentCulture.Name;
 
-            ChelType output = null;
+            ChelType? output = null;
 
             if(!string.IsNullOrEmpty(Name) && !_nameValidator.IsValid(Name))
                 return new FailureResult(
-                    ApplicationTextResolver.Instance.ResolveAndFormat(ApplicationTexts.InvalidCharacterInVariableName, Name)
+                    ApplicationTextResolver.Instance.ResolveAndFormat(ApplicationTexts.InvalidCharacterInVariableName, Name ?? string.Empty)
                 );
 
             if(Clear && string.IsNullOrEmpty(Name))
@@ -59,10 +59,13 @@ namespace Chel.Commands
             }
             else
             {
-                var variable = new Variable(Name, Value);
+                var variable = new Variable(Name!, Value);
                 _variables.Set(variable);
                 output = Value;
             }
+
+            if(output == null)
+                return SuccessResult.Instance;
 
             return new ValueResult(output);
         }
@@ -78,14 +81,17 @@ namespace Chel.Commands
             foreach(var name in names)
             {
                 var variable = _variables.Get(name);
-                output.Add(variable.Name, variable.Value);
+                output.Add(variable!.Name, variable.Value);
             }
 
             return new Map(output);
         }
 
-        private ChelType ShowOrClearVariable()
+        private ChelType? ShowOrClearVariable()
         {
+            if(Name == null)
+                return null;
+
             var variable = _variables.Get(Name);
             if(variable == null)
             {

@@ -20,7 +20,7 @@ namespace Chel.Commands
 
         [NumberedParameter(1, "command")]
         [Description("The identifier of the command or module the display help for.")]
-        public string CommandIdentifier { get; set; }
+        public string? CommandIdentifier { get; set; }
 
         public Help(ICommandRegistry commandRegistry, IExecutionTargetIdentifierParser executionTargetIdentifierParser)
         {
@@ -35,7 +35,7 @@ namespace Chel.Commands
 
             var output = new StringBuilder();
 
-            var identifier = _executionTargetIdentifierParser.Parse(CommandIdentifier);
+            var identifier = _executionTargetIdentifierParser.Parse(CommandIdentifier ?? string.Empty);
 
             if(!string.IsNullOrEmpty(identifier.Name))
             {
@@ -48,7 +48,7 @@ namespace Chel.Commands
                 var successful = ListCommands(output, identifier.Module);
 
                 if(!successful)
-                    return new FailureResult(ApplicationTextResolver.Instance.ResolveAndFormat(ApplicationTexts.CannotDisplayHelpUnknownModule, identifier.Module));
+                    return new FailureResult(ApplicationTextResolver.Instance.ResolveAndFormat(ApplicationTexts.CannotDisplayHelpUnknownModule, identifier.Module ?? string.Empty));
 
                 output.Append(Environment.NewLine);
                 output.Append(ApplicationTextResolver.Instance.Resolve(ApplicationTexts.SpecificCommandHelp));
@@ -67,7 +67,7 @@ namespace Chel.Commands
             return new ValueResult(new Literal(output.ToString()));
         }
 
-        private bool ListCommands(StringBuilder output, string moduleName)
+        private bool ListCommands(StringBuilder output, string? moduleName)
         {
             output.Append(ApplicationTextResolver.Instance.Resolve(ApplicationTexts.AvailableCommands));
             output.Append(":");
@@ -102,7 +102,7 @@ namespace Chel.Commands
 
             var descriptors = _commandRegistry.GetAllRegistrations().Where(x => x.CommandIdentifier.Module != null).OrderBy(x => x.CommandIdentifier.Name);
 
-            foreach(var descriptorGroup in descriptors.GroupBy(x => x.CommandIdentifier.Module).OrderBy(x => x.Key.ToLower()))
+            foreach(var descriptorGroup in descriptors.GroupBy(x => x.CommandIdentifier.Module).OrderBy(x => (x.Key ?? string.Empty).ToLower()))
             {
                 output.Append(descriptorGroup.Key);
                 output.Append(", ");
@@ -183,7 +183,7 @@ namespace Chel.Commands
             AppendParameterUsage(segment, required, output);
         }
 
-        private void AppendParameterDetail(string name, string description, bool required, StringBuilder output)
+        private void AppendParameterDetail(string name, string? description, bool required, StringBuilder output)
         {
             output.Append($"{name, Constants.FirstColumnWidth}");
 

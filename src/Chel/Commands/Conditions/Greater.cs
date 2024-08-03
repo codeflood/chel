@@ -13,12 +13,12 @@ namespace Chel.Commands.Conditions
         [NumberedParameter(1, "base")]
         [Description("The base value for comparison.")]
         [Required]
-        public ChelType Base { get; set; }
+        public ChelType? Base { get; set; }
 
         [NumberedParameter(2, "value")]
         [Description("The value to compare to the base.")]
         [Required]
-        public ChelType Value { get; set; }
+        public ChelType? Value { get; set; }
 
         [FlagParameter("date")]
         [Description("Treat the values as dates.")]
@@ -56,13 +56,13 @@ namespace Chel.Commands.Conditions
 
         private CommandResult CompareNumeric()
         {
-            var op1Result = ParameterParser.ParseDouble(Base, "base");
+            var op1Result = ParameterParser.ParseDouble(Base!, "base");
             if(op1Result.HasError)
-                return new FailureResult(op1Result.ErrorMessage);
+                return new FailureResult(op1Result.ErrorMessage ?? string.Empty);
 
-            var op2Result = ParameterParser.ParseDouble(Value, "value");
+            var op2Result = ParameterParser.ParseDouble(Value!, "value");
             if(op2Result.HasError)
-                return new FailureResult(op2Result.ErrorMessage);
+                return new FailureResult(op2Result.ErrorMessage ?? string.Empty);
 
             var value = op2Result.Value > op1Result.Value ? Constants.TrueLiteral : Constants.FalseLiteral;
             return new ValueResult(new Literal(value));
@@ -70,13 +70,13 @@ namespace Chel.Commands.Conditions
 
         private CommandResult CompareDates()
         {
-            var op1Result = ParameterParser.ParseDateTime(Base, "base");
+            var op1Result = ParameterParser.ParseDateTime(Base!, "base");
             if(op1Result.HasError)
-                return new FailureResult(op1Result.ErrorMessage);
+                return new FailureResult(op1Result.ErrorMessage ?? string.Empty);
 
-            var op2Result = ParameterParser.ParseDateTime(Value, "value");
+            var op2Result = ParameterParser.ParseDateTime(Value!, "value");
             if(op2Result.HasError)
-                return new FailureResult(op2Result.ErrorMessage);
+                return new FailureResult(op2Result.ErrorMessage ?? string.Empty);
 
             var value = op2Result.Value > op1Result.Value ? Constants.TrueLiteral : Constants.FalseLiteral;
             return new ValueResult(new Literal(value));

@@ -32,7 +32,9 @@ namespace Chel
         public CommandNameAlreadyUsedException(ExecutionTargetIdentifier commandIdentifier, Type commandType, Type otherCommandType)
             : base(ApplicationTextResolver.Instance.ResolveAndFormat(
                 ApplicationTexts.CommandNameAlreadyUsed,
-                commandIdentifier.ToString(), commandType?.FullName, otherCommandType?.FullName)
+                commandIdentifier.ToString(),
+                commandType?.FullName ?? string.Empty,
+                otherCommandType?.FullName ?? string.Empty)
             )
         {
             if(commandType == null)

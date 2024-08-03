@@ -13,12 +13,12 @@ namespace Chel.Commands.Conditions
         [NumberedParameter(1, "first")]
         [Description("The first value to check.")]
         [Required]
-        public ChelType FirstOperand { get; set; }
+        public ChelType? FirstOperand { get; set; }
 
         [NumberedParameter(2, "second")]
         [Description("The second value to check.")]
         [Required]
-        public ChelType SecondOperand { get; set; }
+        public ChelType? SecondOperand { get; set; }
 
         [FlagParameter("num")]
         [Description("Treat the values as numeric.")]
@@ -81,19 +81,19 @@ namespace Chel.Commands.Conditions
 
         private CommandResult CompareNormal()
         {
-            var value = FirstOperand.Equals(SecondOperand) ? Constants.TrueLiteral : Constants.FalseLiteral;
+            var value = FirstOperand!.Equals(SecondOperand) ? Constants.TrueLiteral : Constants.FalseLiteral;
             return new ValueResult(new Literal(value));
         }
 
         private CommandResult CompareNumeric()
         {
-            var op1Result = ParameterParser.ParseDouble(FirstOperand, "first");
+            var op1Result = ParameterParser.ParseDouble(FirstOperand!, "first");
             if(op1Result.HasError)
-                return new FailureResult(op1Result.ErrorMessage);
+                return new FailureResult(op1Result.ErrorMessage ?? string.Empty);
 
-            var op2Result = ParameterParser.ParseDouble(SecondOperand, "second");
+            var op2Result = ParameterParser.ParseDouble(SecondOperand!, "second");
             if(op2Result.HasError)
-                return new FailureResult(op2Result.ErrorMessage);
+                return new FailureResult(op2Result.ErrorMessage ?? string.Empty);
 
             var value = op1Result.Value == op2Result.Value ? Constants.TrueLiteral : Constants.FalseLiteral;
             return new ValueResult(new Literal(value));
@@ -101,13 +101,13 @@ namespace Chel.Commands.Conditions
 
         private CommandResult CompareDates()
         {
-            var op1Result = ParameterParser.ParseDateTime(FirstOperand, "first");
+            var op1Result = ParameterParser.ParseDateTime(FirstOperand!, "first");
             if(op1Result.HasError)
-                return new FailureResult(op1Result.ErrorMessage);
+                return new FailureResult(op1Result.ErrorMessage ?? string.Empty);
 
-            var op2Result = ParameterParser.ParseDateTime(SecondOperand, "second");
+            var op2Result = ParameterParser.ParseDateTime(SecondOperand!, "second");
             if(op2Result.HasError)
-                return new FailureResult(op2Result.ErrorMessage);
+                return new FailureResult(op2Result.ErrorMessage ?? string.Empty);
 
             var value = op1Result.Value == op2Result.Value ? Constants.TrueLiteral : Constants.FalseLiteral;
             return new ValueResult(new Literal(value));
@@ -115,13 +115,13 @@ namespace Chel.Commands.Conditions
 
         private CommandResult CompareGuids()
         {
-            var op1Result = ParameterParser.ParseGuid(FirstOperand, "first");
+            var op1Result = ParameterParser.ParseGuid(FirstOperand!, "first");
             if(op1Result.HasError)
-                return new FailureResult(op1Result.ErrorMessage);
+                return new FailureResult(op1Result.ErrorMessage ?? string.Empty);
 
-            var op2Result = ParameterParser.ParseGuid(SecondOperand, "second");
+            var op2Result = ParameterParser.ParseGuid(SecondOperand!, "second");
             if(op2Result.HasError)
-                return new FailureResult(op2Result.ErrorMessage);
+                return new FailureResult(op2Result.ErrorMessage ?? string.Empty);
 
             var value = op1Result.Value == op2Result.Value ? Constants.TrueLiteral : Constants.FalseLiteral;
             return new ValueResult(new Literal(value));

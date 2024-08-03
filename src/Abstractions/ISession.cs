@@ -8,6 +8,6 @@ namespace Chel.Abstractions
         /// <summary>
         /// Execute input.
         /// </summary>
-        void Execute(string input);
+        void Execute(string? input);
     }
 }

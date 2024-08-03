@@ -10,7 +10,7 @@ namespace Chel.Commands
     {
         [NumberedParameter(1, "message")]
         [Description("The message to output.")]
-        public ChelType Message { get; set; }
+        public ChelType? Message { get; set; }
 
         [FlagParameter("upper")]
         [Description("Output the message in uppercase.")]

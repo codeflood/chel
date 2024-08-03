@@ -8,6 +8,6 @@ namespace Chel.Abstractions
         /// <summary>
         /// Indicates whether the name is valid or not.
         /// </summary>
-        bool IsValid(string name);
+        bool IsValid(string? name);
     }
 }

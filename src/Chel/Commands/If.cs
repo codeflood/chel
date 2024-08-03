@@ -22,11 +22,11 @@ namespace Chel.Commands
         [NumberedParameter(2, "script")]
         [Description("The script block to execute if the condition is true.")]
         [Required]
-        public string ScriptBlock { get; set;}
+        public string? ScriptBlock { get; set;}
 
         [NamedParameter("else", "script")]
         [Description("The script block to execute if the condition is false.")]
-        public string ElseScriptBlock { get; set; }
+        public string? ElseScriptBlock { get; set; }
 
         /// <summary>
         /// Create a new instance.
