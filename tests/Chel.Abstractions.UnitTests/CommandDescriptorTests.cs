@@ -15,7 +15,7 @@ namespace Chel.Abstractions.UnitTests
 
             var builder = new CommandDescriptor.Builder(new ExecutionTargetIdentifier(string.Empty, "command"), GetType(), texts);
             var sut = builder.Build();
-            Action sutAction = () => sut.GetDescription(null);
+            Action sutAction = () => sut.GetDescription(null!);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);

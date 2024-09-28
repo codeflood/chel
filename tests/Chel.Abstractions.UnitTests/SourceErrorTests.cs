@@ -9,7 +9,7 @@ namespace Chel.Abstractions.UnitTests
         public void Ctor_MessageIsNull_ThrowsException()
         {
             // arrange
-            var action = () => new SourceError(new SourceLocation(1, 1), null);
+            var action = () => new SourceError(new SourceLocation(1, 1), null!);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(action);

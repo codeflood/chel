@@ -13,7 +13,7 @@ namespace Chel.Abstractions.UnitTests
             var builder = CreateMemberDescriptorBuilder();
             builder.AddDescription("description", "en");
             var sut = builder.Build();
-            Action sutAction = () => sut.GetDescription(null);
+            Action sutAction = () => sut.GetDescription(null!);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -72,7 +72,7 @@ namespace Chel.Abstractions.UnitTests
         {
             // arrange
             var builder = CreateMemberDescriptorBuilder();
-            builder.AddDescription("description", null);
+            builder.AddDescription("description", null!);
             var sut = builder.Build();
 
             // act

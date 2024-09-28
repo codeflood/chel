@@ -9,7 +9,7 @@ namespace Chel.Abstractions.UnitTests
         public void Ctor_NameIsNull_ThrowsException()
         {
             // arrange
-            Action sutAction = () => new NamedParameterAttribute(null, "value");
+            Action sutAction = () => new NamedParameterAttribute(null!, "value");
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -36,7 +36,7 @@ namespace Chel.Abstractions.UnitTests
         public void Ctor_PlaceholderIsNull_ThrowsException()
         {
             // arrange
-            Action sutAction = () => new NamedParameterAttribute("name", null);
+            Action sutAction = () => new NamedParameterAttribute("name", null!);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);

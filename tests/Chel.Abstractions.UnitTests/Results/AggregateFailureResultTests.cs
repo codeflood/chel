@@ -10,7 +10,7 @@ namespace Chel.Abstractions.UnitTests.Results
         public void Ctor_InnerResultsIsNull_ThrowsException()
         {
             // arrange
-            Action sutAction = () => new AggregateFailureResult(null);
+            Action sutAction = () => new AggregateFailureResult(null!);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);

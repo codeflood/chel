@@ -11,7 +11,7 @@ namespace Chel.Abstractions.UnitTests.Parsing
         public void Ctor_NameIsNull_ThrowsException()
         {
             // arrange
-            Action sutAction = () => new SourceNameCommandParameter(new SourceLocation(1, 2), null);
+            Action sutAction = () => new SourceNameCommandParameter(new SourceLocation(1, 2), null!);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);

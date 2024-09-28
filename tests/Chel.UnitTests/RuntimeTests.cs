@@ -15,7 +15,7 @@ namespace Chel.UnitTests
         {
             // arrange
             var sut = new Runtime();
-            Action sutAction = () => sut.RegisterCommandType(null);
+            Action sutAction = () => sut.RegisterCommandType(null!);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -40,7 +40,7 @@ namespace Chel.UnitTests
         {
             // arrange
             var sut = new Runtime();
-            CommandResult commandResult = null;
+            CommandResult? commandResult = null;
 
             // act
             var session = sut.NewSession(result => commandResult = result);
@@ -55,7 +55,7 @@ namespace Chel.UnitTests
         {
             // arrange
             var sut = new Runtime();
-            CommandResult commandResult = null;
+            CommandResult? commandResult = null;
 
             // act
             var session = sut.NewSession(result => commandResult = result);
@@ -92,7 +92,7 @@ namespace Chel.UnitTests
             // arrange
             var sut = new Runtime();
             sut.RegisterCommandType(typeof(StandardCommandServicesDependencyCommand));
-            CommandResult commandResult = null;
+            CommandResult? commandResult = null;
 
             // act
             var session = sut.NewSession(result => commandResult = result);
@@ -107,7 +107,7 @@ namespace Chel.UnitTests
         {
             // arrange
             var sut = new Runtime();
-            Action sutAction = () => sut.RegisterCommandService<object>(null);
+            Action sutAction = () => sut.RegisterCommandService<object>(null!);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -119,7 +119,7 @@ namespace Chel.UnitTests
         {
             // arrange
             var sut = new Runtime();
-            Action sutAction = () => sut.RegisterScriptProvider(null);
+            Action sutAction = () => sut.RegisterScriptProvider(null!);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);

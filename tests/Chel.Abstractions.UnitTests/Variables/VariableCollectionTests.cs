@@ -12,7 +12,7 @@ namespace Chel.Abstractions.UnitTests.Variables
         {
             // arrange
             var sut = new VariableCollection();
-            Action sutAction = () => sut.Set(null);
+            Action sutAction = () => sut.Set(null!);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -32,7 +32,7 @@ namespace Chel.Abstractions.UnitTests.Variables
 
             // assert
             var result = sut.Get("name");
-            Assert.Equal(value, result.Value);
+            Assert.Equal(value, result!.Value);
         }
 
         [Fact]
@@ -49,7 +49,7 @@ namespace Chel.Abstractions.UnitTests.Variables
 
             // assert
             var result = sut.Get("name");
-            Assert.Equal("beta", result.Value.ToString());
+            Assert.Equal("beta", result!.Value.ToString());
         }
 
         [Fact]
@@ -91,7 +91,7 @@ namespace Chel.Abstractions.UnitTests.Variables
             var sut = new VariableCollection();
             sut.Set(new Variable("name", new Literal("value")));
             
-            Action sutAction = () => sut.Remove(null);
+            Action sutAction = () => sut.Remove(null!);
 
             // act
             var ex = Assert.Throws<ArgumentNullException>(sutAction);

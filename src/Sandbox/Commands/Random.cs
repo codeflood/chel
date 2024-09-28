@@ -21,7 +21,7 @@ namespace Chel.Sandbox.Commands
 
         [NamedParameter("options", "values")]
         [Description("The list of values to make a selection from.")]
-        public IList<string> Values { get; set; }
+        public IList<string>? Values { get; set; }
 
         public Random()
         {
@@ -30,7 +30,7 @@ namespace Chel.Sandbox.Commands
 
         public CommandResult Execute()
         {
-            Literal output = null;
+            Literal output;
 
             if(Values?.Count > 0)
                 output = ExecuteRandomSelection();
@@ -42,7 +42,7 @@ namespace Chel.Sandbox.Commands
 
         private Literal ExecuteRandomSelection()
         {
-            var num = _random.Next(0, Values.Count);
+            var num = _random.Next(0, Values!.Count);
             return new Literal(Values[num]);
         }
 

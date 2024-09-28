@@ -14,7 +14,7 @@ namespace Chel.Abstractions.UnitTests
         public void Ctor_ImplementingTypeIsNull_ThrowsException()
         {
             // arrange
-            Action sutAction = () => new CommandDescriptor.Builder(SampleCommandIdentifier, null, Substitute.For<ITextResolver>());
+            Action sutAction = () => new CommandDescriptor.Builder(SampleCommandIdentifier, null!, Substitute.For<ITextResolver>());
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -25,7 +25,7 @@ namespace Chel.Abstractions.UnitTests
         public void Ctor_TextResolverIsNull_ThrowsException()
         {
             // arrange
-            Action sutAction = () => new CommandDescriptor.Builder(SampleCommandIdentifier, GetType(), null);
+            Action sutAction = () => new CommandDescriptor.Builder(SampleCommandIdentifier, GetType(), null!);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -37,7 +37,7 @@ namespace Chel.Abstractions.UnitTests
         {
             // arrange
             var sut = new CommandDescriptor.Builder(SampleCommandIdentifier, GetType(), Substitute.For<ITextResolver>());
-            Action sutAction = () => sut.AddNumberedParameter(null);
+            Action sutAction = () => sut.AddNumberedParameter(null!);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -65,7 +65,7 @@ namespace Chel.Abstractions.UnitTests
         {
             // arrange
             var sut = new CommandDescriptor.Builder(SampleCommandIdentifier, GetType(), Substitute.For<ITextResolver>());
-            Action sutAction = () => sut.AddNamedParameter(null);
+            Action sutAction = () => sut.AddNamedParameter(null!);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -109,7 +109,7 @@ namespace Chel.Abstractions.UnitTests
         {
             // arrange
             var sut = new CommandDescriptor.Builder(SampleCommandIdentifier, GetType(), Substitute.For<ITextResolver>());
-            Action sutAction = () => sut.AddFlagParameter(null);
+            Action sutAction = () => sut.AddFlagParameter(null!);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -195,8 +195,8 @@ namespace Chel.Abstractions.UnitTests
             var commandDescriptor = sut.Build();
 
             // assert
-            Assert.Equal(1, commandDescriptor.NumberedParameters.Count);
-            Assert.Equal(descriptor, commandDescriptor.NumberedParameters[0]);
+            var result = Assert.Single(commandDescriptor.NumberedParameters);
+            Assert.Equal(descriptor, result);
         }
 
         [Fact]
@@ -212,7 +212,7 @@ namespace Chel.Abstractions.UnitTests
             var commandDescriptor = sut.Build();
 
             // assert
-            Assert.Equal(1, commandDescriptor.NamedParameters.Count);
+            Assert.Single(commandDescriptor.NamedParameters);
             Assert.Equal(descriptor, commandDescriptor.NamedParameters["name"]);
         }
 
@@ -229,13 +229,13 @@ namespace Chel.Abstractions.UnitTests
             var commandDescriptor = sut.Build();
 
             // assert
-            Assert.Equal(1, commandDescriptor.FlagParameters.Count);
-            Assert.Equal(descriptor, commandDescriptor.FlagParameters[0]);
+            var result = Assert.Single(commandDescriptor.FlagParameters);
+            Assert.Equal(descriptor, result);
         }
 
         private PropertyInfo CreateProperty()
         {
-            return typeof(SampleCommand).GetProperty("Parameter");
+            return typeof(SampleCommand).GetProperty("Parameter")!;
         }
     }
 }

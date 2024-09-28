@@ -17,7 +17,7 @@ namespace Chel.Abstractions.UnitTests.Parsing
             var sut = new CommandInput.Builder(SourceLocation, SampleExecutionTargetIdentifier).Build();
 
             // act
-            var result = sut.Equals(null);
+            var result = sut.Equals(null!);
 
             // assert
             Assert.False(result);

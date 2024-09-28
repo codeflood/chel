@@ -23,7 +23,7 @@ namespace Chel.Abstractions.UnitTests
         public void Ctor_PlaceholderTextIsNull_ThrowsException()
         {
             // arrange
-            Action sutAction = () => new NumberedParameterAttribute(1, null);
+            Action sutAction = () => new NumberedParameterAttribute(1, null!);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);

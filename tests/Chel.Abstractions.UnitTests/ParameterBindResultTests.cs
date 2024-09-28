@@ -10,7 +10,7 @@ namespace Chel.Abstractions.UnitTests
         {
             // arrange
             var sut = new ParameterBindResult();
-            Action sutAction = () => sut.AddError(null);
+            Action sutAction = () => sut.AddError(null!);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);

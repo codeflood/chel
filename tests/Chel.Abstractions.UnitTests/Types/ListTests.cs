@@ -11,7 +11,7 @@ namespace Chel.Abstractions.UnitTests.Types
         public void Ctor_ValuesIsNull_SetsPropertyToEmptyCollection()
         {
             // arrange, act
-            var sut = new List(null);
+            var sut = new List(null!);
 
             // assert
             Assert.Empty(sut.Values);
@@ -35,8 +35,8 @@ namespace Chel.Abstractions.UnitTests.Types
         public void Equals_ValuesAreBothEmpty_ReturnsTrue()
         {
             // arrange
-            var sut1 = new List(null);
-            var sut2 = new List(null);
+            var sut1 = new List(null!);
+            var sut2 = new List(null!);
 
             // act
             var result = sut1.Equals(sut2);
@@ -148,7 +148,7 @@ namespace Chel.Abstractions.UnitTests.Types
         public void ToString_ListIsEmpty_ReturnsEmptyList()
         {
             // arrange
-            var sut = new List(null);
+            var sut = new List(null!);
 
             // act
             var result = sut.ToString();

@@ -11,7 +11,7 @@ namespace Chel.Abstractions.UnitTests.Types
         public void Ctor_VariableNameIsNull_ThrowsException()
         {
             // arrange
-            Action sutAction = () => new VariableReference(null);
+            Action sutAction = () => new VariableReference(null!);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);

@@ -1292,12 +1292,12 @@ namespace Chel.UnitTests
 
         public static IEnumerable<object[]> Bind_SetList_BindsParameter_DataSource()
         {
-            yield return new object[] { "array", new Func<ListParameterCommand, IEnumerable<string>>(command => command.Array) };
-            yield return new object[] { "enumerable", new Func<ListParameterCommand, IEnumerable<string>>(command => command.Enumerable) };
-            yield return new object[] { "list", new Func<ListParameterCommand, IEnumerable<string>>(command => command.List) };
-            yield return new object[] { "collection", new Func<ListParameterCommand, IEnumerable<string>>(command => command.Collection) };
-            yield return new object[] { "rocollection", new Func<ListParameterCommand, IEnumerable<string>>(command => command.ReadOnlyCollection) };
-            yield return new object[] { "concretelist", new Func<ListParameterCommand, IEnumerable<string>>(command => command.ConcreteList) };
+            yield return new object[] { "array", new Func<ListParameterCommand, IEnumerable<string>>(command => command.Array!) };
+            yield return new object[] { "enumerable", new Func<ListParameterCommand, IEnumerable<string>>(command => command.Enumerable!) };
+            yield return new object[] { "list", new Func<ListParameterCommand, IEnumerable<string>>(command => command.List!) };
+            yield return new object[] { "collection", new Func<ListParameterCommand, IEnumerable<string>>(command => command.Collection!) };
+            yield return new object[] { "rocollection", new Func<ListParameterCommand, IEnumerable<string>>(command => command.ReadOnlyCollection!) };
+            yield return new object[] { "concretelist", new Func<ListParameterCommand, IEnumerable<string>>(command => command.ConcreteList!) };
 
         }
 
@@ -1652,7 +1652,7 @@ namespace Chel.UnitTests
             sut.Bind(command, commandInput);
 
             // assert
-            Assert.Equal("subbed", command.List[0]);
+            Assert.Equal("subbed", command.List![0]);
         }
 
         [Fact]
@@ -1684,7 +1684,7 @@ namespace Chel.UnitTests
 
             // assert
             Assert.True(result.Success);
-            Assert.Equal(2, command.MapList.Count);
+            Assert.Equal(2, command.MapList!.Count);
             Assert.Equal("value1", ((Literal)command.MapList[0].Entries["key1"]).Value);
             Assert.Equal("value2", ((Literal)command.MapList[0].Entries["key2"]).Value);
             Assert.Equal("value3", ((Literal)command.MapList[1].Entries["key3"]).Value);
@@ -1857,7 +1857,7 @@ namespace Chel.UnitTests
 
             // assert
             Assert.True(result.Success);
-            Assert.Equal(2, command.Dictionary.Count);
+            Assert.Equal(2, command.Dictionary!.Count);
             Assert.Equal("value1", command.Dictionary["key1"]);
             Assert.Equal("value2", command.Dictionary["key2"]);
         }
@@ -1886,7 +1886,7 @@ namespace Chel.UnitTests
 
             // assert
             Assert.True(result.Success);
-            Assert.Equal(2, command.AbstractDictionary.Count);
+            Assert.Equal(2, command.AbstractDictionary!.Count);
             Assert.Equal("value1", command.AbstractDictionary["key1"]);
             Assert.Equal("value2", command.AbstractDictionary["key2"]);
         }
@@ -1915,7 +1915,7 @@ namespace Chel.UnitTests
 
             // assert
             Assert.True(result.Success);
-            Assert.Equal(2, command.IntDictionary.Count);
+            Assert.Equal(2, command.IntDictionary!.Count);
             Assert.Equal(42, command.IntDictionary["key1"]);
             Assert.Equal(43, command.IntDictionary["key2"]);
         }
@@ -1947,7 +1947,7 @@ namespace Chel.UnitTests
 
             // assert
             Assert.True(result.Success);
-            Assert.Equal(2, command.ListDictionary.Count);
+            Assert.Equal(2, command.ListDictionary!.Count);
             Assert.Equal(values1, command.ListDictionary["key1"].Values);
             Assert.Equal(values2, command.ListDictionary["key2"].Values);
         }

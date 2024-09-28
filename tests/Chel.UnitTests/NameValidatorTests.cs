@@ -33,7 +33,7 @@ namespace Chel.UnitTests
         [InlineData(":")]
         [InlineData("na:me")]
         [InlineData("*name")]
-        public void IsValid_NameIsInvalid_ReturnsFalse(string name)
+        public void IsValid_NameIsInvalid_ReturnsFalse(string? name)
         {
             // arrange
             var sut = new NameValidator();

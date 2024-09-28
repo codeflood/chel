@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using Xunit;
 
@@ -10,7 +9,7 @@ namespace Chel.Abstractions.UnitTests
         [Fact]
         public void Ctor_NameIsNull_ThrowsException()
         {
-            Action sutAction = () => new ExecutionTargetIdentifier("mod", null);
+            Action sutAction = () => new ExecutionTargetIdentifier("mod", null!);
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
             Assert.Equal("name", ex.ParamName);
         }
@@ -33,7 +32,7 @@ namespace Chel.Abstractions.UnitTests
         public void Equals_OtherInstanceIsNull_ReturnsFalse()
         {
             var sut = new ExecutionTargetIdentifier(null, "a");
-            var result = sut.Equals(null);
+            var result = sut.Equals(null!);
             Assert.False(result);
         }
 

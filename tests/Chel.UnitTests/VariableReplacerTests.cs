@@ -16,7 +16,7 @@ namespace Chel.UnitTests
         {
             // arange
             var sut = new VariableReplacer();
-            Action sutAction = () => sut.ReplaceVariables(null, new Literal("input"));
+            Action sutAction = () => sut.ReplaceVariables(null!, new Literal("input"));
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -29,7 +29,7 @@ namespace Chel.UnitTests
             // arange
             var sut = new VariableReplacer();
             var variables = new VariableCollection();
-            Action sutAction = () => sut.ReplaceVariables(variables, null);
+            Action sutAction = () => sut.ReplaceVariables(variables, null!);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);

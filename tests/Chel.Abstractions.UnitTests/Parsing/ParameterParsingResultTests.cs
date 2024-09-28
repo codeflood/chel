@@ -10,7 +10,7 @@ namespace Chel.Abstractions.UnitTests.Parsing
         public void Ctor_NullErrorMessageProvided_ThrowsException()
         {
             // act, assert
-            var ex = Assert.Throws<ArgumentNullException>(() => new ParameterParsingResult<int>(null));
+            var ex = Assert.Throws<ArgumentNullException>(() => new ParameterParsingResult<int>(null!));
             Assert.Equal("errorMessage", ex.ParamName);
         }
         

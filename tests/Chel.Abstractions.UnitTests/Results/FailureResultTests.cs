@@ -11,7 +11,7 @@ namespace Chel.Abstractions.UnitTests.Results
         {
             // arrange
             var location = new SourceLocation(1, 1);
-            Action sutAction = () => new FailureResult(location, null);
+            Action sutAction = () => new FailureResult(location, null!);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);

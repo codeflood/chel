@@ -8,7 +8,7 @@ namespace Chel.Abstractions.UnitTests
         public void Ctor_WhenNameIsNull_SetsNamePropertyToNull()
         {
             // arrange, act
-            var sut = new InvalidNameException(null);
+            var sut = new InvalidNameException(null!);
 
             // assert
             Assert.Null(sut.Name);
@@ -43,7 +43,7 @@ namespace Chel.Abstractions.UnitTests
         public void ToString_NullName_ReturnsMessage()
         {
             // arrange
-            var sut = new InvalidNameException(null);
+            var sut = new InvalidNameException(null!);
 
             // act
             var result = sut.ToString();

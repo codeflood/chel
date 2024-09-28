@@ -168,7 +168,7 @@ namespace Chel.UnitTests.Commands
 
             // assert
             var variable = variables.Get("name");
-            var values = ((List)variable.Value).Values.Select(x => x.ToString());
+            var values = ((List)variable!.Value).Values.Select(x => x.ToString());
             Assert.Equal(new[]{ "val1", "val2" }, values);
         }
 

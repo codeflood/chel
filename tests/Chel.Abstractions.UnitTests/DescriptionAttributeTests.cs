@@ -10,7 +10,7 @@ namespace Chel.Abstractions.UnitTests
         public void Ctor_TextIsNull_ThrowsException()
         {
             // arrange
-            Action sutAction = () => new DescriptionAttribute(null);
+            Action sutAction = () => new DescriptionAttribute(null!);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);

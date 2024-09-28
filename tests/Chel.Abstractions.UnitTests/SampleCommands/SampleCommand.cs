@@ -8,7 +8,7 @@ namespace Chel.Abstractions.UnitTests.SampleCommands
     public class SampleCommand : ICommand
     {
         [NumberedParameter(1, "param")]
-        public string Parameter { get; set; }
+        public string? Parameter { get; set; }
 
         public CommandResult Execute()
         {

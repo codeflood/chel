@@ -19,7 +19,7 @@ namespace Chel.UnitTests.Commands
 
             // assert
             Assert.True(result.Success);
-            Assert.Empty(result.Value.ToString());
+            Assert.Empty(result.Value.ToString()!);
         }
 
         [Fact]

@@ -18,7 +18,7 @@ namespace Chel.Abstractions.UnitTests
             // act, assert
             var ex = Assert.Throws<TargetInvocationException>(sutAction);
             var innerEx = ex.InnerException as ArgumentNullException;
-            Assert.Equal("property", innerEx.ParamName);
+            Assert.Equal("property", innerEx!.ParamName);
         }
 
         [Fact]
@@ -31,7 +31,7 @@ namespace Chel.Abstractions.UnitTests
             // act, assert
             var ex = Assert.Throws<TargetInvocationException>(sutAction);
             var innerEx = ex.InnerException as ArgumentNullException;
-            Assert.Equal("descriptions", innerEx.ParamName);
+            Assert.Equal("descriptions", innerEx!.ParamName);
         }
 
         [Fact]
@@ -58,7 +58,7 @@ namespace Chel.Abstractions.UnitTests
             texts.GetText("en").Returns("text");
 
             var sut = Substitute.ForPartsOf<ParameterDescriptor>(property, texts, false);
-            Action sutAction = () => sut.GetDescription(null);
+            Action sutAction = () => sut.GetDescription(null!);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -84,7 +84,7 @@ namespace Chel.Abstractions.UnitTests
 
         private PropertyInfo CreateProperty()
         {
-            return typeof(SampleCommand).GetProperty("Parameter");
+            return typeof(SampleCommand).GetProperty("Parameter")!;
         }
     }
 }

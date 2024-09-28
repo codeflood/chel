@@ -11,7 +11,7 @@ namespace Chel.Abstractions.UnitTests.Types
         public void Ctor_EntriesIsNull_SetsPropertyToEmptyCollectionm()
         {
             // arrange, act
-            var sut = new Map(null);
+            var sut = new Map(null!);
 
             // assert
             Assert.Empty(sut.Entries);
@@ -37,8 +37,8 @@ namespace Chel.Abstractions.UnitTests.Types
         public void Equals_EntriesAreBothEmpty_ReturnsTrue()
         {
             // arrange
-            var sut1 = new Map(null);
-            var sut2 = new Map(null);
+            var sut1 = new Map(null!);
+            var sut2 = new Map(null!);
 
             // act
             var result = sut1.Equals(sut2);
@@ -149,7 +149,7 @@ namespace Chel.Abstractions.UnitTests.Types
         public void ToString_MapIsEmpty_ReturnsEmptyMap()
         {
             // arrange
-            var sut = new Map(null);
+            var sut = new Map(null!);
 
             // act
             var result = sut.ToString();

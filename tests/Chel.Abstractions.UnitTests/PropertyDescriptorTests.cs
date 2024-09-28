@@ -11,7 +11,7 @@ namespace Chel.Abstractions.UnitTests
         public void Ctor_PropertyInfoIsNull_Throws()
         {
             // arrange
-            Action sutAction = () => new PropertyDescriptor(null);
+            Action sutAction = () => new PropertyDescriptor(null!);
 
             // act
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -29,7 +29,7 @@ namespace Chel.Abstractions.UnitTests
             var property = commandType.GetProperty(propertyName);
 
             // act
-            var sut = new PropertyDescriptor(property);
+            var sut = new PropertyDescriptor(property!);
 
             // assert
             Assert.False(sut.IsTypeListCompatible);
@@ -50,7 +50,7 @@ namespace Chel.Abstractions.UnitTests
             var property = commandType.GetProperty(propertyName);
 
             // act
-            var sut = new PropertyDescriptor(property);
+            var sut = new PropertyDescriptor(property!);
 
             // assert
             Assert.True(sut.IsTypeListCompatible);
@@ -65,7 +65,7 @@ namespace Chel.Abstractions.UnitTests
             var property = commandType.GetProperty(propertyName);
 
             // act
-            var sut = new PropertyDescriptor(property);
+            var sut = new PropertyDescriptor(property!);
 
             // assert
             Assert.False(sut.IsTypeMapCompatible);
@@ -83,7 +83,7 @@ namespace Chel.Abstractions.UnitTests
             var property = commandType.GetProperty(propertyName);
 
             // act
-            var sut = new PropertyDescriptor(property);
+            var sut = new PropertyDescriptor(property!);
 
             // assert
             Assert.True(sut.IsTypeMapCompatible);
@@ -97,7 +97,7 @@ namespace Chel.Abstractions.UnitTests
             var property = commandType.GetProperty(propertyName);
 
             // act
-            var sut = new PropertyDescriptor(property);
+            var sut = new PropertyDescriptor(property!);
 
             // assert
             Assert.Null(sut.GenericValueType);
@@ -123,7 +123,7 @@ namespace Chel.Abstractions.UnitTests
             var property = commandType.GetProperty(propertyName);
 
             // act
-            var sut = new PropertyDescriptor(property);
+            var sut = new PropertyDescriptor(property!);
 
             // assert
             Assert.Equal(expectedType, sut.GenericValueType);
@@ -145,7 +145,7 @@ namespace Chel.Abstractions.UnitTests
             var property = commandType.GetProperty(propertyName);
 
             // act
-            var sut = new PropertyDescriptor(property);
+            var sut = new PropertyDescriptor(property!);
 
             // assert
             Assert.Null(sut.GenericKeyType);
@@ -163,7 +163,7 @@ namespace Chel.Abstractions.UnitTests
             var property = commandType.GetProperty(propertyName);
 
             // act
-            var sut = new PropertyDescriptor(property);
+            var sut = new PropertyDescriptor(property!);
 
             // assert
             Assert.Equal(expectedType, sut.GenericKeyType);

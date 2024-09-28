@@ -17,9 +17,9 @@ namespace Chel.Abstractions.UnitTests.Parsing
         [InlineData("")]
         [InlineData("   ")]
         [InlineData("\r")]
-        public void Parse_InputIsInvalid_ReturnsEmptyCommandResult(string input)
+        public void Parse_InputIsInvalid_ReturnsEmptyCommandResult(string? input)
         {
-            var result = _sut.Parse(input);
+            var result = _sut.Parse(input!);
             Assert.Null(result.Module);
             Assert.Empty(result.Name);
         }

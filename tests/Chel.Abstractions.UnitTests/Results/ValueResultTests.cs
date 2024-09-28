@@ -11,7 +11,7 @@ namespace Chel.Abstractions.UnitTests.Results
         public void Ctor_ValueIsNull_ThrowsException()
         {
             // arrange
-            Action sutAction = () => new ValueResult(null);
+            Action sutAction = () => new ValueResult(null!);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);

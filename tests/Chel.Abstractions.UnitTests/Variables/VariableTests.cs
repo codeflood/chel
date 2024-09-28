@@ -12,7 +12,7 @@ namespace Chel.Abstractions.UnitTests.Variables
         {
             // arrange
             var value = new Literal("value");
-            Action sutAction = () => new Variable(null, value);
+            Action sutAction = () => new Variable(null!, value);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -35,7 +35,7 @@ namespace Chel.Abstractions.UnitTests.Variables
         public void Ctor_ValueIsNull_ThrowsException()
         {
             // arrange
-            Action sutAction = () => new Variable("name", null);
+            Action sutAction = () => new Variable("name", null!);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);

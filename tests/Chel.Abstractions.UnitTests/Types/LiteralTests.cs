@@ -10,7 +10,7 @@ namespace Chel.Abstractions.UnitTests.Types
         public void Ctor_ValueIsNull_ThrowsExceptino()
         {
             // arrange
-            Action sutAction = () => new Literal(null);
+            Action sutAction = () => new Literal(null!);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);

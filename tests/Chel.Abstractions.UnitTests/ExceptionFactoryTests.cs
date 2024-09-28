@@ -8,7 +8,7 @@ namespace Chel.Abstractions.UnitTests
         [Fact]
         public void CreateArgumentException_TextKeyIsNull_Throws()
         {
-            Action sutAction = () => ExceptionFactory.CreateArgumentException(null, "param");
+            Action sutAction = () => ExceptionFactory.CreateArgumentException(null!, "param");
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
             Assert.Equal("textKey", ex.ParamName);
         }
@@ -24,7 +24,7 @@ namespace Chel.Abstractions.UnitTests
         [Fact]
         public void CreateArgumentException_ParamNameIsNull_Throws()
         {
-            Action sutAction = () => ExceptionFactory.CreateArgumentException("PHRASE", null);
+            Action sutAction = () => ExceptionFactory.CreateArgumentException("PHRASE", null!);
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
             Assert.Equal("paramName", ex.ParamName);
         }
@@ -56,7 +56,7 @@ namespace Chel.Abstractions.UnitTests
         [Fact]
         public void CreateInvalidOperationException_TextKeyIsNull_Throws()
         {
-            Action sutAction = () => ExceptionFactory.CreateInvalidOperationException(null);
+            Action sutAction = () => ExceptionFactory.CreateInvalidOperationException(null!);
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
             Assert.Equal("textKey", ex.ParamName);
         }

@@ -7,7 +7,7 @@ namespace Chel.Abstractions.UnitTests
         [Fact]
         public void Resolve_KeyIsNull_ReturnsEmpty()
         {
-            var result = ApplicationTextResolver.Instance.Resolve(null);
+            var result = ApplicationTextResolver.Instance.Resolve(null!);
             Assert.Empty(result);
         }
 
@@ -35,7 +35,7 @@ namespace Chel.Abstractions.UnitTests
         [Fact]
         public void ResolveAndFormat_KeyIsNull_ReturnsEmpty()
         {
-            var result = ApplicationTextResolver.Instance.ResolveAndFormat(null);
+            var result = ApplicationTextResolver.Instance.ResolveAndFormat(null!);
             Assert.Empty(result);
         }
 

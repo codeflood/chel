@@ -30,7 +30,7 @@ namespace Chel.Abstractions.UnitTests
             // arrange
             var property = CreateProperty();
             var textResolver = Substitute.For<ITextResolver>();
-            Action sutAction = () => new NumberedParameterDescriptor(1, null, property, textResolver, false);
+            Action sutAction = () => new NumberedParameterDescriptor(1, null!, property, textResolver, false);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -70,7 +70,7 @@ namespace Chel.Abstractions.UnitTests
 
         private PropertyInfo CreateProperty()
         {
-            return typeof(SampleCommand).GetProperty("Parameter");
+            return typeof(SampleCommand).GetProperty("Parameter")!;
         }
     }
 }

@@ -79,7 +79,7 @@ namespace Chel.Abstractions.UnitTests
             var sut = new SourceLocation(3, 6);
 
             // act
-            var result = sut.Equals(null);
+            var result = sut.Equals(null!);
 
             // assert
             Assert.False(result);

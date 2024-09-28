@@ -22,7 +22,7 @@ namespace Chel.UnitTests
         {
             // arrange
             Action sutAction = () => new Session(
-                    null,
+                    null!,
                     Substitute.For<ICommandFactory>(),
                     Substitute.For<ICommandParameterBinder>(),
                     Substitute.For<IScriptProvider>(),
@@ -40,7 +40,7 @@ namespace Chel.UnitTests
             // arrange
             Action sutAction = () => new Session(
                     Substitute.For<IParser>(),
-                    null,
+                    null!,
                     Substitute.For<ICommandParameterBinder>(),
                     Substitute.For<IScriptProvider>(),
                     _ => { }
@@ -58,7 +58,7 @@ namespace Chel.UnitTests
             Action sutAction = () => new Session(
                     Substitute.For<IParser>(),
                     Substitute.For<ICommandFactory>(),
-                    null,
+                    null!,
                     Substitute.For<IScriptProvider>(),
                     _ => { }
                 );
@@ -76,7 +76,7 @@ namespace Chel.UnitTests
                     Substitute.For<IParser>(),
                     Substitute.For<ICommandFactory>(),
                     Substitute.For<ICommandParameterBinder>(),
-                    null,
+                    null!,
                     _ => { }
                 );
 
@@ -94,7 +94,7 @@ namespace Chel.UnitTests
                     Substitute.For<ICommandFactory>(),
                     Substitute.For<ICommandParameterBinder>(),
                     Substitute.For<IScriptProvider>(),
-                    null
+                    null!
                 );
 
             // act, assert
@@ -116,7 +116,7 @@ namespace Chel.UnitTests
         public void Execute_SingleCommandNotRegistered_PassesCommandNotFoundResultToHandler()
         {
             // arrange
-            CommandResult executionResult = null;
+            CommandResult? executionResult = null;
             var sut = CreateSession(result => executionResult = result);
             
             // act
@@ -125,14 +125,14 @@ namespace Chel.UnitTests
             // assert
             Assert.IsType<FailureResult>(executionResult);
             var failureResult = executionResult as FailureResult;
-            Assert.Equal(new SourceLocation(1, 1), failureResult.SourceLocation);
+            Assert.Equal(new SourceLocation(1, 1), failureResult!.SourceLocation);
         }
 
         [Fact]
         public void Execute_ErrorOnLine2_ReportsFailureOnLine2()
         {
             // arrange
-            CommandResult executionResult = null;
+            CommandResult? executionResult = null;
             var sut = CreateSession(result => executionResult = result, typeof(SampleCommand));
 
             // act
@@ -141,7 +141,7 @@ namespace Chel.UnitTests
             // assert
             Assert.IsType<FailureResult>(executionResult);
             var failureResult = executionResult as FailureResult;
-            Assert.Equal(new SourceLocation(2, 1), failureResult.SourceLocation);
+            Assert.Equal(new SourceLocation(2, 1), failureResult!.SourceLocation);
         }
 
         [Fact]
@@ -155,7 +155,7 @@ namespace Chel.UnitTests
 
             var sut = CreateSession(
                 result => executionResults.Add(result),
-                null,
+                null!,
                 scriptProvider,
                 typeof(Echo));
 
@@ -178,7 +178,7 @@ namespace Chel.UnitTests
             var scriptProvider = Substitute.For<IScriptProvider>();
             scriptProvider.GetScriptSource(null, "echo").Returns("echo hi");
 
-            CommandResult executionResult = null;
+            CommandResult? executionResult = null;
             var sut = CreateSession(
                 result => executionResult = result,
                 null,
@@ -190,14 +190,14 @@ namespace Chel.UnitTests
 
             // assert
             var valueResult = Assert.IsType<ValueResult>(executionResult);
-            Assert.Empty(valueResult.Value.ToString());
+            Assert.Empty(valueResult.Value.ToString()!);
         }
 
         [Fact]
         public void Execute_Script_PassesCommandResultToHandler()
         {
             // arrange
-            CommandResult executionResult = null;
+            CommandResult? executionResult = null;
             var sut = CreateSession(result => executionResult = result, typeof(SampleCommand));
 
             // act
@@ -211,28 +211,28 @@ namespace Chel.UnitTests
         public void Execute_ParameterProvided_ParameterSetOnCommand()
         {
             // arrange
-            ValueResult executionResult = null;
+            ValueResult? executionResult = null;
             var sut = CreateSession(result => executionResult = result as ValueResult, typeof(NumberedParameterCommand));
 
             // act
             sut.Execute("num p1 p2");
             
             // assert
-            Assert.Equal("p1 p2", executionResult.Value.ToString());
+            Assert.Equal("p1 p2", executionResult!.Value.ToString());
         }
 
         [Fact]
         public void Execute_ParameterBindingHasErrors_FailureResultReturned()
         {
             // arrange
-            FailureResult executionResult = null;
+            FailureResult? executionResult = null;
             var sut = CreateSession(result => executionResult = result as FailureResult, typeof(NumberedParameterCommand));
 
             // act
             sut.Execute("num p1 p2 p3");
             
             // assert
-            Assert.Equal("ERROR (line 1, character 11): Unexpected numbered parameter 'p3'", executionResult.ToString());
+            Assert.Equal("ERROR (line 1, character 11): Unexpected numbered parameter 'p3'", executionResult!.ToString());
         }
 
         [Fact]
@@ -247,14 +247,14 @@ namespace Chel.UnitTests
             var binder = Substitute.For<ICommandParameterBinder>();
             var scriptProvider = Substitute.For<IScriptProvider>();
 
-            FailureResult executionResult = null;
+            FailureResult? executionResult = null;
             var sut = new Session(parser, factory, binder, scriptProvider, result => executionResult = result as FailureResult);
 
             // act
             sut.Execute("command");
 
             // assert
-            Assert.Equal(new SourceLocation(1, 1), executionResult.SourceLocation);
+            Assert.Equal(new SourceLocation(1, 1), executionResult!.SourceLocation);
         }
 
         [Fact]
@@ -273,54 +273,54 @@ namespace Chel.UnitTests
             var binder = Substitute.For<ICommandParameterBinder>();
             var scriptProvider = Substitute.For<IScriptProvider>();
 
-            FailureResult executionResult = null;
+            FailureResult? executionResult = null;
             var sut = new Session(parser, factory, binder, scriptProvider, result => executionResult = result as FailureResult);
 
             // act
             sut.Execute("command");
 
             // assert
-            Assert.Equal(new SourceLocation(1, 1), executionResult.SourceLocation);
+            Assert.Equal(new SourceLocation(1, 1), executionResult!.SourceLocation);
         }
 
         [Fact]
         public void Execute_CommandThrowsException_FailureResultReturned()
         {
             // arrange
-            FailureResult executionResult = null;
+            FailureResult? executionResult = null;
             var sut = CreateSession(result => executionResult = result as FailureResult, typeof(ExceptionCommand));
 
             // act
             sut.Execute("ex");
 
             // assert
-            Assert.Equal(new SourceLocation(1, 1), executionResult.SourceLocation);
+            Assert.Equal(new SourceLocation(1, 1), executionResult!.SourceLocation);
         }
 
         [Fact]
         public void Execute_ParameterIsUnsetVariable_ReturnsFailure()
         {
             // arrange
-            FailureResult executionResult = null;
+            FailureResult? executionResult = null;
             var sut = CreateSession(result => executionResult = result as FailureResult, typeof(NamedParameterCommand));
 
             // act
             sut.Execute("nam -param1 $foo$");
 
             // assert
-            Assert.Equal("Variable $foo$ is not set", executionResult.Message);
+            Assert.Equal("Variable $foo$ is not set", executionResult!.Message);
         }
 
         [Fact]
         public void Execute_ParameterIsSetVariable_PerformsSubstitution()
         {
             // arrange
-            CommandResult executionResult = null;
+            CommandResult? executionResult = null;
             var sut = CreateSession(
                 result => executionResult = result,
                 sessionObjectsConfigurator: x => {
                     x.Register<VariableCollection>();
-                    ((VariableCollection)x.Resolve(typeof(VariableCollection))).Set(new Variable("foo", new Literal("lorem")));
+                    ((VariableCollection)x.Resolve(typeof(VariableCollection))!).Set(new Variable("foo", new Literal("lorem")));
                 },
                 null,
                 typeof(NamedParameterCommand));
@@ -330,105 +330,105 @@ namespace Chel.UnitTests
 
             // assert
             Assert.IsType<ValueResult>(executionResult);
-            Assert.Equal("lorem lorem", (executionResult as ValueResult).Value.ToString());
+            Assert.Equal("lorem lorem", (executionResult as ValueResult)!.Value.ToString());
         }
 
         [Fact]
         public void Execute_CommandReturnsFailureWithCurrentSourceLineToken_ReportsProperSourceLine()
         {
             // arrange
-            FailureResult executionResult = null;
+            FailureResult? executionResult = null;
             var sut = CreateSession(result => executionResult = (FailureResult)result, typeof(FailureCommand));
 
             // act
             sut.Execute("fail");
 
             // assert
-            Assert.Equal(new SourceLocation(1, 1), executionResult.SourceLocation);
+            Assert.Equal(new SourceLocation(1, 1), executionResult!.SourceLocation);
         }
 
         [Fact]
         public void Execute_CommandIncludesSubcommand_ExpandsSubcommandBeforeExecution()
         {
             // arrange
-            ValueResult executionResult = null;
+            ValueResult? executionResult = null;
             var sut = CreateSession(result => executionResult = (ValueResult)result, typeof(NumberedParameterCommand));
 
             // act
             sut.Execute("num << (num 1 2) 3");
             
             // assert
-            Assert.Equal("1 2 3", executionResult.Value.ToString());
+            Assert.Equal("1 2 3", executionResult!.Value.ToString());
         }
 
         [Fact]
         public void Execute_CommandIncludesManySubcommands_ExpandsSubcommandsBeforeExecution()
         {
             // arrange
-            ValueResult executionResult = null;
+            ValueResult? executionResult = null;
             var sut = CreateSession(result => executionResult = (ValueResult)result, typeof(NumberedParameterCommand));
 
             // act
             sut.Execute("num << (num 1 2) <<(num 3 4)");
             
             // assert
-            Assert.Equal("1 2 3 4", executionResult.Value.ToString());
+            Assert.Equal("1 2 3 4", executionResult!.Value.ToString());
         }
 
         [Fact]
         public void Execute_CommandIncludesSubSubcommand_ExpandsSubcommandsBeforeExecution()
         {
             // arrange
-            ValueResult executionResult = null;
+            ValueResult? executionResult = null;
             var sut = CreateSession(result => executionResult = (ValueResult)result, typeof(NumberedParameterCommand));
 
             // act
             sut.Execute("num << (num 1 << (num 2 3)) 4");
             
             // assert
-            Assert.Equal("1 2 3 4", executionResult.Value.ToString());
+            Assert.Equal("1 2 3 4", executionResult!.Value.ToString());
         }
 
         [Fact]
         public void Execute_CommandIncludesSubcommandInList_ExpandsSubcommandBeforeExecution()
         {
             // arrange
-            ValueResult executionResult = null;
+            ValueResult? executionResult = null;
             var sut = CreateSession(result => executionResult = (ValueResult)result, typeof(ListParameterCommand), typeof(NumberedParameterCommand));
 
             // act
             sut.Execute("list-params -array [1 << (num 2 3) 4]");
             
             // assert
-            Assert.Equal("[ 1 (2 3) 4 ]", executionResult.Value.ToString());
+            Assert.Equal("[ 1 (2 3) 4 ]", executionResult!.Value.ToString());
         }
 
         [Fact]
         public void Execute_CommandIncludesManySubcommandsInList_ExpandsSubcommandsBeforeExecution()
         {
             // arrange
-            ValueResult executionResult = null;
+            ValueResult? executionResult = null;
             var sut = CreateSession(result => executionResult = (ValueResult)result, typeof(ListParameterCommand), typeof(NumberedParameterCommand));
 
             // act
             sut.Execute("list-params -array [<< (num 1 2) << (num 3 4)]");
             
             // assert
-            Assert.Equal("[ (1 2) (3 4) ]", executionResult.Value.ToString());
+            Assert.Equal("[ (1 2) (3 4) ]", executionResult!.Value.ToString());
         }
 
         [Fact]
         public void Execute_CommandIncludesSubSubcommandInList_ExpandsSubcommandsBeforeExecution()
         {
             // arrange
-            ValueResult executionResult = null;
+            ValueResult ?executionResult = null;
             var sut = CreateSession(result => executionResult = (ValueResult)result, typeof(ListParameterCommand), typeof(NumberedParameterCommand));
 
             // act
             sut.Execute("list-params -array [ << (num 1 << (num 2 3)) 4]");
             
             // assert
-            Assert.Equal("[ (1 2 3) 4 ]", executionResult.Value.ToString());
+            Assert.Equal("[ (1 2 3) 4 ]", executionResult!.Value.ToString());
         }
 
         // todo: tests for subcommands in maps
@@ -437,42 +437,42 @@ namespace Chel.UnitTests
         public void Execute_SubcommandFails_FailureResultReturned()
         {
             // arrange
-            FailureResult executionResult = null;
+            FailureResult? executionResult = null;
             var sut = CreateSession(result => executionResult = (FailureResult)result, typeof(NumberedParameterCommand), typeof(FailureCommand));
 
             // act
             sut.Execute("num << fail 2");
             
             // assert
-            Assert.Equal(new SourceLocation(1, 8), executionResult.SourceLocation);
+            Assert.Equal(new SourceLocation(1, 8), executionResult!.SourceLocation);
         }
 
         [Fact]
         public void Execute_SubSubcommandFails_FailureResultReturned()
         {
             // arrange
-            FailureResult executionResult = null;
+            FailureResult? executionResult = null;
             var sut = CreateSession(result => executionResult = (FailureResult)result, typeof(NumberedParameterCommand), typeof(FailureCommand));
 
             // act
             sut.Execute("num << (num << fail 2) 3");
             
             // assert
-            Assert.Equal(new SourceLocation(1, 16), executionResult.SourceLocation);
+            Assert.Equal(new SourceLocation(1, 16), executionResult!.SourceLocation);
         }
 
         [Fact]
         public void Execute_UnknownSubcommand_FailureResultReturned()
         {
             // arrange
-            FailureResult executionResult = null;
+            FailureResult? executionResult = null;
             var sut = CreateSession(result => executionResult = (FailureResult)result, typeof(NumberedParameterCommand));
 
             // act
             sut.Execute("num << unknown");
             
             // assert
-            Assert.Equal(new SourceLocation(1, 8), executionResult.SourceLocation);
+            Assert.Equal(new SourceLocation(1, 8), executionResult!.SourceLocation);
             Assert.Equal("Unknown command 'unknown'", executionResult.Message);
         }
 
@@ -480,14 +480,14 @@ namespace Chel.UnitTests
         public void Execute_UnknownSubcommand_ReportsErrorOnLine2()
         {
             // arrange
-            FailureResult executionResult = null;
+            FailureResult? executionResult = null;
             var sut = CreateSession(result => executionResult = (FailureResult)result, typeof(NumberedParameterCommand));
 
             // act
             sut.Execute("num << (\nunknown)");
             
             // assert
-            Assert.Equal(new SourceLocation(2, 1), executionResult.SourceLocation);
+            Assert.Equal(new SourceLocation(2, 1), executionResult!.SourceLocation);
         }
 
         private Session CreateSession(Action<CommandResult> resultHandler, params Type[] commandTypes)
@@ -497,8 +497,8 @@ namespace Chel.UnitTests
 
         private Session CreateSession(
             Action<CommandResult> resultHandler,
-            Action<ScopedObjectRegistry> sessionObjectsConfigurator = null,
-            IScriptProvider scriptProvider = null,
+            Action<ScopedObjectRegistry>? sessionObjectsConfigurator = null,
+            IScriptProvider? scriptProvider = null,
             params Type[] commandTypes)
         {
             var nameValidator = new NameValidator();
@@ -518,12 +518,12 @@ namespace Chel.UnitTests
 
             var variables = scopedObjects.Resolve(typeof(VariableCollection)) as VariableCollection;
             var replacer = new VariableReplacer();
-            var binder = new CommandParameterBinder(registry, replacer, variables);
+            var binder = new CommandParameterBinder(registry, replacer, variables!);
 
             if(scriptProvider == null)
             {
                 scriptProvider = Substitute.For<IScriptProvider>();
-                scriptProvider.GetScriptSource(Arg.Any<string>(), Arg.Any<string>()).Returns((string)null);
+                scriptProvider.GetScriptSource(Arg.Any<string>(), Arg.Any<string>()).Returns((string)null!);
             }
 
             return new Session(parser, factory, binder, scriptProvider, resultHandler);

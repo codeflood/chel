@@ -28,7 +28,7 @@ namespace Chel.Abstractions.UnitTests
             // arrange
             var location = new SourceLocation(1, 1);
             var sut = new CommandInput.Builder(location, SampleCommandIdentifier);
-            Action sutAction = () => sut.AddParameter(null);
+            Action sutAction = () => sut.AddParameter(null!);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
@@ -63,8 +63,8 @@ namespace Chel.Abstractions.UnitTests
             var commandInput = sut.Build();
 
             // assert
-            Assert.Equal("value1", ((commandInput.Parameters[0] as SourceValueCommandParameter).Value as Literal).Value);
-            Assert.Equal("value2", ((commandInput.Parameters[1] as SourceValueCommandParameter).Value as Literal).Value);
+            Assert.Equal("value1", ((commandInput.Parameters[0] as SourceValueCommandParameter)!.Value as Literal)!.Value);
+            Assert.Equal("value2", ((commandInput.Parameters[1] as SourceValueCommandParameter)!.Value as Literal)!.Value);
         }
 
         [Theory]
@@ -83,7 +83,7 @@ namespace Chel.Abstractions.UnitTests
             var commandInput = sut.Build();
 
             // assert
-            Assert.Equal(value, ((commandInput.Parameters[0] as SourceValueCommandParameter).Value as Literal).Value);
+            Assert.Equal(value, ((commandInput.Parameters[0] as SourceValueCommandParameter)!.Value as Literal)!.Value);
         }
     }
 }

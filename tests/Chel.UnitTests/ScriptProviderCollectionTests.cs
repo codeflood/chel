@@ -10,7 +10,7 @@ public class ScriptProviderCollectionTests
     [Fact]
     public void Ctor_ProvidersIsNull_DoesNotThrow()
     {
-        new ScriptProviderCollection(null);
+        new ScriptProviderCollection(null!);
     }
 
     [Fact]
@@ -23,7 +23,7 @@ public class ScriptProviderCollectionTests
     public void GetScriptNames_NoProviders_ReturnsEmpty()
     {
         // arrange
-        var sut = new ScriptProviderCollection(null);
+        var sut = new ScriptProviderCollection(null!);
 
         // act
         var result = sut.GetScriptNames();
@@ -102,8 +102,8 @@ public class ScriptProviderCollectionTests
         var provider1 = Substitute.For<IScriptProvider>();
         var provider2 = Substitute.For<IScriptProvider>();
 
-        provider1.GetScriptSource(Arg.Any<string>(), Arg.Any<string>()).Returns((string)null);
-        provider2.GetScriptSource(Arg.Any<string>(), Arg.Any<string>()).Returns((string)null);
+        provider1.GetScriptSource(Arg.Any<string>(), Arg.Any<string>()).Returns((string)null!);
+        provider2.GetScriptSource(Arg.Any<string>(), Arg.Any<string>()).Returns((string)null!);
 
         var sut = new ScriptProviderCollection(new[] { provider1, provider2 });
 

@@ -23,7 +23,7 @@ namespace Chel.UnitTests
         {
             // arrange
             var sut = new ScopedObjectRegistry();
-            Action sutAction = () => sut.RegisterInstance<GoodObject>(null);
+            Action sutAction = () => sut.RegisterInstance<GoodObject>(null!);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);

@@ -12,7 +12,7 @@ namespace Chel.Abstractions.UnitTests.Parsing
         public void Ctor_ValueIsNull_ThrowsException()
         {
             // arrange
-            Action sutAction = () => new SourceValueCommandParameter(new SourceLocation(1, 2), null);
+            Action sutAction = () => new SourceValueCommandParameter(new SourceLocation(1, 2), null!);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);

@@ -9,7 +9,7 @@ namespace Chel.Abstractions.UnitTests
         public void Ctor_NameIsNull_ThrowsException()
         {
             // arrange
-            Action sutAction = () => new FlagParameterAttribute(null);
+            Action sutAction = () => new FlagParameterAttribute(null!);
 
             // act, assert
             var ex = Assert.Throws<ArgumentNullException>(sutAction);
