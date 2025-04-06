@@ -531,6 +531,76 @@ namespace Chel.UnitTests.Parsing
         }
 
         [Fact]
+        public void Parse_InputContainsCompoundValue_ValueParsed()
+        {
+            // arrange
+            var builder = CreateCommandInputBuilder(1, 1, "cmd");
+            builder.AddParameter(
+                new SourceValueCommandParameter(
+                    new SourceLocation(1, 5),
+                    new CompoundValue([
+                        new Literal("a"),
+                        new VariableReference("var"),
+                        new Literal("a")
+                    ])
+                )
+            );
+            var expectedCommand = builder.Build();
+
+            var sut = CreateParser();
+
+            // act
+            var result = sut.Parse("cmd a$var$a");
+
+            // assert
+            Assert.Equal(expectedCommand, result[0]);
+        }
+
+        [Fact]
+        public void Parse_InputContainsBracketedVariableReference_ValueParsed()
+        {
+            // arrange
+            var builder = CreateCommandInputBuilder(1, 1, "cmd");
+            builder.AddParameter(
+                new SourceValueCommandParameter(
+                    new SourceLocation(1, 5),
+                    new VariableReference("var")
+                )
+            );
+            var expectedCommand = builder.Build();
+
+            var sut = CreateParser();
+
+            // act
+            var result = sut.Parse("cmd ($var$)");
+
+            // assert
+            Assert.Equal(expectedCommand, result[0]);
+        }
+
+        [Fact]
+        public void Parse_InputContainsMultipleBracketedValue_ValueParsed()
+        {
+            // arrange
+            var builder = CreateCommandInputBuilder(1, 1, "cmd");
+            builder.AddParameter(
+                new SourceValueCommandParameter(
+                    new SourceLocation(1, 5),
+                    new Literal("a")
+                )
+            );
+            var expectedCommand = builder.Build();
+
+            var sut = CreateParser();
+
+            // act
+            var result = sut.Parse("cmd (((a)))");
+
+            // assert
+            Assert.Equal(expectedCommand, result[0]);
+        }
+
+        [Fact]
         public void Parse_InputContainsVariableWithSubReference_ParsesVariableAndSubReference()
         {
             // arrange

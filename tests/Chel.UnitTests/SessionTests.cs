@@ -18,7 +18,7 @@ namespace Chel.UnitTests
     public class SessionTests
     {
         [Fact]
-        private void Ctor_ParserIsNull_ThrowsException()
+        public void Ctor_ParserIsNull_ThrowsException()
         {
             // arrange
             Action sutAction = () => new Session(
@@ -35,7 +35,7 @@ namespace Chel.UnitTests
         }
 
         [Fact]
-        private void Ctor_FactoryIsNull_ThrowsException()
+        public void Ctor_FactoryIsNull_ThrowsException()
         {
             // arrange
             Action sutAction = () => new Session(
